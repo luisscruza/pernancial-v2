@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('google_id')->nullable();
             $table->foreignId('base_currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();

@@ -12,6 +12,7 @@
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^2.0.1",
         "laravel/framework": "^12.3",
+        "laravel/socialite": "^5.19",
         "laravel/tinker": "^2.10.1",
         "tightenco/ziggy": "^2.5.2"
     },
@@ -68,7 +69,7 @@
         "test:lint": [
             "pint --test"
         ],
-        "test:unit": "pest --parallel --coverage --exactly=100.0",
+        "test:unit": "pest --parallel --coverage --compact --exactly=100.0",
         "test:types": "phpstan",
         "test:refactor": "rector --dry-run",
         "test": [

@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -67,7 +68,9 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function configureUrls(): void
     {
-        URL::forceScheme('https');
+        if (App::isProduction()) {
+            URL::forceScheme('https');
+        }
     }
 
     /**
