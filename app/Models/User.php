@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property-read int $id
+ * @property-read string $name
+ * @property-read string $email
+ */
 final class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -57,5 +62,25 @@ final class User extends Authenticatable
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
+    }
+
+    /**
+     * Get the categories for the user.
+     *
+     * @return HasMany<Category, $this>
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    /**
+     * Get the currencies for the user.
+     *
+     * @return HasMany<Currency, $this>
+     */
+    public function currencies(): HasMany
+    {
+        return $this->hasMany(Currency::class);
     }
 }

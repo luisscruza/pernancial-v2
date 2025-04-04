@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Account;
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\User;
 
@@ -45,4 +46,20 @@ test('user has correct casts', function () {
     expect($casts)
         ->toHaveKey('email_verified_at', 'datetime')
         ->toHaveKey('password', 'hashed');
+});
+
+it('has many categories', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->create(['user_id' => $user->id]);
+
+    expect($user->categories)->toHaveCount(1)
+        ->and($user->categories->first()->id)->toBe($category->id);
+});
+
+it('has many currencies', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->create(['user_id' => $user->id]);
+
+    expect($user->currencies)->toHaveCount(1)
+        ->and($user->currencies->first()->id)->toBe($currency->id);
 });
