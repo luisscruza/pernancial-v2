@@ -44,6 +44,6 @@ final class GoogleOAuthController
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('accounts', absolute: false));
     }
 }

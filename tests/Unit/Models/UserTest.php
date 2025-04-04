@@ -27,8 +27,8 @@ test('user belongs to base currency', function () {
     $currency = Currency::factory()->create();
     $user = User::factory()->create(['base_currency_id' => $currency->id]);
 
-    expect($user->baseCurrency)->toBeInstanceOf(Currency::class)
-        ->and($user->baseCurrency->id)->toBe($currency->id);
+    expect($user->currency)->toBeInstanceOf(Currency::class)
+        ->and($user->currency->id)->toBe($currency->id);
 });
 
 test('user has many accounts', function () {

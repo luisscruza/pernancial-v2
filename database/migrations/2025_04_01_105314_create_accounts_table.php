@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('currency_id')->constrained();
             $table->string('name');
+            $table->string('emoji');
+            $table->string('color');
             $table->string('type');
             $table->decimal('balance', 20, 4)->default(0);
             $table->text('description')->nullable();

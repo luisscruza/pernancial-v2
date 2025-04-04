@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Enums\AccountType;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\User;
@@ -40,16 +41,18 @@ test('user can create an account', function () {
         'description' => 'Test Description',
     ]);
 
+    $user = $user->fresh();
+
     expect($response->status())->toBe(302)
         ->and($user->accounts()->count())->toBe(1)
         ->and($user->accounts()->first()->name)->toBe('Test Account')
-        ->and($user->accounts()->first()->type)->toBe('bank')
+        ->and($user->accounts()->first()->type)->toBe(AccountType::BANK)
         ->and($user->accounts()->first()->balance)->toBe(1000)
-        ->and($user->currencies()->first()->code)->toBe('USD')
-        ->and($user->accounts()->first()->currency_id)->toBe($user->currencies()->first()->id)
+        ->and($user->currency->code)->toBe('USD')
+        ->and($user->accounts()->first()->currency_id)->toBe($user->currency->id)
         ->and($user->accounts()->first()->description)->toBe('Test Description')
-        ->and($user->baseCurrency->id)->toBe($user->currencies()->first()->id)
-        ->and($response->headers->get('Location'))->toBe(route('dashboard'));
+        ->and($user->base_currency_id)->toBe($user->currency->id)
+        ->and($response->headers->get('Location'))->toBe(route('accounts'));
 });
 
 it('redirects to the dashboard if the user has at least one account', function () {
@@ -66,5 +69,5 @@ it('redirects to the dashboard if the user has at least one account', function (
     $response = $this->actingAs($user)->get(route('onboarding.accounts'));
 
     expect($response->status())->toBe(302)
-        ->and($response->headers->get('Location'))->toBe(route('dashboard'));
+        ->and($response->headers->get('Location'))->toBe(route('accounts'));
 });

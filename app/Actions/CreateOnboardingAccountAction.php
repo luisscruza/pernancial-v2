@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\AccountType;
 use App\Enums\BaseCurrency;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -34,12 +35,16 @@ final readonly class CreateOnboardingAccountAction
                 isBase: true,
             );
 
+            $type = AccountType::from($data['type']);
+
             $user->accounts()->create([
                 'name' => $data['name'],
                 'currency_id' => $currency->id,
                 'description' => $data['description'],
                 'balance' => $data['balance'],
-                'type' => $data['type'],
+                'type' => $type,
+                'emoji' => $type->emoji(),
+                'color' => $type->color(),
             ]);
 
             $user->update([

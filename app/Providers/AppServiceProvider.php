@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +61,9 @@ final class AppServiceProvider extends ServiceProvider
     {
         Model::unguard();
 
-        Model::shouldBeStrict();
+        // Model::shouldBeStrict();
+
+        JsonResource::withoutWrapping();
     }
 
     /**

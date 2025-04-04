@@ -42,14 +42,3 @@ parameters:
 			count: 1
 			path: app/Http/Middleware/HandleInertiaRequests.php
 
-		-
-			message: '#^Parameter \#1 \$string of function mb_trim expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Middleware/HandleInertiaRequests.php
-
-		-
-			message: '#^Parameter \#1 \$string of function str expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Middleware/HandleInertiaRequests.php

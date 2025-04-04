@@ -1,3 +1,4 @@
+import * as AccountController from './AccountController'
 import * as OnboardingController from './OnboardingController'
 import * as OnboardingCategoryController from './OnboardingCategoryController'
 import * as OnboardingAccountController from './OnboardingAccountController'
@@ -6,6 +7,7 @@ import * as GoogleOAuthController from './GoogleOAuthController'
 import * as Auth from './Auth'
 
 const Controllers = {
+    AccountController, 
     OnboardingController, 
     OnboardingCategoryController, 
     OnboardingAccountController, 

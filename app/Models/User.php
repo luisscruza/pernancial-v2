@@ -49,7 +49,7 @@ final class User extends Authenticatable
      *
      * @return BelongsTo<Currency, $this>
      */
-    public function baseCurrency(): BelongsTo
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'base_currency_id');
     }

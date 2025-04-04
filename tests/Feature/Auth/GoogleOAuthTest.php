@@ -38,7 +38,7 @@ test('new user can be created from google oauth callback', function () {
 
     $response = $this->get(route('auth.google.callback'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('accounts'));
 
     $user = User::where('email', 'test@example.com')->first();
     expect($user)->not->toBeNull()
@@ -65,7 +65,7 @@ test('existing user can login with google oauth callback', function () {
 
     $response = $this->get(route('auth.google.callback'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('accounts'));
     expect(Auth::id())->toBe($existingUser->id)
         ->and(User::count())->toBe(1);
 });
@@ -98,9 +98,9 @@ test('google oauth callback redirects to intended url', function () {
         ->once()
         ->andReturn($socialiteUser);
 
-    session(['url.intended' => route('dashboard')]);
+    session(['url.intended' => route('accounts')]);
 
     $response = $this->get(route('auth.google.callback'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('accounts'));
 });

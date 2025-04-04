@@ -14,16 +14,6 @@ final class Currency extends Model
     use HasFactory;
 
     /**
-     * Get the users for the currency.
-     *
-     * @return HasMany<User, $this>
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'base_currency_id');
-    }
-
-    /**
      * Get the accounts for the currency.
      *
      * @return HasMany<Account, $this>

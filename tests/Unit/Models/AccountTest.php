@@ -14,6 +14,8 @@ test('to array', function () {
         'user_id',
         'currency_id',
         'name',
+        'emoji',
+        'color',
         'type',
         'balance',
         'description',

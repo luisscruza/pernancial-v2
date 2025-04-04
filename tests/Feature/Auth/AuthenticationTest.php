@@ -7,7 +7,7 @@ use App\Models\User;
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create()->fresh();
 
     $response = $this->actingAs($user)->post('/logout');
 

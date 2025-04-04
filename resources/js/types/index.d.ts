@@ -38,6 +38,7 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    currency: Currency;
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -58,17 +59,20 @@ export interface Currency {
     name: string;
     code: string;
     symbol: string;
+    decimal_places: number;
+    decimal_separator: string;
+    thousands_separator: string;
+    symbol_position: string;
 }
-
 
 export interface BaseCurrency {
     value: string;
     label: string;
     symbol: string;
-    decimalPlaces: number;
-    decimalSeparator: string;
-    thousandsSeparator: string;
-    symbolPosition: string;
+    decimal_places: number;
+    decimal_separator: string;
+    thousands_separator: string;
+    symbol_position: string;
 }
 
 export interface Account {
@@ -77,8 +81,11 @@ export interface Account {
     currency_id: number;
     name: string;
     type: 'savings' | 'cash' | 'investment' | 'credit_card';
+    emoji: string;
+    color: string;
     balance: number;
     description?: string;
+    currency?: Currency;
 }
 
 export interface CreateAccountData {

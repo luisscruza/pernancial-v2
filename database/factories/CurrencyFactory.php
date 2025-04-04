@@ -21,7 +21,7 @@ final class CurrencyFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'code' => fake()->unique()->currencyCode(),
+            'code' => fake()->currencyCode(),
             'name' => fake()->unique()->name(),
             'symbol' => fake()->randomElement(['$', '€', '£', '¥']),
             'decimal_places' => fake()->numberBetween(0, 2),
@@ -31,13 +31,5 @@ final class CurrencyFactory extends Factory
             'conversion_rate' => fake()->randomFloat(10, 0.1, 10),
             'is_base' => false,
         ];
-    }
-
-    public function base(): self
-    {
-        return $this->state(fn (array $attributes): array => [
-            'is_base' => true,
-            'conversion_rate' => 1,
-        ]);
     }
 }

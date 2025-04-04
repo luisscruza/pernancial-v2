@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('/', [AccountController::class, 'index'])->name('accounts');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {

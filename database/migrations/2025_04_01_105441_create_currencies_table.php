@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('currencies', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->string('code', 3)->unique();
+            $table->string('code', 3);
             $table->string('name');
             $table->string('symbol', 10);
             $table->integer('decimal_places');
@@ -27,6 +27,8 @@ return new class extends Migration
             $table->decimal('conversion_rate', 20, 10);
             $table->boolean('is_base');
             $table->timestamps();
+
+            $table->unique(['user_id', 'code']);
         });
     }
 

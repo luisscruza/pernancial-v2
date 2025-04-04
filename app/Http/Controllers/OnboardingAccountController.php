@@ -27,7 +27,7 @@ final class OnboardingAccountController
         }
 
         if ($user->accounts()->count() > 0) {
-            return redirect()->route('dashboard');
+            return redirect()->route('accounts');
         }
 
         $currencies = BaseCurrency::toArray();
@@ -47,6 +47,6 @@ final class OnboardingAccountController
 
         $createOnboardingAccountAction->handle($user, $data);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('accounts');
     }
 }

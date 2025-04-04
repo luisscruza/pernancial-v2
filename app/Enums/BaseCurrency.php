@@ -27,10 +27,10 @@ enum BaseCurrency: string
             'value' => $currency->value,
             'label' => $currency->label(),
             'symbol' => $currency->symbol(),
-            'decimalPlaces' => $currency->decimalPlaces(),
-            'decimalSeparator' => $currency->decimalSeparator(),
-            'thousandsSeparator' => $currency->thousandsSeparator(),
-            'symbolPosition' => $currency->symbolPosition(),
+            'decimal_places' => $currency->decimalPlaces(),
+            'decimal_separator' => $currency->decimalSeparator(),
+            'thousands_separator' => $currency->thousandsSeparator(),
+            'symbol_position' => $currency->symbolPosition(),
         ], self::cases());
     }
 
