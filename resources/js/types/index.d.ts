@@ -40,3 +40,51 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Category {
+    id: string;
+    name: string;
+    emoji: string;
+    user_id: number;
+}
+
+export interface CreateCategoryData {
+    name: string;
+    emoji: string;
+}
+
+export interface Currency {
+    id: number;
+    name: string;
+    code: string;
+    symbol: string;
+}
+
+
+export interface BaseCurrency {
+    value: string;
+    label: string;
+    symbol: string;
+    decimalPlaces: number;
+    decimalSeparator: string;
+    thousandsSeparator: string;
+    symbolPosition: string;
+}
+
+export interface Account {
+    id: number;
+    user_id: number;
+    currency_id: number;
+    name: string;
+    type: 'savings' | 'cash' | 'investment' | 'credit_card';
+    balance: number;
+    description?: string;
+}
+
+export interface CreateAccountData {
+    name: string;
+    type: Account['type'];
+    balance: number;
+    currency_id: number;
+    description?: string;
+}
