@@ -11,9 +11,14 @@ test('to array', function () {
 
     expect(array_keys($currency->toArray()))->toBe([
         'id',
+        'user_id',
         'code',
         'name',
         'symbol',
+        'decimal_places',
+        'decimal_separator',
+        'thousands_separator',
+        'symbol_position',
         'conversion_rate',
         'is_base',
         'created_at',
