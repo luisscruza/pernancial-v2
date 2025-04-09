@@ -47,6 +47,6 @@ final class OnboardingAccountController
 
         $createOnboardingAccountAction->handle($user, $data);
 
-        return redirect()->route('accounts');
+        return redirect()->route('onboarding.setting-up');
     }
 }

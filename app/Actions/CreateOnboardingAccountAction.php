@@ -16,6 +16,7 @@ final readonly class CreateOnboardingAccountAction
      */
     public function __construct(
         private CreateCurrencyAction $createCurrencyAction,
+        private CreateTransactionAction $createTransactionAction,
     ) {
         //
     }
@@ -37,11 +38,11 @@ final readonly class CreateOnboardingAccountAction
 
             $type = AccountType::from($data['type']);
 
-            $user->accounts()->create([
+            $account = $user->accounts()->create([
                 'name' => $data['name'],
                 'currency_id' => $currency->id,
                 'description' => $data['description'],
-                'balance' => $data['balance'],
+                'balance' => 0,
                 'type' => $type,
                 'emoji' => $type->emoji(),
                 'color' => $type->color(),
@@ -50,6 +51,14 @@ final readonly class CreateOnboardingAccountAction
             $user->update([
                 'base_currency_id' => $currency->id,
             ]);
+
+            $this->createTransactionAction->handle($account, [
+                'type' => 'initial',
+                'amount' => $data['balance'],
+                'transaction_date' => now()->format('Y-m-d'),
+                'description' => 'Balance inicial',
+            ]);
+
         });
     }
 }

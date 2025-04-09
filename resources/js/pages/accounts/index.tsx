@@ -9,7 +9,7 @@ import { formatCurrency } from '@/utils/currency';
 
 export default function AccountPage({ accounts }: { accounts: Account[] }) {
     const page = usePage<SharedData>();
-    const totalBalance = 0;
+    const totalBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
 
     return (
         <AppLayout title="Cuentas">

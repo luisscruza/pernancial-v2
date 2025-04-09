@@ -159,6 +159,55 @@ accounts.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     method: 'head',
 })
 
-const onboarding = { onboarding, categories, accounts }
+/**
+ * @see routes/web.php:25
+ * @route /onboarding/setting-up
+ */
+export const settingUp = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+    url: string,
+    method: 'get',
+} => ({
+    url: settingUp.url(options),
+    method: 'get',
+})
+
+settingUp.definition = {
+    methods: ['get','head'],
+    url: '\/onboarding\/setting-up',
+}
+
+/**
+ * @see routes/web.php:25
+ * @route /onboarding/setting-up
+ */
+settingUp.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
+    return settingUp.definition.url + queryParams(options)
+}
+
+/**
+ * @see routes/web.php:25
+ * @route /onboarding/setting-up
+ */
+settingUp.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+    url: string,
+    method: 'get',
+} => ({
+    url: settingUp.url(options),
+    method: 'get',
+})
+
+/**
+ * @see routes/web.php:25
+ * @route /onboarding/setting-up
+ */
+settingUp.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+    url: string,
+    method: 'head',
+} => ({
+    url: settingUp.url(options),
+    method: 'head',
+})
+
+const onboarding = { onboarding, categories, accounts, settingUp }
 
 export default onboarding
