@@ -2,7 +2,7 @@ import { queryParams, type QueryParams } from './../../../../wayfinder'
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::index
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 export const index = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -20,7 +20,7 @@ index.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::index
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 index.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -29,7 +29,7 @@ index.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::index
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 index.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -42,7 +42,7 @@ index.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::index
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 index.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -55,7 +55,7 @@ index.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:40
+ * @see app/Http/Controllers/OnboardingAccountController.php:41
  * @route /onboarding/accounts
  */
 export const store = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -73,7 +73,7 @@ store.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:40
+ * @see app/Http/Controllers/OnboardingAccountController.php:41
  * @route /onboarding/accounts
  */
 store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -82,7 +82,7 @@ store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:40
+ * @see app/Http/Controllers/OnboardingAccountController.php:41
  * @route /onboarding/accounts
  */
 store.post = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {

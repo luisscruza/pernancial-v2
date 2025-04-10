@@ -108,7 +108,7 @@ categories.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }):
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::accounts
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 export const accounts = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -126,7 +126,7 @@ accounts.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::accounts
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 accounts.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -135,7 +135,7 @@ accounts.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => 
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::accounts
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 accounts.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -148,7 +148,7 @@ accounts.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\OnboardingAccountController::accounts
- * @see app/Http/Controllers/OnboardingAccountController.php:20
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
 accounts.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {

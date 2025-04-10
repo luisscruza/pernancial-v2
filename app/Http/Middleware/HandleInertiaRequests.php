@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -38,13 +39,8 @@ final class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = null;
-        /**
-         * @var \App\Models\User $user
-         */
-        if (auth()->check()) {
-            $user = auth()->user();
-        }
+        /** @var ?User $user */
+        $user = $request->user();
 
         return [
             ...parent::share($request),

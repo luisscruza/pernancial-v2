@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\CreateOnboardingAccountAction;
 use App\Enums\BaseCurrency;
 use App\Http\Requests\StoreOnboardingAccountRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ final class OnboardingAccountController
      */
     public function index(Request $request): Response|RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($user->categories()->count() === 0) {
@@ -39,13 +40,10 @@ final class OnboardingAccountController
 
     public function store(StoreOnboardingAccountRequest $request, CreateOnboardingAccountAction $createOnboardingAccountAction): RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
-        /** @var array{name: string, description: string, balance: float, currency_id: string, type: string} $data */
-        $data = $request->validated();
-
-        $createOnboardingAccountAction->handle($user, $data);
+        $createOnboardingAccountAction->handle($user, $request->getDto());
 
         return redirect()->route('onboarding.setting-up');
     }

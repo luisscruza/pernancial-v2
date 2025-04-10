@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Dto\CreateTransactionDto;
+use App\Dto\OnboardingAccountDto;
 use App\Enums\AccountType;
 use App\Enums\BaseCurrency;
 use App\Models\User;
@@ -23,25 +25,23 @@ final readonly class CreateOnboardingAccountAction
 
     /**
      * Invoke the class instance.
-     *
-     * @param  array{name: string, description: string, balance: float, currency_id: string, type: string}  $data
      */
-    public function handle(User $user, array $data): void
+    public function handle(User $user, OnboardingAccountDto $data): void
     {
         DB::transaction(function () use ($user, $data): void {
             $currency = $this->createCurrencyAction->handle(
                 user: $user,
-                currency: BaseCurrency::from($data['currency_id']),
+                currency: BaseCurrency::from($data->currency_id),
                 conversionRate: 1,
                 isBase: true,
             );
 
-            $type = AccountType::from($data['type']);
+            $type = AccountType::from($data->type);
 
             $account = $user->accounts()->create([
-                'name' => $data['name'],
+                'name' => $data->name,
                 'currency_id' => $currency->id,
-                'description' => $data['description'],
+                'description' => $data->description,
                 'balance' => 0,
                 'type' => $type,
                 'emoji' => $type->emoji(),
@@ -52,13 +52,17 @@ final readonly class CreateOnboardingAccountAction
                 'base_currency_id' => $currency->id,
             ]);
 
-            $this->createTransactionAction->handle($account, [
-                'type' => 'initial',
-                'amount' => $data['balance'],
-                'transaction_date' => now()->format('Y-m-d'),
-                'description' => 'Balance inicial',
-            ]);
-
+            $this->createTransactionAction->handle($account,
+                new CreateTransactionDto(
+                    type: 'initial',
+                    amount: $data->balance,
+                    transaction_date: now()->format('Y-m-d'),
+                    description: 'Balance inicial',
+                    destination_account_id: null,
+                    category_id: null,
+                    conversion_rate: null,
+                ),
+            );
         });
     }
 }

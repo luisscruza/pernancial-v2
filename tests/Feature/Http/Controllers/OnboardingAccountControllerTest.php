@@ -52,7 +52,7 @@ test('user can create an account', function () {
         ->and($user->accounts()->first()->currency_id)->toBe($user->currency->id)
         ->and($user->accounts()->first()->description)->toBe('Test Description')
         ->and($user->base_currency_id)->toBe($user->currency->id)
-        ->and($response->headers->get('Location'))->toBe(route('accounts'));
+        ->and($response->headers->get('Location'))->toBe(route('onboarding.setting-up'));
 });
 
 it('redirects to the dashboard if the user has at least one account', function () {

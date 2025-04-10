@@ -60,7 +60,7 @@ final class TransactionFactory extends Factory
      */
     public function expense(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'type' => 'expense',
             'destination_account_id' => null,
             'conversion_rate' => null,
@@ -74,7 +74,7 @@ final class TransactionFactory extends Factory
      */
     public function income(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'type' => 'income',
             'destination_account_id' => null,
             'conversion_rate' => null,
@@ -88,7 +88,7 @@ final class TransactionFactory extends Factory
      */
     public function transfer(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $amount = $attributes['amount'] ?? $this->faker->randomFloat(2, 10, 1000);
 
             return [
@@ -105,7 +105,7 @@ final class TransactionFactory extends Factory
      */
     public function transferWithConversion(): self
     {
-        return $this->transfer()->state(function (array $attributes) {
+        return $this->transfer()->state(function (array $attributes): array {
             $amount = $attributes['amount'] ?? $this->faker->randomFloat(2, 10, 1000);
             $conversionRate = $this->faker->randomFloat(6, 0.5, 2.0);
 
