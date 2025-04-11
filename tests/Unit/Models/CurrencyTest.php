@@ -27,7 +27,7 @@ test('to array', function () {
 
 test('currency has many accounts', function () {
     $currency = Currency::factory()->create();
-    $account = Account::factory()->create(['currency_id' => $currency->id]);
+    Account::factory()->create(['currency_id' => $currency->id]);
 
     expect($currency->accounts)->toHaveCount(1)
         ->and($currency->accounts->first())->toBeInstanceOf(Account::class);
