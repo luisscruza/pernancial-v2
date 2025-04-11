@@ -49,3 +49,4 @@ appearance.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }):
     method: 'head',
 })
 
+export default appearance

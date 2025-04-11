@@ -1,45 +1,56 @@
 import { queryParams, type QueryParams } from './../../wayfinder'
 
 /**
- * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:41
+ * @see \App\Http\Controllers\OnboardingAccountController::accounts
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
-export const store = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+export const accounts = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
-    method: 'post',
+    method: 'get',
 } => ({
-    url: store.url(options),
-    method: 'post',
+    url: accounts.url(options),
+    method: 'get',
 })
 
-store.definition = {
-    methods: ['post'],
+accounts.definition = {
+    methods: ['get','head'],
     url: '\/onboarding\/accounts',
 }
 
 /**
- * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:41
+ * @see \App\Http\Controllers\OnboardingAccountController::accounts
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
-store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
-    return store.definition.url + queryParams(options)
+accounts.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
+    return accounts.definition.url + queryParams(options)
 }
 
 /**
- * @see \App\Http\Controllers\OnboardingAccountController::store
- * @see app/Http/Controllers/OnboardingAccountController.php:41
+ * @see \App\Http\Controllers\OnboardingAccountController::accounts
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
  * @route /onboarding/accounts
  */
-store.post = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+accounts.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
-    method: 'post',
+    method: 'get',
 } => ({
-    url: store.url(options),
-    method: 'post',
+    url: accounts.url(options),
+    method: 'get',
 })
 
-const accounts = { store }
+/**
+ * @see \App\Http\Controllers\OnboardingAccountController::accounts
+ * @see app/Http/Controllers/OnboardingAccountController.php:21
+ * @route /onboarding/accounts
+ */
+accounts.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+    url: string,
+    method: 'head',
+} => ({
+    url: accounts.url(options),
+    method: 'head',
+})
 
 export default accounts

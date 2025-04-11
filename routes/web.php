@@ -11,6 +11,7 @@ use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/', [AccountController::class, 'index'])->name('accounts');
+    Route::get('/accounts/{account}', [AccountController::class, 'show'])->name('accounts.show');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {

@@ -1,4 +1,4 @@
-import { queryParams, type QueryParams } from './../wayfinder'
+import { queryParams, type QueryParams } from './../../wayfinder'
 
 /**
  * @see vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:98
@@ -65,6 +65,4 @@ local.head = (args: { path: string | number } | [path: string | number] | string
     method: 'head',
 })
 
-const storage = { local }
-
-export default storage
+export default local

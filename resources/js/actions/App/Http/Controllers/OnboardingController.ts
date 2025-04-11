@@ -2,7 +2,7 @@ import { queryParams, type QueryParams } from './../../../../wayfinder'
 
 /**
  * @see \App\Http\Controllers\OnboardingController::OnboardingController
- * @see app/Http/Controllers/OnboardingController.php:12
+ * @see app/Http/Controllers/OnboardingController.php:13
  * @route /onboarding
  */
 const OnboardingController = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -20,7 +20,7 @@ OnboardingController.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingController::OnboardingController
- * @see app/Http/Controllers/OnboardingController.php:12
+ * @see app/Http/Controllers/OnboardingController.php:13
  * @route /onboarding
  */
 OnboardingController.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -29,7 +29,7 @@ OnboardingController.url = (options?: { query?: QueryParams, mergeQuery?: QueryP
 
 /**
  * @see \App\Http\Controllers\OnboardingController::OnboardingController
- * @see app/Http/Controllers/OnboardingController.php:12
+ * @see app/Http/Controllers/OnboardingController.php:13
  * @route /onboarding
  */
 OnboardingController.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -42,7 +42,7 @@ OnboardingController.get = (options?: { query?: QueryParams, mergeQuery?: QueryP
 
 /**
  * @see \App\Http\Controllers\OnboardingController::OnboardingController
- * @see app/Http/Controllers/OnboardingController.php:12
+ * @see app/Http/Controllers/OnboardingController.php:13
  * @route /onboarding
  */
 OnboardingController.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {

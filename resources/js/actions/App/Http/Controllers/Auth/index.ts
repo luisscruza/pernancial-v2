@@ -1,4 +1,4 @@
-import * as AuthenticatedSessionController from './AuthenticatedSessionController'
+import AuthenticatedSessionController from './AuthenticatedSessionController'
 
 const Auth = {
     AuthenticatedSessionController,

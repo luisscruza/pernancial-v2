@@ -8,20 +8,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from "@inertiajs/react";
 import { store } from '@/actions/App/Http/Controllers/OnboardingCategoryController';
 const DEFAULT_CATEGORIES: Omit<Category, 'user_id'>[] = [
-    { id: 'groceries', name: 'Compras', emoji: '🥑' },
-    { id: 'clothing', name: 'Ropa', emoji: '👖' },
-    { id: 'dining', name: 'Comer afuera', emoji: '🍔' },
-    { id: 'luxury', name: 'Lujo', emoji: '💎' },
-    { id: 'auto', name: 'Auto', emoji: '🚗' },
-    { id: 'pets', name: 'Mascotas', emoji: '🐶' },
+    { id: 'groceries', name: 'Compras', emoji: '🥑', type: 'expense' },
+    { id: 'clothing', name: 'Ropa', emoji: '👖', type: 'expense' },
+    { id: 'dining', name: 'Comer afuera', emoji: '🍔', type: 'expense' },
+    { id: 'luxury', name: 'Lujo', emoji: '💎', type: 'expense' },
+    { id: 'auto', name: 'Auto', emoji: '🚗', type: 'expense' },
+    { id: 'pets', name: 'Mascotas', emoji: '🐶', type: 'expense' },
 ];
-
 
 export default function Onboarding() {
     const [customCategories, setCustomCategories] = useState<Omit<Category, 'user_id'>[]>([]);
 
     const form = useForm({
-        categories: [] as Array<{ id: string, name: string, emoji: string }>,
+        categories: [] as Array<{ id: string, name: string, emoji: string, type: 'expense' | 'income' }>,
     });
 
     const handleSelectCategory = (id: string) => {
@@ -37,7 +36,8 @@ export default function Onboarding() {
                 : [...form.data.categories, {
                     id: category.id,
                     name: category.name,
-                    emoji: category.emoji
+                    emoji: category.emoji,
+                    type: category.type
                 }]
         );
     };
@@ -54,7 +54,8 @@ export default function Onboarding() {
             {
                 id: newCategory.id,
                 name: newCategory.name,
-                emoji: newCategory.emoji
+                emoji: newCategory.emoji,
+                type: 'expense'
             }
         ]);
     };

@@ -1,45 +1,56 @@
 import { queryParams, type QueryParams } from './../../wayfinder'
 
 /**
- * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see \App\Http\Controllers\OnboardingCategoryController::categories
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
-export const store = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+export const categories = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
-    method: 'post',
+    method: 'get',
 } => ({
-    url: store.url(options),
-    method: 'post',
+    url: categories.url(options),
+    method: 'get',
 })
 
-store.definition = {
-    methods: ['post'],
+categories.definition = {
+    methods: ['get','head'],
     url: '\/onboarding\/categories',
 }
 
 /**
- * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see \App\Http\Controllers\OnboardingCategoryController::categories
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
-store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
-    return store.definition.url + queryParams(options)
+categories.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
+    return categories.definition.url + queryParams(options)
 }
 
 /**
- * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see \App\Http\Controllers\OnboardingCategoryController::categories
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
-store.post = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+categories.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
-    method: 'post',
+    method: 'get',
 } => ({
-    url: store.url(options),
-    method: 'post',
+    url: categories.url(options),
+    method: 'get',
 })
 
-const categories = { store }
+/**
+ * @see \App\Http\Controllers\OnboardingCategoryController::categories
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
+ * @route /onboarding/categories
+ */
+categories.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+    url: string,
+    method: 'head',
+} => ({
+    url: categories.url(options),
+    method: 'head',
+})
 
 export default categories

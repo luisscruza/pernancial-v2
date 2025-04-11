@@ -60,7 +60,9 @@ export const queryParams = (options?: {
             });
 
             for (const subKey in query[key]) {
-                params.set(`${key}[${subKey}]`, getValue(query[key][subKey]));
+                if (['string', 'number', 'boolean'].includes(typeof query[key][subKey])) {
+                    params.set(`${key}[${subKey}]`, getValue(query[key][subKey]));
+                }
             }
         } else {
             params.set(key, getValue(query[key]));

@@ -40,3 +40,4 @@ logout.post = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     method: 'post',
 })
 
+export default logout

@@ -1,4 +1,4 @@
-import * as Controllers from './Controllers'
+import Controllers from './Controllers'
 
 const Http = {
     Controllers,

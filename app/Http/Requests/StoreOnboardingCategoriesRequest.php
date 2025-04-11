@@ -27,6 +27,7 @@ final class StoreOnboardingCategoriesRequest extends FormRequest
             'categories' => ['required', 'array', 'min:1'],
             'categories.*.name' => ['required', 'string', 'max:255'],
             'categories.*.emoji' => ['required', 'string', 'max:255'],
+            'categories.*.type' => ['required', 'string', 'max:255', 'in:expense,income'],
         ];
     }
 }

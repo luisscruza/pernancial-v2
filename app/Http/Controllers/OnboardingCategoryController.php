@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateOnboardingCategoriesAction;
 use App\Http\Requests\StoreOnboardingCategoriesRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ final class OnboardingCategoryController
      */
     public function index(Request $request): Response|RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($user->categories()->count() > 0) {
@@ -30,7 +31,7 @@ final class OnboardingCategoryController
 
     public function store(StoreOnboardingCategoriesRequest $request, CreateOnboardingCategoriesAction $createOnboardingCategoriesAction): RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         /** @var array<int, array{name: string, emoji: string}> $data */

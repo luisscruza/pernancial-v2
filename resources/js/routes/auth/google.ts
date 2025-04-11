@@ -1,58 +1,56 @@
 import { queryParams, type QueryParams } from './../../wayfinder'
 
 /**
- * @see \App\Http\Controllers\GoogleOAuthController::callback
- * @see app/Http/Controllers/GoogleOAuthController.php:29
- * @route /auth/google/callback
+ * @see \App\Http\Controllers\GoogleOAuthController::google
+ * @see app/Http/Controllers/GoogleOAuthController.php:21
+ * @route /auth/google
  */
-export const callback = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+export const google = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
     method: 'get',
 } => ({
-    url: callback.url(options),
+    url: google.url(options),
     method: 'get',
 })
 
-callback.definition = {
+google.definition = {
     methods: ['get','head'],
-    url: '\/auth\/google\/callback',
+    url: '\/auth\/google',
 }
 
 /**
- * @see \App\Http\Controllers\GoogleOAuthController::callback
- * @see app/Http/Controllers/GoogleOAuthController.php:29
- * @route /auth/google/callback
+ * @see \App\Http\Controllers\GoogleOAuthController::google
+ * @see app/Http/Controllers/GoogleOAuthController.php:21
+ * @route /auth/google
  */
-callback.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
-    return callback.definition.url + queryParams(options)
+google.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
+    return google.definition.url + queryParams(options)
 }
 
 /**
- * @see \App\Http\Controllers\GoogleOAuthController::callback
- * @see app/Http/Controllers/GoogleOAuthController.php:29
- * @route /auth/google/callback
+ * @see \App\Http\Controllers\GoogleOAuthController::google
+ * @see app/Http/Controllers/GoogleOAuthController.php:21
+ * @route /auth/google
  */
-callback.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+google.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
     method: 'get',
 } => ({
-    url: callback.url(options),
+    url: google.url(options),
     method: 'get',
 })
 
 /**
- * @see \App\Http\Controllers\GoogleOAuthController::callback
- * @see app/Http/Controllers/GoogleOAuthController.php:29
- * @route /auth/google/callback
+ * @see \App\Http\Controllers\GoogleOAuthController::google
+ * @see app/Http/Controllers/GoogleOAuthController.php:21
+ * @route /auth/google
  */
-callback.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
+google.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
     method: 'head',
 } => ({
-    url: callback.url(options),
+    url: google.url(options),
     method: 'head',
 })
-
-const google = { callback }
 
 export default google

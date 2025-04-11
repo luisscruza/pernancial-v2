@@ -1,10 +1,10 @@
-import * as AccountController from './AccountController'
-import * as OnboardingController from './OnboardingController'
-import * as OnboardingCategoryController from './OnboardingCategoryController'
-import * as OnboardingAccountController from './OnboardingAccountController'
-import * as Settings from './Settings'
-import * as GoogleOAuthController from './GoogleOAuthController'
-import * as Auth from './Auth'
+import AccountController from './AccountController'
+import OnboardingController from './OnboardingController'
+import OnboardingCategoryController from './OnboardingCategoryController'
+import OnboardingAccountController from './OnboardingAccountController'
+import Settings from './Settings'
+import GoogleOAuthController from './GoogleOAuthController'
+import Auth from './Auth'
 
 const Controllers = {
     AccountController, 

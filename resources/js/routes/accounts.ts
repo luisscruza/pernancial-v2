@@ -2,8 +2,8 @@ import { queryParams, type QueryParams } from './../wayfinder'
 
 /**
  * @see \App\Http\Controllers\AccountController::accounts
- * @see app/Http/Controllers/AccountController.php:17
- * @route //
+ * @see app/Http/Controllers/AccountController.php:18
+ * @route /
  */
 export const accounts = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
@@ -15,13 +15,13 @@ export const accounts = (options?: { query?: QueryParams, mergeQuery?: QueryPara
 
 accounts.definition = {
     methods: ['get','head'],
-    url: '\/\/',
+    url: '\/',
 }
 
 /**
  * @see \App\Http\Controllers\AccountController::accounts
- * @see app/Http/Controllers/AccountController.php:17
- * @route //
+ * @see app/Http/Controllers/AccountController.php:18
+ * @route /
  */
 accounts.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
     return accounts.definition.url + queryParams(options)
@@ -29,8 +29,8 @@ accounts.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => 
 
 /**
  * @see \App\Http\Controllers\AccountController::accounts
- * @see app/Http/Controllers/AccountController.php:17
- * @route //
+ * @see app/Http/Controllers/AccountController.php:18
+ * @route /
  */
 accounts.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
@@ -42,8 +42,8 @@ accounts.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\AccountController::accounts
- * @see app/Http/Controllers/AccountController.php:17
- * @route //
+ * @see app/Http/Controllers/AccountController.php:18
+ * @route /
  */
 accounts.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     url: string,
@@ -53,3 +53,4 @@ accounts.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
     method: 'head',
 })
 
+export default accounts

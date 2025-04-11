@@ -20,7 +20,7 @@ final class CreateOnboardingCategoriesAction
     /**
      * Invoke the class instance.
      *
-     * @param  array<int, array{name: string, emoji: string}>  $data
+     * @param  array<int, array{name: string, emoji: string, type: string}>  $data
      */
     public function handle(User $user, array $data): void
     {
@@ -29,6 +29,7 @@ final class CreateOnboardingCategoriesAction
                 $user->categories()->create([
                     'name' => $category['name'],
                     'emoji' => $category['emoji'],
+                    'type' => $category['type'],
                 ]);
             }
         });

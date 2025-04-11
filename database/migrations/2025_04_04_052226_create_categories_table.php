@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('emoji');
+            $table->string('type');
             $table->foreignIdFor(User::class);
             $table->timestamps();
         });

@@ -1,4 +1,4 @@
-import * as RedirectController from './RedirectController'
+import RedirectController from './RedirectController'
 
 const Routing = {
     RedirectController,

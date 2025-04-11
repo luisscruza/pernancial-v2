@@ -1,4 +1,4 @@
-import * as ProfileController from './ProfileController'
+import ProfileController from './ProfileController'
 
 const Settings = {
     ProfileController,

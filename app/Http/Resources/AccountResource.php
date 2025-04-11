@@ -29,7 +29,7 @@ final class AccountResource extends JsonResource
             'emoji' => $this->emoji,
             'color' => $this->color,
             'balance' => $this->balance,
-            'currency' => $this->whenLoaded('currency', fn (): CurrencyResource => new CurrencyResource($this->currency)),
+            'currency' => new CurrencyResource($this->currency),
             'description' => $this->description,
         ];
     }

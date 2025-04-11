@@ -2,7 +2,7 @@ import { queryParams, type QueryParams } from './../../../../wayfinder'
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::index
- * @see app/Http/Controllers/OnboardingCategoryController.php:19
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
 export const index = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -20,7 +20,7 @@ index.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::index
- * @see app/Http/Controllers/OnboardingCategoryController.php:19
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
 index.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -29,7 +29,7 @@ index.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::index
- * @see app/Http/Controllers/OnboardingCategoryController.php:19
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
 index.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -42,7 +42,7 @@ index.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::index
- * @see app/Http/Controllers/OnboardingCategoryController.php:19
+ * @see app/Http/Controllers/OnboardingCategoryController.php:20
  * @route /onboarding/categories
  */
 index.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -55,7 +55,7 @@ index.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see app/Http/Controllers/OnboardingCategoryController.php:32
  * @route /onboarding/categories
  */
 export const store = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -73,7 +73,7 @@ store.definition = {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see app/Http/Controllers/OnboardingCategoryController.php:32
  * @route /onboarding/categories
  */
 store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -82,7 +82,7 @@ store.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
 
 /**
  * @see \App\Http\Controllers\OnboardingCategoryController::store
- * @see app/Http/Controllers/OnboardingCategoryController.php:31
+ * @see app/Http/Controllers/OnboardingCategoryController.php:32
  * @route /onboarding/categories
  */
 store.post = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
