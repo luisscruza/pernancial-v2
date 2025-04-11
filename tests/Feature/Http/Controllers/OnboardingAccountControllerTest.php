@@ -15,6 +15,7 @@ test('users can view onboarding accounts if they have at least one category', fu
     $user->categories()->create([
         'name' => 'Test Category',
         'emoji' => '💰',
+        'type' => 'expense',
     ]);
 
     $response = $this->actingAs($user)->get(route('onboarding.accounts'));
@@ -64,6 +65,8 @@ it('redirects to the dashboard if the user has at least one account', function (
 
     Category::factory()->create([
         'user_id' => $user->id,
+        'name' => 'Test Category',
+        'type' => 'expense',
     ]);
 
     $response = $this->actingAs($user)->get(route('onboarding.accounts'));

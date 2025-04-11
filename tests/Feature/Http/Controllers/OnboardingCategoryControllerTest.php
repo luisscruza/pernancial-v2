@@ -22,6 +22,7 @@ test('users can store onboarding categories', function () {
             [
                 'name' => 'Test Category',
                 'emoji' => '🔍',
+                'type' => 'expense',
             ],
         ],
     ]);
@@ -40,6 +41,7 @@ it('redirects to the accounts onboarding page if the user has at least one categ
     $user->categories()->create([
         'name' => 'Test Category',
         'emoji' => '🔍',
+        'type' => 'expense',
     ]);
 
     $response = $this->actingAs($user)->get(route('onboarding.categories'));
