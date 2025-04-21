@@ -2,28 +2,43 @@ import OnboardingLayout from '@/layouts/onboarding-layout';
 import { type Category, type CreateCategoryData } from '@/types';
 import { Head } from '@inertiajs/react';
 import { CategoryGrid } from '@/components/onboarding/CategoryGrid';
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from "@inertiajs/react";
 import { store } from '@/actions/App/Http/Controllers/OnboardingCategoryController';
+
+type CategoryType = 'expense' | 'income';
+
 const DEFAULT_CATEGORIES: Omit<Category, 'user_id'>[] = [
+    // Expense categories
     { id: 'groceries', name: 'Compras', emoji: '🥑', type: 'expense' },
     { id: 'clothing', name: 'Ropa', emoji: '👖', type: 'expense' },
     { id: 'dining', name: 'Comer afuera', emoji: '🍔', type: 'expense' },
     { id: 'luxury', name: 'Lujo', emoji: '💎', type: 'expense' },
     { id: 'auto', name: 'Auto', emoji: '🚗', type: 'expense' },
     { id: 'pets', name: 'Mascotas', emoji: '🐶', type: 'expense' },
+
+    // Income categories
+    { id: 'salary', name: 'Salario', emoji: '💰', type: 'income' },
+    { id: 'investments', name: 'Inversiones', emoji: '📈', type: 'income' },
+    { id: 'gifts', name: 'Regalos', emoji: '🎁', type: 'income' },
 ];
 
 export default function Onboarding() {
     const [customCategories, setCustomCategories] = useState<Omit<Category, 'user_id'>[]>([]);
 
     const form = useForm({
-        categories: [] as Array<{ id: string, name: string, emoji: string, type: 'expense' | 'income' }>,
+        categories: [] as Array<{ id: string, name: string, emoji: string, type: CategoryType }>,
     });
 
-    const handleSelectCategory = (id: string) => {
+    // Memoize all categories to prevent recalculation on each render
+    const allCategories = useMemo(() =>
+        [...DEFAULT_CATEGORIES, ...customCategories],
+        [customCategories]
+    );
+
+    const handleSelectCategory = useCallback((id: string) => {
         const category = allCategories.find(cat => cat.id === id);
 
         if (!category) return;
@@ -40,9 +55,9 @@ export default function Onboarding() {
                     type: category.type
                 }]
         );
-    };
+    }, [allCategories, form]);
 
-    const handleCreateCategory = (data: CreateCategoryData) => {
+    const handleCreateCategory = useCallback((data: CreateCategoryData) => {
         const newCategory = {
             id: `custom-${Date.now()}`,
             ...data,
@@ -55,18 +70,16 @@ export default function Onboarding() {
                 id: newCategory.id,
                 name: newCategory.name,
                 emoji: newCategory.emoji,
-                type: 'expense'
+                type: newCategory.type
             }
         ]);
-    };
+    }, [form]);
 
-    const handleContinue = () => {
+    const handleContinue = useCallback(() => {
         form.post(store().url, {
             preserveScroll: true,
         });
-    };
-
-    const allCategories = [...DEFAULT_CATEGORIES, ...customCategories];
+    }, [form]);
 
     return (
         <OnboardingLayout>
@@ -74,7 +87,7 @@ export default function Onboarding() {
             <div className="flex flex-col h-full">
                 {/* Fixed header */}
                 <div className="sticky top-0 bg-transparent z-0 mb-4 pt-4 pb-4">
-                    <div className="mx-auto max-w-2xl space-y-2">
+                    <div className="mx-auto max-w-2xl space-y-2 px-4 pt-2">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key="categories"
@@ -84,7 +97,7 @@ export default function Onboarding() {
                             >
                                 <h1 className="text-2xl font-bold">Elige tus categorías</h1>
                                 <p className="text-gray-400">
-                                    Selecciona las categorías que usarás para organizar tus gastos
+                                    Selecciona las categorías que usarás para organizar tus gastos e ingresos
                                 </p>
                             </motion.div>
                         </AnimatePresence>
@@ -93,7 +106,7 @@ export default function Onboarding() {
 
                 {/* Scrollable content */}
                 <div className="flex-1 overflow-y-auto p-5">
-                    <div className="mx-auto max-w-2xl">
+                    <div className="mx-auto max-w-2xl pb-24">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key="categories"

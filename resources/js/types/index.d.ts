@@ -51,7 +51,7 @@ export interface Category {
 
 export interface CreateCategoryData {
     name: string;
-    type: string;
+    type: 'expense' | 'income';
     emoji: string;
 }
 
@@ -101,8 +101,6 @@ export interface Transaction {
     transaction_date: string;
     category?: Category;
 }
-
-
 
 export interface Category {
     id: string;

@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import { memo } from "react";
 
 interface CategoryCardProps {
     emoji: string;
@@ -7,7 +8,13 @@ interface CategoryCardProps {
     onClick?: () => void;
 }
 
-export function CategoryCard({ emoji, name, isSelected = false, onClick }: CategoryCardProps) {
+
+export const CategoryCard = memo(function CategoryCard({
+    emoji,
+    name,
+    isSelected = false,
+    onClick
+}: CategoryCardProps) {
     return (
         <motion.button
             onClick={onClick}
@@ -46,4 +53,4 @@ export function CategoryCard({ emoji, name, isSelected = false, onClick }: Categ
             </motion.span>
         </motion.button>
     );
-} 
+}); 

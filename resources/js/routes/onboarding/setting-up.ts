@@ -1,7 +1,7 @@
 import { queryParams, type QueryParams } from './../../wayfinder'
 
 /**
- * @see routes/web.php:26
+ * @see routes/web.php:31
  * @route /onboarding/setting-up
  */
 export const settingUp = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -18,7 +18,7 @@ settingUp.definition = {
 }
 
 /**
- * @see routes/web.php:26
+ * @see routes/web.php:31
  * @route /onboarding/setting-up
  */
 settingUp.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) => {
@@ -26,7 +26,7 @@ settingUp.url = (options?: { query?: QueryParams, mergeQuery?: QueryParams }) =>
 }
 
 /**
- * @see routes/web.php:26
+ * @see routes/web.php:31
  * @route /onboarding/setting-up
  */
 settingUp.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
@@ -38,7 +38,7 @@ settingUp.get = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {
 })
 
 /**
- * @see routes/web.php:26
+ * @see routes/web.php:31
  * @route /onboarding/setting-up
  */
 settingUp.head = (options?: { query?: QueryParams, mergeQuery?: QueryParams }): {

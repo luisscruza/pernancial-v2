@@ -1,5 +1,5 @@
 import { Sheet } from "@silk-hq/components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { type CreateCategoryData } from "@/types";
 import {
@@ -14,16 +14,34 @@ import "./BottomSheet.css";
 interface CreateCategorySheetProps {
     onSubmit: (data: CreateCategoryData) => void;
     trigger?: React.ReactNode;
+    defaultType?: "expense" | "income";
 }
 
-function CategoryForm({ onSubmit, onDismiss }: { onSubmit: (data: CreateCategoryData) => void; onDismiss: () => void }) {
+type CategoryType = "expense" | "income";
+
+const DEFAULT_EMOJIS = {
+    expense: "🛒",
+    income: "💰"
+};
+
+function CategoryForm({ onSubmit, onDismiss, defaultType = "expense" }: {
+    onSubmit: (data: CreateCategoryData) => void;
+    onDismiss: () => void;
+    defaultType?: CategoryType;
+}) {
     const [name, setName] = useState("");
-    const [emoji, setEmoji] = useState("😀");
+    const [emoji, setEmoji] = useState(DEFAULT_EMOJIS[defaultType]);
+    const [type, setType] = useState<CategoryType>(defaultType);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+
+    // Update emoji when type changes
+    useEffect(() => {
+        setEmoji(DEFAULT_EMOJIS[type]);
+    }, [type]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({ name, emoji, type: "expense" });
+        onSubmit({ name, emoji, type });
         onDismiss();
     };
 
@@ -46,12 +64,44 @@ function CategoryForm({ onSubmit, onDismiss }: { onSubmit: (data: CreateCategory
             >
                 <Sheet.Title className="text-xl font-bold">Nueva categoría</Sheet.Title>
                 <Sheet.Description className="text-sm text-gray-500">
-                    Crea una nueva categoría para organizar tus gastos
+                    Crea una nueva categoría para organizar tus finanzas
                 </Sheet.Description>
             </motion.div>
 
             <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.05 }}
+                    >
+                        <label className="mb-2 block text-sm font-medium">
+                            Tipo
+                        </label>
+                        <div className="flex rounded-lg overflow-hidden border border-gray-300">
+                            <button
+                                type="button"
+                                className={`flex-1 py-2.5 px-4 text-center transition ${type === "expense"
+                                    ? "bg-primary text-white font-medium"
+                                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                    }`}
+                                onClick={() => setType("expense")}
+                            >
+                                Gasto
+                            </button>
+                            <button
+                                type="button"
+                                className={`flex-1 py-2.5 px-4 text-center transition ${type === "income"
+                                    ? "bg-primary text-white font-medium"
+                                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                    }`}
+                                onClick={() => setType("income")}
+                            >
+                                Ingreso
+                            </button>
+                        </div>
+                    </motion.div>
+
                     <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -124,7 +174,7 @@ function CategoryForm({ onSubmit, onDismiss }: { onSubmit: (data: CreateCategory
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            placeholder="Ej: Supermercado"
+                            placeholder={type === "expense" ? "Ej: Supermercado" : "Ej: Salario"}
                             required
                         />
                     </motion.div>
@@ -146,7 +196,7 @@ function CategoryForm({ onSubmit, onDismiss }: { onSubmit: (data: CreateCategory
     );
 }
 
-export function CreateCategorySheet({ onSubmit, trigger }: CreateCategorySheetProps) {
+export function CreateCategorySheet({ onSubmit, trigger, defaultType = "expense" }: CreateCategorySheetProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -190,6 +240,7 @@ export function CreateCategorySheet({ onSubmit, trigger }: CreateCategorySheetPr
                                 >
                                     <Sheet.BleedingBackground className="BottomSheet-bleedingBackground" />
                                     <CategoryForm
+                                        defaultType={defaultType}
                                         onSubmit={(data) => {
                                             onSubmit(data);
                                             setIsOpen(false);
