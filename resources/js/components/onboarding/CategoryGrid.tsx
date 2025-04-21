@@ -42,8 +42,6 @@ const CreateCategoryButton = memo(({
     </motion.div>
 ));
 
-CreateCategoryButton.displayName = 'CreateCategoryButton';
-
 export function CategoryGrid({
     categories,
     selectedCategories,
