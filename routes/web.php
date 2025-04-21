@@ -6,12 +6,17 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/', [AccountController::class, 'index'])->name('accounts');
     Route::get('/accounts/{account}', [AccountController::class, 'show'])->name('accounts.show');
+
+    Route::get('/reset-database', function () {
+        Artisan::call('migrate:fresh');
+    })->name('onboarding.reset-database');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {
