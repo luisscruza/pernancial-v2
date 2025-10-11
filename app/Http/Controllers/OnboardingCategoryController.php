@@ -34,7 +34,7 @@ final class OnboardingCategoryController
         /** @var User $user */
         $user = $request->user();
 
-        /** @var array<int, array{name: string, emoji: string}> $data */
+        /** @var array<int, array{name: string, emoji: string, type: string}> $data */
         $data = $request->validated('categories');
 
         $createOnboardingCategoriesAction->handle($user, $data);
