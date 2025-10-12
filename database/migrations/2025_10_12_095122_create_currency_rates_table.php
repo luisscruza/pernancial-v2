@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('currency_rates', function (Blueprint $table) {
+        Schema::create('currency_rates', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Currency::class)->constrained()->cascadeOnDelete();
