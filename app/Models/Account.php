@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\AccountType;
-use App\Models\Scopes\TenantScope;
+use App\Traits\BelongsToUser;
 use Database\Factories\AccountFactory;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,10 +14,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read AccountType $type
+ * @property-read int $id
+ * @property int $user_id
  */
-#[ScopedBy(TenantScope::class)]
 final class Account extends Model
 {
+    /**
+     * @use BelongsToUser<Account>
+     */
+    use BelongsToUser;
+
     /** @use HasFactory<AccountFactory> */
     use HasFactory;
 

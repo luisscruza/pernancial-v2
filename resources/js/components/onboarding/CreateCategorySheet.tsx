@@ -50,10 +50,6 @@ function CategoryForm({ onSubmit, onDismiss, defaultType = "expense" }: {
         setIsEmojiPickerOpen(false);
     };
 
-    const handleEmojiPickerClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    };
-
     return (
         <div className="px-4 pb-8 pt-4" onClick={(e) => e.stopPropagation()}>
             <motion.div
@@ -257,4 +253,4 @@ export function CreateCategorySheet({ onSubmit, trigger, defaultType = "expense"
             </AnimatePresence>
         </Sheet.Root>
     );
-} 
+}
