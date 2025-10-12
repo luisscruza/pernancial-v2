@@ -1,7 +1,7 @@
 import AuthenticatedSessionController from './AuthenticatedSessionController'
 
 const Auth = {
-    AuthenticatedSessionController,
+    AuthenticatedSessionController: Object.assign(AuthenticatedSessionController, AuthenticatedSessionController),
 }
 
 export default Auth

@@ -23,13 +23,12 @@ test('user can visit accounts page', function () {
 
 test('user can visit account page', function () {
 
-    $user = User::factory()->has(Account::factory()->count(1))
-        ->has(Currency::factory()->count(2))
-        ->has(Category::factory()->count(2))->create();
+    $user = User::factory()->create();
 
-    $account = $user->accounts()->first();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
 
-    $transaction = Transaction::factory()->for($account)->create();
+    Transaction::factory()->for($account)->create();
 
     $this->actingAs($user)->get(route('accounts.show', $account))
         ->assertInertia(fn (Assert $page) => $page

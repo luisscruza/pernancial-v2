@@ -28,14 +28,6 @@ final class Account extends Model
     use HasFactory;
 
     /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
      * @return BelongsTo<Currency, $this>
      */
     public function currency(): BelongsTo

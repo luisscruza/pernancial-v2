@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Models\Scopes\TenantScope;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @template TModel of Model
@@ -14,6 +16,16 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait BelongsToUser
 {
+    /**
+     * Get the user that owns the model.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     protected static function bootBelongsToUser(): void
     {
         static::addGlobalScope(new TenantScope());

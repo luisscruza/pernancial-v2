@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\BelongsToUser;
+use Database\Factories\CurrencyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class Currency extends Model
 {
-    /** @use HasFactory<\Database\Factories\CurrencyFactory> */
+    /** @use BelongsToUser<Currency> */
+    use BelongsToUser;
+
+    /** @use HasFactory<CurrencyFactory> */
     use HasFactory;
 
     /**

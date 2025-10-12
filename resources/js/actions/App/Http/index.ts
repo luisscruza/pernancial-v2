@@ -1,7 +1,7 @@
 import Controllers from './Controllers'
 
 const Http = {
-    Controllers,
+    Controllers: Object.assign(Controllers, Controllers),
 }
 
 export default Http
