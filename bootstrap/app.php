@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance']);
 
-        $middleware->redirectGuestsTo(fn (Request $request) => route('auth'));
+        $middleware->redirectGuestsTo(fn (Request $request): string => route('auth'));
 
         $middleware->alias([
             'onboarding' => OnboardingMiddleware::class,
