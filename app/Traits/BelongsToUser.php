@@ -18,9 +18,6 @@ trait BelongsToUser
     {
         static::addGlobalScope(new TenantScope());
 
-        /** @var class-string<TModel> $modelClass */
-        $modelClass = static::class;
-
         static::creating(function (Model $model): void {
             /** @var TModel $model */
             if (auth()->check() && empty($model->user_id)) {

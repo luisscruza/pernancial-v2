@@ -35,10 +35,3 @@ parameters:
 			identifier: instanceof.alwaysFalse
 			count: 1
 			path: app/Http/Controllers/Settings/ProfileController.php
-
-		-
-			message: '#^Method App\\Http\\Middleware\\HandleInertiaRequests\:\:share\(\) should return array\<string, mixed\> but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Middleware/HandleInertiaRequests.php
-

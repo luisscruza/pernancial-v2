@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\AccountType;
 use App\Models\Account;
 use App\Models\Currency;
 use App\Models\User;
@@ -38,4 +39,24 @@ test('account belongs to currency', function () {
 
     expect($account->currency)->toBeInstanceOf(Currency::class)
         ->and($account->currency->id)->toBe($currency->id);
+});
+
+test('account global scope is applied', function () {
+    $user = User::factory()->create();
+
+    Auth::login($user);
+
+    $type = AccountType::GENERAL;
+
+    $account = Account::create([
+        'name' => 'Test Account',
+        'currency_id' => Currency::factory()->create()->id,
+        'description' => 'This is a test account',
+        'balance' => 0,
+        'type' => $type,
+        'emoji' => $type->emoji(),
+        'color' => $type->color(),
+    ]);
+
+    expect($account->user_id)->toBe($user->id);
 });
