@@ -1,24 +1,81 @@
 import { PaginatedProps, SharedData } from '@/types';
 import { Account, Transaction } from '@/types';
-import { Head, Link, WhenVisible } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Plus } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency} from '@/utils/currency';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import TransactionModal from '@/components/transaction-modal';
+
+interface Category {
+    id: number;
+    name: string;
+    emoji: string;
+    type: string;
+}
+
+interface OtherAccount {
+    id: number;
+    name: string;
+    emoji: string;
+    currency: {
+        symbol: string;
+        name: string;
+    };
+}
+
+interface TransactionType {
+    value: string;
+    label: string;
+}
 
 interface Props extends SharedData {
     account: Account;
-    transactions: PaginatedProps<Transaction>
+    transactions: PaginatedProps<Transaction>;
+    incomeCategories: Category[];
+    expenseCategories: Category[];
+    otherAccounts: OtherAccount[];
+    transactionTypes: TransactionType[];
 }
 
-export default function Show({ account, transactions }: Props) {
+export default function Show({
+    account,
+    transactions,
+    incomeCategories,
+    expenseCategories,
+    otherAccounts,
+    transactionTypes
+}: Props) {
 
     const [tab, setTab] = useState('balance');
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    const typeColorMap: Record<string, string> = {
+        expense: 'text-red-500',
+        income: 'text-green-500',
+        initial: 'text-gray-500',
+        transfer_in: 'text-green-500',
+        transfer_out: 'text-red-500',
+        };
+
+    const handleLoadMore = () => {
+        if (transactions.next_page_url && !isLoadingMore) {
+            setIsLoadingMore(true);
+            router.visit(transactions.next_page_url, {
+                only: ['transactions'],
+                preserveState: true,
+                preserveScroll: true,
+                onFinish: () => setIsLoadingMore(false),
+            });
+        }
+    };
+
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -53,6 +110,13 @@ export default function Show({ account, transactions }: Props) {
                         <h1 className="text-2xl font-semibold text-gray-600">Detalle</h1>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button
+                            onClick={() => setIsTransactionModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700"
+                        >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Nueva transacción
+                        </Button>
                         <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                         </Button>
@@ -116,19 +180,27 @@ export default function Show({ account, transactions }: Props) {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <p className={transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}>
+                                                            <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
                                                                 {formatCurrency(transaction.amount, account.currency!)}
+                                                                <span className="text-xs text-gray-500">{formatCurrency(transaction.running_balance, account.currency!)}</span>
                                                             </p>
+
                                                         </motion.div>
                                                     ))}
-                                    <WhenVisible params={{
-                                        only: ['transactions'],
-                                        data: {
-                                            page: transactions.current_page + 1,
-                                        }
-                                    }} always={transactions.next_page_url != null} fallback={<div className="text-md text-center">Cargando...</div>}>
-                                       <></>
-                                    </WhenVisible>
+
+                                                    {transactions.next_page_url && (
+                                                        <div className="flex justify-center pt-6">
+                                                            <Button
+                                                                onClick={handleLoadMore}
+                                                                disabled={isLoadingMore}
+                                                                variant="outline"
+                                                                className="min-w-32"
+                                                            >
+                                                                {isLoadingMore ? 'Cargando...' : 'Cargar más'}
+                                                            </Button>
+                                                        </div>
+                                                    )}
+
                                     {hasReachedEnd ? (
                                         <p className="text-center text-sm text-muted-foreground">
                                             No hay más registros que mostrar.
@@ -139,6 +211,17 @@ export default function Show({ account, transactions }: Props) {
                         </CardContent>
                     </Card>
                 </motion.div>
+
+                {/* Transaction Modal */}
+                <TransactionModal
+                    isOpen={isTransactionModalOpen}
+                    onClose={() => setIsTransactionModalOpen(false)}
+                    account={account}
+                    incomeCategories={incomeCategories}
+                    expenseCategories={expenseCategories}
+                    otherAccounts={otherAccounts}
+                    transactionTypes={transactionTypes}
+                />
             </div>
         </AppLayout>
     );

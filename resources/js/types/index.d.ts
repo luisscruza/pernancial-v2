@@ -99,7 +99,9 @@ export interface Transaction {
     created_at: string;
     updated_at: string;
     transaction_date: string;
+    running_balance?: number;
     category?: Category;
+    type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';
 }
 
 export interface Category {

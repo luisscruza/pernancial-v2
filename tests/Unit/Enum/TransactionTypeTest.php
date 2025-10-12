@@ -8,12 +8,14 @@ use App\Enums\TransactionType;
 
 test('cases', function () {
     expect(TransactionType::cases())->toBeArray()
-        ->and(TransactionType::cases())->toHaveCount(4)
+        ->and(TransactionType::cases())->toHaveCount(6)
         ->and(TransactionType::cases())->toBe([
             TransactionType::INCOME,
             TransactionType::EXPENSE,
             TransactionType::TRANSFER,
             TransactionType::INITIAL,
+            TransactionType::TRANSFER_IN,
+            TransactionType::TRANSFER_OUT,
         ]);
 });
 
@@ -22,4 +24,6 @@ test('labels', function () {
     expect(TransactionType::EXPENSE->label())->toBe('Gasto');
     expect(TransactionType::TRANSFER->label())->toBe('Transferencia');
     expect(TransactionType::INITIAL->label())->toBe('Inicial');
+    expect(TransactionType::TRANSFER_IN->label())->toBe('Transferencia entrante');
+    expect(TransactionType::TRANSFER_OUT->label())->toBe('Transferencia saliente');
 });

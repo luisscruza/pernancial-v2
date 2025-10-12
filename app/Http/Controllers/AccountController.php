@@ -6,9 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateAccountAction;
 use App\Enums\AccountType;
+use App\Enums\CategoryType;
+use App\Enums\TransactionType;
 use App\Http\Requests\CreateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -72,10 +75,54 @@ final class AccountController
     /**
      * Display the specified account.
      */
-    public function show(Request $request, Account $account): Response
+    public function show(Request $request, Account $account, #[CurrentUser] User $user): Response
     {
         $page = $request->integer('page', 1);
         $per_page = $request->integer('per_page', 20);
+
+        // Get categories for transaction creation
+        $incomeCategories = $user->categories()
+            ->where('type', CategoryType::INCOME)
+            ->get()
+            ->map(fn (Category $category): array => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'emoji' => $category->emoji,
+                'type' => $category->type,
+            ]);
+
+        $expenseCategories = $user->categories()
+            ->where('type', CategoryType::EXPENSE)
+            ->get()
+            ->map(fn (Category $category): array => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'emoji' => $category->emoji,
+                'type' => $category->type,
+            ]);
+
+        // Get other accounts for transfers (excluding current account)
+        $otherAccounts = $user->accounts()
+            ->where('id', '!=', $account->id)
+            ->with('currency')
+            ->get()
+            ->map(fn (Account $acc): array => [
+                'id' => $acc->id,
+                'name' => $acc->name,
+                'emoji' => $acc->emoji,
+                'currency' => [
+                    'symbol' => $acc->currency?->symbol,
+                    'name' => $acc->currency?->name,
+                ],
+            ]);
+
+        // Transaction types for the modal
+        $transactionTypes = collect(TransactionType::cases())
+            ->filter(fn (TransactionType $type): bool => ! in_array($type, [TransactionType::TRANSFER_IN, TransactionType::TRANSFER_OUT, TransactionType::INITIAL], true))
+            ->map(fn (TransactionType $type): array => [
+                'value' => $type->value,
+                'label' => $type->label(),
+            ]);
 
         return Inertia::render('accounts/show', [
             'account' => AccountResource::make($account),
@@ -83,6 +130,10 @@ final class AccountController
                 ->with('category')
                 ->orderBy('created_at', 'desc')
                 ->paginate($per_page, page: $page)),
+            'incomeCategories' => $incomeCategories,
+            'expenseCategories' => $expenseCategories,
+            'otherAccounts' => $otherAccounts,
+            'transactionTypes' => $transactionTypes,
         ]);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Dto\CreateTransactionDto;
+use App\Enums\TransactionType;
 use App\Models\Account;
 use Illuminate\Support\Facades\DB;
 
@@ -28,12 +29,12 @@ final readonly class CreateInitialTransactionAction
             }
 
             $this->createTransactionAction->handle($account, new CreateTransactionDto(
-                type: 'initial',
+                type: TransactionType::INITIAL,
                 amount: $balance,
                 transaction_date: now()->format('Y-m-d'),
                 description: 'Balance inicial',
-                destination_account_id: null,
-                category_id: null,
+                destination_account: null,
+                category: null,
                 conversion_rate: null,
             ));
         });

@@ -69,7 +69,6 @@ test('user can visit account page', function () {
 test('user can view account creation page', function () {
     $user = User::factory()->create();
     $currency = Currency::factory()->for($user)->create();
-    // User needs an existing account to pass onboarding middleware
     Account::factory()->for($user)->for($currency)->create();
 
     $response = $this->actingAs($user)->get(route('accounts.create'));
@@ -209,7 +208,7 @@ test('account creation validates currency exists', function () {
     $data = [
         'name' => 'Test Account',
         'balance' => 100,
-        'currency_id' => 99999, // Non-existent currency
+        'currency_id' => 99999,
         'type' => AccountType::SAVINGS->value,
     ];
 
@@ -244,7 +243,7 @@ test('account creation validates description max length', function () {
 
     $data = [
         'name' => 'Test Account',
-        'description' => str_repeat('a', 256), // 256 characters
+        'description' => str_repeat('a', 256),
         'balance' => 100,
         'currency_id' => $currency->id,
         'type' => AccountType::SAVINGS->value,

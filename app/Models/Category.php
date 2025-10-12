@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CategoryType;
+use App\Traits\BelongsToUser;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 final class Category extends Model
 {
+    /** @use BelongsToUser<Category> */
+    use BelongsToUser;
+
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 

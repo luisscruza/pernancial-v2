@@ -7,7 +7,6 @@ namespace Database\Factories;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,7 +26,6 @@ final class TransactionFactory extends Factory
         $amount = $this->faker->randomFloat(2, 10, 1000);
 
         $baseData = [
-            'user_id' => User::factory(),
             'type' => $type,
             'amount' => $amount,
             'transaction_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
@@ -39,8 +37,6 @@ final class TransactionFactory extends Factory
         // Add type-specific data
         if ($type === 'transfer') {
             $baseData['destination_account_id'] = Account::factory();
-            $baseData['destination_running_balance'] = $amount;
-
             // Sometimes add currency conversion data
             if ($this->faker->boolean(30)) {
                 $conversionRate = $this->faker->randomFloat(6, 0.5, 2.0);
@@ -65,7 +61,6 @@ final class TransactionFactory extends Factory
             'destination_account_id' => null,
             'conversion_rate' => null,
             'converted_amount' => null,
-            'destination_running_balance' => null,
         ]);
     }
 
@@ -79,7 +74,6 @@ final class TransactionFactory extends Factory
             'destination_account_id' => null,
             'conversion_rate' => null,
             'converted_amount' => null,
-            'destination_running_balance' => null,
         ]);
     }
 

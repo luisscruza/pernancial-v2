@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../wayfinder'
 /**
 * @see \App\Http\Controllers\AccountController::accounts
-* @see app/Http/Controllers/AccountController.php:25
+* @see app/Http/Controllers/AccountController.php:28
 * @route '/'
 */
 export const accounts = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ accounts.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::accounts
-* @see app/Http/Controllers/AccountController.php:25
+* @see app/Http/Controllers/AccountController.php:28
 * @route '/'
 */
 accounts.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ accounts.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AccountController::accounts
-* @see app/Http/Controllers/AccountController.php:25
+* @see app/Http/Controllers/AccountController.php:28
 * @route '/'
 */
 accounts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ accounts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::accounts
-* @see app/Http/Controllers/AccountController.php:25
+* @see app/Http/Controllers/AccountController.php:28
 * @route '/'
 */
 accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
