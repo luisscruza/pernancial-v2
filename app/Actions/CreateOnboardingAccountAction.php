@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Dto\CreateTransactionDto;
 use App\Dto\OnboardingAccountDto;
 use App\Enums\AccountType;
 use App\Enums\BaseCurrency;
@@ -18,7 +17,7 @@ final readonly class CreateOnboardingAccountAction
      */
     public function __construct(
         private CreateCurrencyAction $createCurrencyAction,
-        private CreateTransactionAction $createTransactionAction,
+        private CreateInitialTransactionAction $createInitialTransactionAction,
     ) {
         //
     }
@@ -52,17 +51,8 @@ final readonly class CreateOnboardingAccountAction
                 'base_currency_id' => $currency->id,
             ]);
 
-            $this->createTransactionAction->handle($account,
-                new CreateTransactionDto(
-                    type: 'initial',
-                    amount: $data->balance,
-                    transaction_date: now()->format('Y-m-d'),
-                    description: 'Balance inicial',
-                    destination_account_id: null,
-                    category_id: null,
-                    conversion_rate: null,
-                ),
-            );
+            $this->createInitialTransactionAction->handle($account, $data->balance);
+
         });
     }
 }

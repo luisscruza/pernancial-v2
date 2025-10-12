@@ -58,4 +58,17 @@ enum AccountType: string
             self::INVESTMENT => '#84CC16',
         };
     }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::CASH => 'Para gastos diarios y efectivo',
+            self::BANK => 'Para cuentas bancarias generales',
+            self::CREDIT_CARD => 'Para tarjetas de crédito',
+            self::SAVINGS => 'Para ahorros y metas financieras',
+            self::CHECKING => 'Para cuentas corrientes',
+            self::GENERAL => 'Para propósitos generales',
+            self::INVESTMENT => 'Para inversiones y portafolios',
+        };
+    }
 }

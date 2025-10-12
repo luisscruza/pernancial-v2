@@ -8,8 +8,8 @@ use App\Actions\CreateOnboardingAccountAction;
 use App\Enums\BaseCurrency;
 use App\Http\Requests\StoreOnboardingAccountRequest;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,11 +18,8 @@ final class OnboardingAccountController
     /**
      * Display the onboarding account page.
      */
-    public function index(Request $request): Response|RedirectResponse
+    public function index(#[CurrentUser] User $user): Response|RedirectResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         if ($user->categories()->count() === 0) {
             return redirect()->route('onboarding.categories');
         }
@@ -38,11 +35,8 @@ final class OnboardingAccountController
         ]);
     }
 
-    public function store(StoreOnboardingAccountRequest $request, CreateOnboardingAccountAction $createOnboardingAccountAction): RedirectResponse
+    public function store(StoreOnboardingAccountRequest $request, CreateOnboardingAccountAction $createOnboardingAccountAction, #[CurrentUser] User $user): RedirectResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         $createOnboardingAccountAction->handle($user, $request->getDto());
 
         return redirect()->route('onboarding.setting-up');

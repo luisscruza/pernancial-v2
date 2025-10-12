@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\OnboardingAccountController::store
-* @see app/Http/Controllers/OnboardingAccountController.php:41
+* @see app/Http/Controllers/OnboardingAccountController.php:38
 * @route '/onboarding/accounts'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\OnboardingAccountController::store
-* @see app/Http/Controllers/OnboardingAccountController.php:41
+* @see app/Http/Controllers/OnboardingAccountController.php:38
 * @route '/onboarding/accounts'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OnboardingAccountController::store
-* @see app/Http/Controllers/OnboardingAccountController.php:41
+* @see app/Http/Controllers/OnboardingAccountController.php:38
 * @route '/onboarding/accounts'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

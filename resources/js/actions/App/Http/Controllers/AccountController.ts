@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:18
+* @see app/Http/Controllers/AccountController.php:25
 * @route '/'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:18
+* @see app/Http/Controllers/AccountController.php:25
 * @route '/'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:18
+* @see app/Http/Controllers/AccountController.php:25
 * @route '/'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:18
+* @see app/Http/Controllers/AccountController.php:25
 * @route '/'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,8 +44,86 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
+* @see \App\Http\Controllers\AccountController::create
+* @see app/Http/Controllers/AccountController.php:39
+* @route '/accounts/create'
+*/
+export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: create.url(options),
+    method: 'get',
+})
+
+create.definition = {
+    methods: ["get","head"],
+    url: '/accounts/create',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\AccountController::create
+* @see app/Http/Controllers/AccountController.php:39
+* @route '/accounts/create'
+*/
+create.url = (options?: RouteQueryOptions) => {
+    return create.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AccountController::create
+* @see app/Http/Controllers/AccountController.php:39
+* @route '/accounts/create'
+*/
+create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: create.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AccountController::create
+* @see app/Http/Controllers/AccountController.php:39
+* @route '/accounts/create'
+*/
+create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: create.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\AccountController::store
+* @see app/Http/Controllers/AccountController.php:63
+* @route '/accounts'
+*/
+export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: store.url(options),
+    method: 'post',
+})
+
+store.definition = {
+    methods: ["post"],
+    url: '/accounts',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\AccountController::store
+* @see app/Http/Controllers/AccountController.php:63
+* @route '/accounts'
+*/
+store.url = (options?: RouteQueryOptions) => {
+    return store.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AccountController::store
+* @see app/Http/Controllers/AccountController.php:63
+* @route '/accounts'
+*/
+store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: store.url(options),
+    method: 'post',
+})
+
+/**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:32
+* @see app/Http/Controllers/AccountController.php:75
 * @route '/accounts/{account}'
 */
 export const show = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:32
+* @see app/Http/Controllers/AccountController.php:75
 * @route '/accounts/{account}'
 */
 show.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -93,7 +171,7 @@ show.url = (args: { account: number | { id: number } } | [account: number | { id
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:32
+* @see app/Http/Controllers/AccountController.php:75
 * @route '/accounts/{account}'
 */
 show.get = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -103,7 +181,7 @@ show.get = (args: { account: number | { id: number } } | [account: number | { id
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:32
+* @see app/Http/Controllers/AccountController.php:75
 * @route '/accounts/{account}'
 */
 show.head = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -111,6 +189,6 @@ show.head = (args: { account: number | { id: number } } | [account: number | { i
     method: 'head',
 })
 
-const AccountController = { index, show }
+const AccountController = { index, create, store, show }
 
 export default AccountController
