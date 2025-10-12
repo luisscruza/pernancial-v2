@@ -16,6 +16,7 @@
         "laravel/socialite": "^5.19",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.4",
+        "nunomaduro/essentials": "^1.0",
         "tightenco/ziggy": "^2.5.2"
     },
     "require-dev": {
