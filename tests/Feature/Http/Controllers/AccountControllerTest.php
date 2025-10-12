@@ -46,7 +46,7 @@ test('user can visit account page', function () {
             )
             ->has('transactions', fn (Assert $page) => $page
                 ->has('data', fn (Assert $page) => $page
-                    ->where('0', $account->transactions()->with('category')->first()->toArray())
+                    ->where('0', $account->transactions()->with('category', 'fromAccount', 'destinationAccount')->first()->toArray())
                 )
                 ->hasAll([
                     'current_page',

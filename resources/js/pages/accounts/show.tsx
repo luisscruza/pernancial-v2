@@ -64,6 +64,17 @@ export default function Show({
         transfer_out: 'text-red-500',
         };
 
+        const getSymbol = (type: string) => {
+        switch (type) {
+            case 'expense': return '-';
+            case 'income': return '+';
+            case 'initial': return '';
+            case 'transfer_in': return '+';
+            case 'transfer_out': return '-';
+            default: return '';
+        }
+    }
+
     const handleLoadMore = () => {
         if (transactions.next_page_url && !isLoadingMore) {
             setIsLoadingMore(true);
@@ -171,17 +182,44 @@ export default function Show({
                                                         >
                                                             <div className="flex items-center gap-4">
                                                                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                                                    <span>{transaction.category?.emoji || '💰'}</span>
+                                                                    { transaction.category ? (
+                                                                        <span className="text-lg">{transaction.category.emoji}</span>
+                                                                    ) : (
+                                                                        transaction.type === 'transfer_in' ? <span className="text-lg">⬅️</span> :
+                                                                        transaction.type === 'transfer_out' ? <span className="text-lg">➡️</span> :
+                                                                        <span className="text-lg">❓</span>
+                                                                    )}
                                                                 </div>
                                                                 <div>
-                                                                    <h3 className="font-medium">{transaction.description}</h3>
+                                                                    {transaction.category && (
+                                                                        <h3 className="font-medium">{transaction.category.name}</h3>
+                                                                    )}
+
+                                                                    {transaction.description && (
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            {transaction.description}
+                                                                        </p>
+                                                                    )}
+
+
+
+                                                                    {transaction.type.startsWith('transfer') && (
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            <span className="font-medium">Transferencia </span>
+                                                                            {transaction.type === 'transfer_in'
+                                                                                ? `Desde: ${transaction.from_account?.name} (${transaction.from_account?.currency.symbol})`
+                                                                                : `A: ${transaction.destination_account?.name} (${transaction.destination_account?.currency.symbol})`}
+                                                                        </p>
+                                                                    )}
+
                                                                     <p className="text-sm text-muted-foreground">
                                                                         {new Date(transaction.transaction_date).toLocaleDateString()}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                             <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
-                                                                {formatCurrency(transaction.amount, account.currency!)}
+                                                                {getSymbol(transaction.type)}
+                                                                   {formatCurrency(transaction.amount, account.currency!)}
                                                                 <span className="text-xs text-gray-500">{formatCurrency(transaction.running_balance, account.currency!)}</span>
                                                             </p>
 

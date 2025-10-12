@@ -80,7 +80,6 @@ final class AccountController
         $page = $request->integer('page', 1);
         $per_page = $request->integer('per_page', 20);
 
-        // Get categories for transaction creation
         $incomeCategories = $user->categories()
             ->where('type', CategoryType::INCOME)
             ->get()
@@ -101,7 +100,6 @@ final class AccountController
                 'type' => $category->type,
             ]);
 
-        // Get other accounts for transfers (excluding current account)
         $otherAccounts = $user->accounts()
             ->where('id', '!=', $account->id)
             ->with('currency')
@@ -116,7 +114,6 @@ final class AccountController
                 ],
             ]);
 
-        // Transaction types for the modal
         $transactionTypes = collect(TransactionType::cases())
             ->filter(fn (TransactionType $type): bool => ! in_array($type, [TransactionType::TRANSFER_IN, TransactionType::TRANSFER_OUT, TransactionType::INITIAL], true))
             ->map(fn (TransactionType $type): array => [
@@ -127,8 +124,8 @@ final class AccountController
         return Inertia::render('accounts/show', [
             'account' => AccountResource::make($account),
             'transactions' => Inertia::deepMerge($account->transactions()
-                ->with('category')
-                ->orderBy('created_at', 'desc')
+                ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
+                ->orderBy('transaction_date', 'desc')
                 ->paginate($per_page, page: $page)),
             'incomeCategories' => $incomeCategories,
             'expenseCategories' => $expenseCategories,

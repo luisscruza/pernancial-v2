@@ -86,7 +86,7 @@ export interface Account {
     color: string;
     balance: number;
     description?: string;
-    currency?: Currency;
+    currency: Currency;
     transactions?: Transaction[];
 }
 
@@ -102,6 +102,8 @@ export interface Transaction {
     running_balance?: number;
     category?: Category;
     type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';
+    from_account: Account | null;
+    destination_account: Account | null;
 }
 
 export interface Category {

@@ -29,7 +29,6 @@ final class UpdateAccountBalance implements ShouldQueue
      */
     public function handle(): void
     {
-
         $this->updateBalance();
         $this->updateRunningBalance();
     }
@@ -41,8 +40,8 @@ final class UpdateAccountBalance implements ShouldQueue
     {
         $expenses = $this->account->transactions()->where('type', TransactionType::EXPENSE)->sum('amount');
         $incomes = $this->account->transactions()->where('type', TransactionType::INCOME)->sum('amount');
-        $transfersIn = $this->account->transactions()->where('type', TransactionType::TRANSFER_IN)->whereNotNull('destination_account_id')->sum('amount');
-        $transfersOut = $this->account->transactions()->where('type', TransactionType::TRANSFER_OUT)->whereNull('destination_account_id')->sum('amount');
+        $transfersIn = $this->account->transactions()->where('type', TransactionType::TRANSFER_IN)->sum('amount');
+        $transfersOut = $this->account->transactions()->where('type', TransactionType::TRANSFER_OUT)->sum('amount');
         $initial = $this->account->transactions()->where('type', TransactionType::INITIAL)->sum('amount');
 
         $this->account->update([
@@ -55,8 +54,28 @@ final class UpdateAccountBalance implements ShouldQueue
      */
     private function updateRunningBalance(): void
     {
-        $this->transaction?->update([
-            'running_balance' => $this->account->balance,
-        ]);
+        $transactions = $this->account->transactions()
+            ->when($this->transaction instanceof Transaction, function ($query): void {
+                $query->where('transaction_date', '>=', $this->transaction->transaction_date)
+                    ->orWhere(function ($q): void {
+                        $q->where('transaction_date', $this->transaction->transaction_date)
+                            ->where('id', '>=', $this->transaction->id);
+                    });
+            })
+            ->orderBy('transaction_date')
+            ->orderBy('id')
+            ->get();
+
+        $runningBalance = 0.0;
+
+        foreach ($transactions as $transaction) {
+            if (in_array($transaction->type, [TransactionType::INCOME, TransactionType::TRANSFER_IN, TransactionType::INITIAL], true)) {
+                $runningBalance += $transaction->amount;
+            } elseif ($transaction->type === TransactionType::EXPENSE || $transaction->type === TransactionType::TRANSFER_OUT) {
+                $runningBalance -= $transaction->amount;
+            }
+
+            $transaction->update(['running_balance' => $runningBalance]);
+        }
     }
 }

@@ -69,7 +69,7 @@ final readonly class CreateTransactionAction
     private function handleInTransfer(Account $account, CreateTransactionDto $data): void
     {
 
-        if ($data->destination_account === null) {
+        if (! $data->destination_account instanceof Account) {
             throw new InvalidArgumentException('Destination account is required for transfer in transactions.');
         }
 

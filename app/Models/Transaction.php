@@ -32,6 +32,14 @@ final class Transaction extends Model
     }
 
     /**
+     * @return BelongsTo<Account, $this>
+     */
+    public function fromAccount(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'from_account_id');
+    }
+
+    /**
      * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
