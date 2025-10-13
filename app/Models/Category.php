@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CategoryType;
 use App\Traits\BelongsToUser;
+use App\Traits\HasUuidRouting;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,9 @@ final class Category extends Model
 
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
+
+    /** @use HasUuidRouting<Category> */
+    use HasUuidRouting;
 
     /**
      * @return HasMany<Transaction, $this>

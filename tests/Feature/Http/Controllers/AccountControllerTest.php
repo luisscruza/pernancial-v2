@@ -36,6 +36,8 @@ test('user can visit account page', function () {
             ->component('accounts/show')
             ->has('account', fn (Assert $page) => $page
                 ->where('id', $account->id)
+                ->whereNotNull('uuid')
+                ->whereNotNull('balance_in_base')
                 ->where('name', $account->name)
                 ->where('type', $account->type->label())
                 ->where('emoji', $account->emoji)

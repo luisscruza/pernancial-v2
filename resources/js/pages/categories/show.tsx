@@ -76,7 +76,7 @@ export default function CategoryShow({
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" asChild>
-                            <Link href={route('categories.edit', category.id)}>
+                            <Link href={route('categories.edit', category.uuid)}>
                                 <Pencil className="h-4 w-4" />
                             </Link>
                         </Button>

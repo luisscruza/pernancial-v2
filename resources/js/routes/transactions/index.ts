@@ -4,7 +4,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefa
 * @see app/Http/Controllers/TransactionController.php:17
 * @route '/accounts/{account}/transactions'
 */
-export const store = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const store = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -19,13 +19,13 @@ store.definition = {
 * @see app/Http/Controllers/TransactionController.php:17
 * @route '/accounts/{account}/transactions'
 */
-store.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+store.url = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { account: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { account: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { account: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -38,7 +38,7 @@ store.url = (args: { account: number | { id: number } } | [account: number | { i
 
     const parsedArgs = {
         account: typeof args.account === 'object'
-        ? args.account.id
+        ? args.account.uuid
         : args.account,
     }
 
@@ -52,7 +52,7 @@ store.url = (args: { account: number | { id: number } } | [account: number | { i
 * @see app/Http/Controllers/TransactionController.php:17
 * @route '/accounts/{account}/transactions'
 */
-store.post = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+store.post = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })

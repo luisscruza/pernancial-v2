@@ -16,7 +16,7 @@ final readonly class CreateOnboardingAccountAction
      * Create a new class instance.
      */
     public function __construct(
-        private CreateCurrencyAction $createCurrencyAction,
+        private CreateOnboardingCurrencyAction $createCurrencyAction,
         private CreateInitialTransactionAction $createInitialTransactionAction,
     ) {
         //

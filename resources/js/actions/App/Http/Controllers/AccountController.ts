@@ -126,7 +126,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 * @see app/Http/Controllers/AccountController.php:78
 * @route '/accounts/{account}'
 */
-export const show = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -141,13 +141,13 @@ show.definition = {
 * @see app/Http/Controllers/AccountController.php:78
 * @route '/accounts/{account}'
 */
-show.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+show.url = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { account: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { account: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { account: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -160,7 +160,7 @@ show.url = (args: { account: number | { id: number } } | [account: number | { id
 
     const parsedArgs = {
         account: typeof args.account === 'object'
-        ? args.account.id
+        ? args.account.uuid
         : args.account,
     }
 
@@ -174,7 +174,7 @@ show.url = (args: { account: number | { id: number } } | [account: number | { id
 * @see app/Http/Controllers/AccountController.php:78
 * @route '/accounts/{account}'
 */
-show.get = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -184,7 +184,7 @@ show.get = (args: { account: number | { id: number } } | [account: number | { id
 * @see app/Http/Controllers/AccountController.php:78
 * @route '/accounts/{account}'
 */
-show.head = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })

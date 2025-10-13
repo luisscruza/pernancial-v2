@@ -9,6 +9,7 @@ use Database\Factories\CurrencyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Date;
 
 final class Currency extends Model
 {
@@ -26,6 +27,29 @@ final class Currency extends Model
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
+    }
+
+    /**
+     * Get the rates for the currency.
+     *
+     * @return HasMany<CurrencyRate, $this>
+     */
+    public function rates(): HasMany
+    {
+        return $this->hasMany(CurrencyRate::class);
+    }
+
+    /**
+     * Get the rate for a specific date.
+     */
+    public function rateForDate(string $date): ?float
+    {
+        $rate = $this->rates()
+            ->where('effective_date', '<=', $date)
+            ->orderBy('effective_date', 'desc')
+            ->first();
+
+        return $rate?->rate;
     }
 
     /**

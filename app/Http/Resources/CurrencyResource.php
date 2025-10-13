@@ -28,6 +28,7 @@ final class CurrencyResource extends JsonResource
             'decimal_separator' => $this->decimal_separator,
             'thousands_separator' => $this->thousands_separator,
             'symbol_position' => $this->symbol_position,
+            'is_base' => $this->is_base,
         ];
     }
 }

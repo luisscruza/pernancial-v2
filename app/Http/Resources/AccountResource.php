@@ -24,11 +24,13 @@ final class AccountResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'uuid' => $this->uuid,
             'name' => $this->name,
             'type' => $this->type->label(),
             'emoji' => $this->emoji,
             'color' => $this->color,
             'balance' => $this->balance,
+            'balance_in_base' => $this->balance_in_base,
             'currency' => new CurrencyResource($this->currency),
             'description' => $this->description,
         ];

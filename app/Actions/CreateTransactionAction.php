@@ -8,6 +8,7 @@ use App\Dto\CreateTransactionDto;
 use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
 use App\Models\Account;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -33,12 +34,30 @@ final readonly class CreateTransactionAction
                 'description' => $data->description,
                 'category_id' => $data->category?->id,
                 'destination_account_id' => $data->destination_account?->id,
-                'conversion_rate' => $data->conversion_rate,
+                'conversion_rate' => 1,
+                'converted_amount' => $data->amount,
                 'running_balance' => 0,
             ]);
 
+            if (! $account->currency->is_base) {
+                $this->handleConversion($account, $transaction);
+            }
+
             UpdateAccountBalance::dispatchSync($account, $transaction);
         });
+    }
+
+    /**
+     * Handle the conversion for non-base currency transactions.
+     */
+    private function handleConversion(Account $account, Transaction $transaction): void
+    {
+        $rate = $account->currency->rateForDate($transaction->transaction_date->toDateString());
+
+        $transaction->update([
+            'conversion_rate' => $rate,
+            'converted_amount' => $transaction->amount * $rate,
+        ]);
     }
 
     /**

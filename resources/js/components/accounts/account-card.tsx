@@ -19,7 +19,7 @@ export function AccountCard({ account, className }: AccountCardProps) {
             transition={{ duration: 0.2 }}
         >
             <Link
-                href={`/accounts/${account.id}`}
+                href={`/accounts/${account.uuid}`}
                 className={cn(
                     "flex items-center justify-between w-full rounded-xl border-[1px] border-gray-50 bg-white p-4 shadow-sm hover:shadow-sm transition-all duration-200",
                     className

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
@@ -24,6 +26,14 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
     Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+
+    Route::get('/currencies', [CurrencyController::class, 'index'])->name('currencies.index');
+    Route::get('/currencies/create', [CurrencyController::class, 'create'])->name('currencies.create');
+    Route::post('/currencies', [CurrencyController::class, 'store'])->name('currencies.store');
+    Route::get('/currencies/{currency}', [CurrencyController::class, 'show'])->name('currencies.show');
+    Route::get('/currencies/{currency}/edit', [CurrencyController::class, 'edit'])->name('currencies.edit');
+    Route::put('/currencies/{currency}', [CurrencyController::class, 'update'])->name('currencies.update');
+    Route::post('/currencies/{currency}/rates', [CurrencyRateController::class, 'store'])->name('currencies.rates.store');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {

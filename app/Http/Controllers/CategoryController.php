@@ -25,7 +25,7 @@ final class CategoryController
         $categories = $user->categories()
             ->orderBy('type')
             ->orderBy('name')
-            ->get(['id', 'name', 'emoji', 'type']);
+            ->get(['id', 'uuid', 'name', 'emoji', 'type']);
 
         return Inertia::render('categories/index', [
             'categories' => $categories,
@@ -68,7 +68,7 @@ final class CategoryController
             ->paginate(20);
 
         return Inertia::render('categories/show', [
-            'category' => $category->only(['id', 'name', 'emoji', 'type']),
+            'category' => $category->only(['id', 'uuid', 'name', 'emoji', 'type']),
             'transactions' => $transactions,
         ]);
     }
@@ -79,7 +79,7 @@ final class CategoryController
     public function edit(Category $category): Response
     {
         return Inertia::render('categories/edit', [
-            'category' => $category->only(['id', 'name', 'emoji', 'type']),
+            'category' => $category->only(['id', 'uuid', 'name', 'emoji', 'type']),
         ]);
     }
 

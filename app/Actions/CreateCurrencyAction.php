@@ -4,36 +4,37 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\BaseCurrency;
+use App\Dto\CreateCurrencyDto;
 use App\Models\Currency;
-use App\Models\User;
+use App\Models\CurrencyRate;
 use Illuminate\Support\Facades\DB;
 
 final class CreateCurrencyAction
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    public function handle(CreateCurrencyDto $dto, int $userId): Currency
     {
-        //
-    }
+        return DB::transaction(function () use ($dto, $userId) {
+            $currency = Currency::create([
+                'user_id' => $userId,
+                'code' => $dto->code,
+                'name' => $dto->name,
+                'symbol' => $dto->symbol,
+                'decimal_places' => $dto->decimalPlaces,
+                'decimal_separator' => $dto->decimalSeparator,
+                'thousands_separator' => $dto->thousandsSeparator,
+                'symbol_position' => $dto->symbolPosition,
+                'conversion_rate' => $dto->conversionRate,
+                'is_base' => $dto->isBase,
+            ]);
 
-    /**
-     * Invoke the class instance.
-     */
-    public function handle(User $user, BaseCurrency $currency, ?float $conversionRate = 1, bool $isBase = false): Currency
-    {
-        return DB::transaction(fn (): Currency => $user->currencies()->create([
-            'code' => $currency->value,
-            'name' => $currency->label(),
-            'symbol' => $currency->symbol(),
-            'decimal_places' => $currency->decimalPlaces(),
-            'decimal_separator' => $currency->decimalSeparator(),
-            'thousands_separator' => $currency->thousandsSeparator(),
-            'symbol_position' => $currency->symbolPosition(),
-            'conversion_rate' => $conversionRate,
-            'is_base' => $isBase,
-        ]));
+            // Create initial currency rate record
+            CurrencyRate::create([
+                'currency_id' => $currency->id,
+                'rate' => $dto->conversionRate,
+                'effective_date' => now()->toDateString(),
+            ]);
+
+            return $currency;
+        });
     }
 }

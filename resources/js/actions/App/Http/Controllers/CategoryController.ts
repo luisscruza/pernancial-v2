@@ -126,7 +126,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 * @see app/Http/Controllers/CategoryController.php:62
 * @route '/categories/{category}'
 */
-export const show = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -141,13 +141,13 @@ show.definition = {
 * @see app/Http/Controllers/CategoryController.php:62
 * @route '/categories/{category}'
 */
-show.url = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+show.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { category: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { category: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { category: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -160,7 +160,7 @@ show.url = (args: { category: number | { id: number } } | [category: number | { 
 
     const parsedArgs = {
         category: typeof args.category === 'object'
-        ? args.category.id
+        ? args.category.uuid
         : args.category,
     }
 
@@ -174,7 +174,7 @@ show.url = (args: { category: number | { id: number } } | [category: number | { 
 * @see app/Http/Controllers/CategoryController.php:62
 * @route '/categories/{category}'
 */
-show.get = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -184,7 +184,7 @@ show.get = (args: { category: number | { id: number } } | [category: number | { 
 * @see app/Http/Controllers/CategoryController.php:62
 * @route '/categories/{category}'
 */
-show.head = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -194,7 +194,7 @@ show.head = (args: { category: number | { id: number } } | [category: number | {
 * @see app/Http/Controllers/CategoryController.php:79
 * @route '/categories/{category}/edit'
 */
-export const edit = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const edit = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -209,13 +209,13 @@ edit.definition = {
 * @see app/Http/Controllers/CategoryController.php:79
 * @route '/categories/{category}/edit'
 */
-edit.url = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+edit.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { category: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { category: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { category: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -228,7 +228,7 @@ edit.url = (args: { category: number | { id: number } } | [category: number | { 
 
     const parsedArgs = {
         category: typeof args.category === 'object'
-        ? args.category.id
+        ? args.category.uuid
         : args.category,
     }
 
@@ -242,7 +242,7 @@ edit.url = (args: { category: number | { id: number } } | [category: number | { 
 * @see app/Http/Controllers/CategoryController.php:79
 * @route '/categories/{category}/edit'
 */
-edit.get = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+edit.get = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -252,7 +252,7 @@ edit.get = (args: { category: number | { id: number } } | [category: number | { 
 * @see app/Http/Controllers/CategoryController.php:79
 * @route '/categories/{category}/edit'
 */
-edit.head = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+edit.head = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
     method: 'head',
 })
@@ -262,7 +262,7 @@ edit.head = (args: { category: number | { id: number } } | [category: number | {
 * @see app/Http/Controllers/CategoryController.php:89
 * @route '/categories/{category}'
 */
-export const update = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -277,13 +277,13 @@ update.definition = {
 * @see app/Http/Controllers/CategoryController.php:89
 * @route '/categories/{category}'
 */
-update.url = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+update.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { category: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { category: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { category: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -296,7 +296,7 @@ update.url = (args: { category: number | { id: number } } | [category: number | 
 
     const parsedArgs = {
         category: typeof args.category === 'object'
-        ? args.category.id
+        ? args.category.uuid
         : args.category,
     }
 
@@ -310,7 +310,7 @@ update.url = (args: { category: number | { id: number } } | [category: number | 
 * @see app/Http/Controllers/CategoryController.php:89
 * @route '/categories/{category}'
 */
-update.put = (args: { category: number | { id: number } } | [category: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })

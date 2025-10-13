@@ -9,7 +9,7 @@ import { formatCurrency } from '@/utils/currency';
 
 export default function AccountPage({ accounts }: { accounts: Account[] }) {
     const page = usePage<SharedData>();
-    const totalBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
+    const totalBalance = accounts.reduce((acc, account) => acc + account.balance_in_base, 0);
 
     return (
         <AppLayout title="Cuentas">
@@ -36,7 +36,7 @@ export default function AccountPage({ accounts }: { accounts: Account[] }) {
                         {accounts.map((account, index) => (
                             <motion.div
                                 layout
-                                key={account.id}
+                                key={account.uuid}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}

@@ -248,7 +248,7 @@ test('transaction creation updates account balance', function () {
         'transaction_date' => now()->toDateString(),
     ];
 
-    $this->actingAs($this->user)->post(route('transactions.store', $this->account), $data);
+    $response = $this->actingAs($this->user)->post(route('transactions.store', $this->account), $data);
 
     expect($this->account->transactions()->count())->toBe(1)
         ->and($this->account->fresh()->balance)->toBe(100);

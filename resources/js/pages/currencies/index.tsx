@@ -1,27 +1,37 @@
 import AppLayout from '@/layouts/app-layout';
-import { Category } from '@/types';
+import { Currency } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, CoinsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { categoryLabel } from '@/lib/labels';
 
-interface CategoryItemProps {
-    category: Category;
+interface CurrencyItemProps {
+    currency: Currency & {
+        rates?: Array<{ rate: number; effective_date: string }>;
+        conversion_rate: number;
+        is_base: boolean;
+    };
 }
 
-function CategoryItem({ category }: CategoryItemProps) {
+function CurrencyItem({ currency }: CurrencyItemProps) {
+    const formatRate = (rate: number) => {
+        return new Intl.NumberFormat('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6,
+        }).format(rate);
+    };
+
     return (
-        <Link href={route('categories.show', category.uuid)}>
+        <Link href={route('currencies.show', currency.id)}>
             <motion.div
                 layout
                 className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
             >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     <motion.div
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-2xl"
+                        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-indigo-100 text-xl font-bold text-blue-600"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
@@ -30,25 +40,46 @@ function CategoryItem({ category }: CategoryItemProps) {
                             damping: 15
                         }}
                     >
-                        {category.emoji}
+                        {currency.symbol}
                     </motion.div>
                     <div>
-                        <h3 className="font-medium text-gray-900">{category.name}</h3>
-                        <p className="text-sm text-gray-500 capitalize">{categoryLabel(category.type)}</p>
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900">{currency.code}</h3>
+                            {currency.is_base && (
+                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                                    Base
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-500">{currency.name}</p>
                     </div>
+                </div>
+                <div className="text-right">
+                    <p className="font-medium text-gray-900">
+                        {formatRate(currency.conversion_rate)}
+                    </p>
+                    <p className="text-xs text-gray-500">Tasa actual</p>
                 </div>
             </motion.div>
         </Link>
     );
 }
 
-export default function CategoriesPage({ categories }: { categories: Category[] }) {
-    const expenseCategories = categories.filter(category => category.type === 'expense');
-    const incomeCategories = categories.filter(category => category.type === 'income');
+export default function CurrenciesPage({ 
+    currencies 
+}: { 
+    currencies: Array<Currency & {
+        rates?: Array<{ rate: number; effective_date: string }>;
+        conversion_rate: number;
+        is_base: boolean;
+    }> 
+}) {
+    const baseCurrency = currencies.find(currency => currency.is_base);
+    const otherCurrencies = currencies.filter(currency => !currency.is_base);
 
     return (
-        <AppLayout title="Categorías">
-            <Head title="Categorías" />
+        <AppLayout title="Monedas">
+            <Head title="Monedas" />
             <div className="mx-auto w-full max-w-4xl p-4">
                 <motion.div
                     className="mb-8 flex items-center justify-between"
@@ -56,25 +87,44 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <motion.h1
-                        className="text-3xl font-bold text-gray-900"
+                    <motion.div
+                        className="flex items-center gap-3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.3 }}
                     >
-                        Categorías
-                    </motion.h1>
+                        <CoinsIcon className="h-8 w-8 text-blue-600" />
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Monedas
+                        </h1>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.2 }}
+                    >
+                        <Button
+                            variant="default"
+                            asChild
+                            className="rounded-full bg-blue-600 hover:bg-blue-700"
+                        >
+                            <Link href={route('currencies.create')} className="gap-2">
+                                <PlusIcon className="h-4 w-4" />
+                                Nueva moneda
+                            </Link>
+                        </Button>
+                    </motion.div>
                 </motion.div>
 
                 <motion.div
                     layout
-                    className="space-y-8"
+                    className="space-y-6"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                 >
-                    {/* Expense Categories */}
-                    {expenseCategories.length > 0 && (
+                    {/* Base Currency */}
+                    {baseCurrency && (
                         <motion.section
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -86,58 +136,47 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                Gastos
+                                Moneda base
                             </motion.h2>
-                            <div className="grid gap-4">
-                                <AnimatePresence mode="popLayout">
-                                    {expenseCategories.map((category, index) => (
-                                        <motion.div
-                                            key={category.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -20 }}
-                                            transition={{
-                                                delay: index * 0.1,
-                                                duration: 0.3
-                                            }}
-                                        >
-                                            <CategoryItem category={category} />
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                            </div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4, duration: 0.3 }}
+                            >
+                                <CurrencyItem currency={baseCurrency} />
+                            </motion.div>
                         </motion.section>
                     )}
 
-                    {/* Income Categories */}
-                    {incomeCategories.length > 0 && (
+                    {/* Other Currencies */}
+                    {otherCurrencies.length > 0 && (
                         <motion.section
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
+                            transition={{ delay: baseCurrency ? 0.4 : 0.2 }}
                         >
                             <motion.h2
                                 className="mb-4 text-xl font-semibold text-gray-800"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
+                                transition={{ delay: baseCurrency ? 0.5 : 0.3 }}
                             >
-                                Ingresos
+                                Otras monedas
                             </motion.h2>
                             <div className="grid gap-4">
                                 <AnimatePresence mode="popLayout">
-                                    {incomeCategories.map((category, index) => (
+                                    {otherCurrencies.map((currency, index) => (
                                         <motion.div
-                                            key={category.id}
+                                            key={currency.id}
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -20 }}
                                             transition={{
-                                                delay: index * 0.1,
+                                                delay: index * 0.1 + (baseCurrency ? 0.6 : 0.4),
                                                 duration: 0.3
                                             }}
                                         >
-                                            <CategoryItem category={category} />
+                                            <CurrencyItem currency={currency} />
                                         </motion.div>
                                     ))}
                                 </AnimatePresence>
@@ -145,26 +184,8 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                         </motion.section>
                     )}
 
-                    {/* Create New Category Button */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.6, duration: 0.2 }}
-                    >
-                        <Button
-                            variant="default"
-                            asChild
-                            className="w-full rounded-full bg-accent py-6 text-lg font-bold text-accent-foreground transition-all duration-200 hover:bg-accent/80"
-                        >
-                            <Link href="/categories/create" className="gap-2">
-                                <PlusIcon className="h-4 w-4" />
-                                Nueva categoría
-                            </Link>
-                        </Button>
-                    </motion.div>
-
                     {/* Empty State */}
-                    {categories.length === 0 && (
+                    {currencies.length === 0 && (
                         <motion.div
                             layout
                             initial={{ opacity: 0 }}
@@ -184,7 +205,7 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                                     damping: 15
                                 }}
                             >
-                                📂
+                                💰
                             </motion.div>
                             <motion.h3
                                 className="mt-4 text-lg font-medium"
@@ -192,7 +213,7 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                No tienes categorías
+                                No tienes monedas configuradas
                             </motion.h3>
                             <motion.p
                                 className="mt-2 text-sm text-gray-500"
@@ -200,7 +221,7 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.4 }}
                             >
-                                Crea tu primera categoría para organizar tus transacciones.
+                                Crea tu primera moneda para gestionar diferentes divisas en tus transacciones.
                             </motion.p>
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -212,9 +233,9 @@ export default function CategoriesPage({ categories }: { categories: Category[] 
                                     asChild
                                     className="mt-6 rounded-full bg-blue-500 hover:bg-blue-600"
                                 >
-                                    <Link href="/categories/create" className="gap-2">
+                                    <Link href={route('currencies.create')} className="gap-2">
                                         <PlusIcon className="h-4 w-4" />
-                                        Crear categoría
+                                        Crear moneda
                                     </Link>
                                 </Button>
                             </motion.div>

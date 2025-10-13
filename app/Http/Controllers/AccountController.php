@@ -106,6 +106,7 @@ final class AccountController
             ->get()
             ->map(fn (Account $acc): array => [
                 'id' => $acc->id,
+                'uuid' => $acc->uuid,
                 'name' => $acc->name,
                 'emoji' => $acc->emoji,
                 'currency' => [

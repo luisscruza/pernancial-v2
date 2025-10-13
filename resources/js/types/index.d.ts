@@ -44,6 +44,7 @@ export interface User {
 
 export interface Category {
     id: string;
+    uuid?: string;
     name: string;
     emoji: string;
     user_id: number;
@@ -64,6 +65,7 @@ export interface Currency {
     decimal_separator: string;
     thousands_separator: string;
     symbol_position: string;
+    is_base: boolean;
 }
 
 export interface BaseCurrency {
@@ -78,6 +80,7 @@ export interface BaseCurrency {
 
 export interface Account {
     id: number;
+    uuid: string;
     user_id: number;
     currency_id: number;
     name: string;
@@ -85,6 +88,7 @@ export interface Account {
     emoji: string;
     color: string;
     balance: number;
+    balance_in_base: number;
     description?: string;
     currency: Currency;
     transactions?: Transaction[];
@@ -100,6 +104,7 @@ export interface Transaction {
     updated_at: string;
     transaction_date: string;
     running_balance?: number;
+    converted_amount?: number;
     category?: Category;
     account: Account;
     type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';

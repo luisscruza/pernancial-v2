@@ -105,7 +105,7 @@ export default function CreateAccount({ currencies, accountTypes }: Props) {
                     transition={{ duration: 0.3 }}
                 >
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href="/accounts" className="gap-2">
+                        <Link href="/" className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
                             Volver
                         </Link>

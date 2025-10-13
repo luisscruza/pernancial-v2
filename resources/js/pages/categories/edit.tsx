@@ -46,7 +46,7 @@ export default function EditCategory({ category }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        form.put(route('categories.update', category.id), {
+        form.put(route('categories.update', category.uuid), {
             onSuccess: () => {
                 // Success will be handled by redirect
             }
@@ -70,7 +70,7 @@ export default function EditCategory({ category }: Props) {
                     transition={{ duration: 0.3 }}
                 >
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={route('categories.show', category.id)} className="gap-2">
+                        <Link href={route('categories.show', category.uuid)} className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
                             Volver
                         </Link>
@@ -240,7 +240,7 @@ export default function EditCategory({ category }: Props) {
                                 className="flex-1"
                                 asChild
                             >
-                                <Link href={route('categories.show', category.id)}>Cancelar</Link>
+                                <Link href={route('categories.show', category.uuid)}>Cancelar</Link>
                             </Button>
                             <Button
                                 type="submit"

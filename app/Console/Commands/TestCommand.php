@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateAccountBalance;
-use App\Models\Account;
-use App\Models\Transaction;
 use Illuminate\Console\Command;
 
 /**
@@ -33,10 +30,6 @@ final class TestCommand extends Command
      */
     public function handle(): void
     {
-        $account = Account::findOrFail(2);
-
-        $transaction = Transaction::find(10);
-
-        UpdateAccountBalance::dispatchSync($account, $transaction);
+        //
     }
 }

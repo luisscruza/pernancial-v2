@@ -6,12 +6,14 @@ use App\Enums\AccountType;
 use App\Models\Account;
 use App\Models\Currency;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 test('to array', function () {
     $account = Account::factory()->create()->fresh();
 
     expect(array_keys($account->toArray()))->toBe([
         'id',
+        'uuid',
         'user_id',
         'currency_id',
         'name',

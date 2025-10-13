@@ -64,7 +64,7 @@ export default function TransactionModal({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
-        post(route('transactions.store', account.id), {
+        post(route('transactions.store', account.uuid), {
             onSuccess: () => {
                 reset();
                 setSelectedType('');

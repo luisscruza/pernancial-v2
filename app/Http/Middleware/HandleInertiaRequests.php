@@ -57,6 +57,7 @@ final class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'base_currency' => $user ? $user->currencies()->where('is_base', true)->first() : null,
         ];
     }
 }

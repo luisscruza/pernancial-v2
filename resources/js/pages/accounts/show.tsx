@@ -1,6 +1,6 @@
 import { PaginatedProps, SharedData } from '@/types';
 import { Account, Transaction } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,9 @@ export default function Show({
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+        const page = usePage<SharedData>();
+        const { base_currency } = page.props;
 
     const typeColorMap: Record<string, string> = {
         expense: 'text-red-500',
@@ -218,8 +221,10 @@ export default function Show({
                                                                 </div>
                                                             </div>
                                                             <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
-                                                                {getSymbol(transaction.type)}
+                                                               <span >{getSymbol(transaction.type)}
                                                                    {formatCurrency(transaction.amount, account.currency!)}
+                                                                   {! account.currency.is_base && <span className="text-xs text-gray-500">({formatCurrency(transaction.converted_amount!, base_currency!)})</span>}
+                                                                   </span>
                                                                 <span className="text-xs text-gray-500">{formatCurrency(transaction.running_balance, account.currency!)}</span>
                                                             </p>
 

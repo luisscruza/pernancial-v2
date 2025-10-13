@@ -16,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table): void {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('emoji');
             $table->string('type');
