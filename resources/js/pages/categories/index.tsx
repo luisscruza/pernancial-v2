@@ -12,31 +12,33 @@ interface CategoryItemProps {
 
 function CategoryItem({ category }: CategoryItemProps) {
     return (
-        <motion.div
-            layout
-            className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-        >
-            <div className="flex items-center gap-3">
-                <motion.div
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-2xl"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 15
-                    }}
-                >
-                    {category.emoji}
-                </motion.div>
-                <div>
-                    <h3 className="font-medium text-gray-900">{category.name}</h3>
-                    <p className="text-sm text-gray-500 capitalize">{categoryLabel(category.type)}</p>
+        <Link href={route('categories.show', category.id)}>
+            <motion.div
+                layout
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+            >
+                <div className="flex items-center gap-3">
+                    <motion.div
+                        className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-2xl"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 15
+                        }}
+                    >
+                        {category.emoji}
+                    </motion.div>
+                    <div>
+                        <h3 className="font-medium text-gray-900">{category.name}</h3>
+                        <p className="text-sm text-gray-500 capitalize">{categoryLabel(category.type)}</p>
+                    </div>
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </Link>
     );
 }
 

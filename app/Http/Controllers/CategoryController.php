@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\CreateCategoryAction;
+use App\Actions\UpdateCategoryAction;
 use App\Http\Requests\CreateCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -51,5 +54,49 @@ final class CategoryController
         $createCategoryAction->handle($user, $data);
 
         return to_route('categories')->with('success', 'Categoría creada exitosamente.');
+    }
+
+    /**
+     * Display the specified category with its transactions.
+     */
+    public function show(Category $category, #[CurrentUser] User $user): Response
+    {
+        $transactions = $category->transactions()
+            ->with(['account.currency', 'fromAccount.currency', 'destinationAccount.currency'])
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return Inertia::render('categories/show', [
+            'category' => $category->only(['id', 'name', 'emoji', 'type']),
+            'transactions' => $transactions,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified category.
+     */
+    public function edit(Category $category, #[CurrentUser] User $user): Response
+    {
+        return Inertia::render('categories/edit', [
+            'category' => $category->only(['id', 'name', 'emoji', 'type']),
+        ]);
+    }
+
+    /**
+     * Update the specified category in storage.
+     */
+    public function update(
+        UpdateCategoryRequest $request,
+        Category $category,
+        UpdateCategoryAction $updateCategoryAction,
+        #[CurrentUser] User $user
+    ): RedirectResponse {
+        /** @var array{name: string, emoji: string, type: string} $data */
+        $data = $request->validated();
+
+        $updateCategoryAction->handle($category, $data);
+
+        return to_route('categories.show', $category)->with('success', 'Categoría actualizada exitosamente.');
     }
 }

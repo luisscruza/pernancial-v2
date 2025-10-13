@@ -7,6 +7,7 @@ namespace App\Mcp\Resources;
 use App\Models\Transaction;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Resource;
@@ -50,7 +51,7 @@ final class TransactionsResource extends Resource
         $user = User::where('email', 'cruzmediaorg@gmail.com')->first();
 
         try {
-            $transactions = Transaction::whereHas('account', function ($query) use ($user): void {
+            $transactions = Transaction::whereHas('account', function (Builder $query) use ($user): void {
                 $query->where('user_id', $user->id);
             })
                 ->with(['account.currency', 'category', 'destinationAccount.currency'])

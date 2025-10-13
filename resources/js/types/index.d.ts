@@ -101,6 +101,7 @@ export interface Transaction {
     transaction_date: string;
     running_balance?: number;
     category?: Category;
+    account: Account;
     type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';
     from_account: Account | null;
     destination_account: Account | null;

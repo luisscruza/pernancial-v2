@@ -264,3 +264,133 @@ test('categories display shows correct fields', function () {
         ->missing('categories.0.user_id') // Should not include user_id
     );
 });
+
+test('user can view category detail page', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $category = Category::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)->get(route('categories.show', $category));
+
+    $response->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('categories/show')
+            ->has('category')
+            ->where('category.id', $category->id)
+            ->where('category.name', $category->name)
+            ->where('category.emoji', $category->emoji)
+            ->where('category.type', $category->type)
+            ->has('transactions')
+        );
+});
+
+test('user can view category edit page', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $category = Category::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)->get(route('categories.edit', $category));
+
+    $response->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('categories/edit')
+            ->has('category')
+            ->where('category.id', $category->id)
+            ->where('category.name', $category->name)
+            ->where('category.emoji', $category->emoji)
+            ->where('category.type', $category->type)
+        );
+});
+
+test('user can update a category', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Old Name',
+        'emoji' => '🛒',
+        'type' => 'expense',
+    ]);
+
+    $data = [
+        'name' => 'Updated Category Name',
+        'emoji' => '🎯',
+        'type' => 'income',
+    ];
+
+    $response = $this->actingAs($user)->put(route('categories.update', $category), $data);
+
+    $response->assertRedirect(route('categories.show', $category))
+        ->assertSessionHas('success', 'Categoría actualizada exitosamente.');
+
+    $category = $category->fresh();
+    expect($category->name)->toBe('Updated Category Name')
+        ->and($category->emoji)->toBe('🎯')
+        ->and($category->type)->toBe(CategoryType::INCOME);
+});
+
+test('category update validates required fields', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $category = Category::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)->putJson(route('categories.update', $category), []);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['name', 'emoji', 'type']);
+});
+
+test('user cannot view other users category', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+
+    $currency1 = Currency::factory()->for($user1)->create();
+    $currency2 = Currency::factory()->for($user2)->create();
+
+    Account::factory()->for($user1)->for($currency1)->create();
+    Account::factory()->for($user2)->for($currency2)->create();
+
+    $category = Category::factory()->for($user2)->create();
+
+    $response = $this->actingAs($user1)->get(route('categories.show', $category));
+    $response->assertNotFound();
+
+    $response = $this->actingAs($user1)->get(route('categories.edit', $category));
+    $response->assertNotFound();
+
+    $response = $this->actingAs($user1)->put(route('categories.update', $category), [
+        'name' => 'Hacked',
+        'emoji' => '🚨',
+        'type' => 'expense',
+    ]);
+    $response->assertNotFound();
+});
+
+test('category shows related transactions', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $category = Category::factory()->for($user)->create();
+
+    $transaction1 = App\Models\Transaction::factory()->for($account)->for($category)->create([
+        'transaction_date' => now()->subDay(),
+    ]);
+    $transaction2 = App\Models\Transaction::factory()->for($account)->for($category)->create([
+        'transaction_date' => now(),
+    ]);
+
+    $otherCategory = Category::factory()->for($user)->create();
+    App\Models\Transaction::factory()->for($account)->for($otherCategory)->create();
+
+    $response = $this->actingAs($user)->get(route('categories.show', $category));
+
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('categories/show')
+        ->has('transactions.data', 2)
+        ->where('transactions.data.0.id', $transaction2->id)
+        ->where('transactions.data.1.id', $transaction1->id)
+    );
+});
