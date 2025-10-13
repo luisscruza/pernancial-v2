@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\CreateOnboardingCategoriesAction;
 use App\Http\Requests\StoreOnboardingCategoriesRequest;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,11 +30,8 @@ final class OnboardingCategoryController
         return Inertia::render('onboarding/categories/index');
     }
 
-    public function store(StoreOnboardingCategoriesRequest $request, CreateOnboardingCategoriesAction $createOnboardingCategoriesAction): RedirectResponse
+    public function store(StoreOnboardingCategoriesRequest $request, CreateOnboardingCategoriesAction $createOnboardingCategoriesAction, #[CurrentUser] User $user): RedirectResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         /** @var array<int, array{name: string, emoji: string, type: string}> $data */
         $data = $request->validated('categories');
 

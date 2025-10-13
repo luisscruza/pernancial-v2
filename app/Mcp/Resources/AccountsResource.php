@@ -54,23 +54,21 @@ final class AccountsResource extends Resource
                 ->with(['currency'])
                 ->orderBy('name')
                 ->get()
-                ->map(function (Account $account) {
-                    return [
-                        'id' => $account->id,
-                        'name' => $account->name,
-                        'type' => $account->type->value,
-                        'type_label' => $account->type->name ?? $account->type->value,
-                        'currency' => [
-                            'id' => $account->currency->id,
-                            'code' => $account->currency->code,
-                            'name' => $account->currency->name,
-                            'symbol' => $account->currency->symbol,
-                        ],
-                        'balance' => $account->balance,
-                        'created_at' => $account->created_at?->toISOString(),
-                        'updated_at' => $account->updated_at?->toISOString(),
-                    ];
-                });
+                ->map(fn (Account $account): array => [
+                    'id' => $account->id,
+                    'name' => $account->name,
+                    'type' => $account->type->value,
+                    'type_label' => $account->type->name ?? $account->type->value,
+                    'currency' => [
+                        'id' => $account->currency->id,
+                        'code' => $account->currency->code,
+                        'name' => $account->currency->name,
+                        'symbol' => $account->currency->symbol,
+                    ],
+                    'balance' => $account->balance,
+                    'created_at' => $account->created_at?->toISOString(),
+                    'updated_at' => $account->updated_at?->toISOString(),
+                ]);
 
             $responseData = [
                 'accounts' => $accounts,

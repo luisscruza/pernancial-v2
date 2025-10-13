@@ -1,5 +1,6 @@
 import AccountController from './AccountController'
 import TransactionController from './TransactionController'
+import CategoryController from './CategoryController'
 import OnboardingController from './OnboardingController'
 import OnboardingCategoryController from './OnboardingCategoryController'
 import OnboardingAccountController from './OnboardingAccountController'
@@ -10,6 +11,7 @@ import Auth from './Auth'
 const Controllers = {
     AccountController: Object.assign(AccountController, AccountController),
     TransactionController: Object.assign(TransactionController, TransactionController),
+    CategoryController: Object.assign(CategoryController, CategoryController),
     OnboardingController: Object.assign(OnboardingController, OnboardingController),
     OnboardingCategoryController: Object.assign(OnboardingCategoryController, OnboardingCategoryController),
     OnboardingAccountController: Object.assign(OnboardingAccountController, OnboardingAccountController),

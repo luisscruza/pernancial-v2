@@ -53,15 +53,13 @@ final class CategoriesResource extends Resource
             $categories = Category::where('user_id', $user->id)
                 ->orderBy('name')
                 ->get()
-                ->map(function (Category $category) {
-                    return [
-                        'id' => $category->id,
-                        'name' => $category->name,
-                        'type' => $category->type,
-                        'created_at' => $category->created_at?->toISOString(),
-                        'updated_at' => $category->updated_at?->toISOString(),
-                    ];
-                });
+                ->map(fn (Category $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'type' => $category->type,
+                    'created_at' => $category->created_at?->toISOString(),
+                    'updated_at' => $category->updated_at?->toISOString(),
+                ]);
 
             $responseData = [
                 'categories' => $categories,

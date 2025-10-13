@@ -50,7 +50,7 @@ final class TransactionsResource extends Resource
         $user = User::where('email', 'cruzmediaorg@gmail.com')->first();
 
         try {
-            $transactions = Transaction::whereHas('account', function ($query) use ($user) {
+            $transactions = Transaction::whereHas('account', function ($query) use ($user): void {
                 $query->where('user_id', $user->id);
             })
                 ->with(['account.currency', 'category', 'destinationAccount.currency'])
@@ -58,7 +58,7 @@ final class TransactionsResource extends Resource
                 ->orderBy('created_at', 'desc')
                 ->limit(50) // Limit to last 50 transactions
                 ->get()
-                ->map(function (Transaction $transaction) {
+                ->map(function (Transaction $transaction): array {
                     $data = [
                         'id' => $transaction->id,
                         'type' => $transaction->type,

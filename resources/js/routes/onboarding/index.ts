@@ -3,7 +3,7 @@ import categories08bc8d from './categories'
 import accountsDb024e from './accounts'
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::categories
-* @see app/Http/Controllers/OnboardingCategoryController.php:20
+* @see app/Http/Controllers/OnboardingCategoryController.php:21
 * @route '/onboarding/categories'
 */
 export const categories = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -18,7 +18,7 @@ categories.definition = {
 
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::categories
-* @see app/Http/Controllers/OnboardingCategoryController.php:20
+* @see app/Http/Controllers/OnboardingCategoryController.php:21
 * @route '/onboarding/categories'
 */
 categories.url = (options?: RouteQueryOptions) => {
@@ -27,7 +27,7 @@ categories.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::categories
-* @see app/Http/Controllers/OnboardingCategoryController.php:20
+* @see app/Http/Controllers/OnboardingCategoryController.php:21
 * @route '/onboarding/categories'
 */
 categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -37,7 +37,7 @@ categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::categories
-* @see app/Http/Controllers/OnboardingCategoryController.php:20
+* @see app/Http/Controllers/OnboardingCategoryController.php:21
 * @route '/onboarding/categories'
 */
 categories.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -90,7 +90,7 @@ accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see routes/web.php:30
+* @see routes/web.php:35
 * @route '/onboarding/setting-up'
 */
 export const settingUp = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -104,7 +104,7 @@ settingUp.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:30
+* @see routes/web.php:35
 * @route '/onboarding/setting-up'
 */
 settingUp.url = (options?: RouteQueryOptions) => {
@@ -112,7 +112,7 @@ settingUp.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:30
+* @see routes/web.php:35
 * @route '/onboarding/setting-up'
 */
 settingUp.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -121,7 +121,7 @@ settingUp.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:30
+* @see routes/web.php:35
 * @route '/onboarding/setting-up'
 */
 settingUp.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

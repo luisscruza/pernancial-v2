@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
@@ -16,6 +17,10 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
     Route::get('/accounts/{account}', [AccountController::class, 'show'])->name('accounts.show');
     Route::post('/accounts/{account}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+    Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {

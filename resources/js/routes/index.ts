@@ -44,6 +44,50 @@ accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
+* @see \App\Http\Controllers\CategoryController::categories
+* @see app/Http/Controllers/CategoryController.php:20
+* @route '/categories'
+*/
+export const categories = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: categories.url(options),
+    method: 'get',
+})
+
+categories.definition = {
+    methods: ["get","head"],
+    url: '/categories',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\CategoryController::categories
+* @see app/Http/Controllers/CategoryController.php:20
+* @route '/categories'
+*/
+categories.url = (options?: RouteQueryOptions) => {
+    return categories.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CategoryController::categories
+* @see app/Http/Controllers/CategoryController.php:20
+* @route '/categories'
+*/
+categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: categories.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\CategoryController::categories
+* @see app/Http/Controllers/CategoryController.php:20
+* @route '/categories'
+*/
+categories.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: categories.url(options),
+    method: 'head',
+})
+
+/**
 * @see \App\Http\Controllers\OnboardingController::__invoke
 * @see app/Http/Controllers/OnboardingController.php:13
 * @route '/onboarding'

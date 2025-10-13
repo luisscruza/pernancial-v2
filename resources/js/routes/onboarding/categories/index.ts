@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::store
-* @see app/Http/Controllers/OnboardingCategoryController.php:32
+* @see app/Http/Controllers/OnboardingCategoryController.php:33
 * @route '/onboarding/categories'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::store
-* @see app/Http/Controllers/OnboardingCategoryController.php:32
+* @see app/Http/Controllers/OnboardingCategoryController.php:33
 * @route '/onboarding/categories'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OnboardingCategoryController::store
-* @see app/Http/Controllers/OnboardingCategoryController.php:32
+* @see app/Http/Controllers/OnboardingCategoryController.php:33
 * @route '/onboarding/categories'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
