@@ -126,6 +126,7 @@ final class AccountController
             'transactions' => Inertia::deepMerge($account->transactions()
                 ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
                 ->orderBy('transaction_date', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->paginate($per_page, page: $page)),
             'incomeCategories' => $incomeCategories,
             'expenseCategories' => $expenseCategories,

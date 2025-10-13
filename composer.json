@@ -13,6 +13,8 @@
         "inertiajs/inertia-laravel": "^2.0.2",
         "inertiaui/modal": "^0.19.4",
         "laravel/framework": "^12.8.1",
+        "laravel/mcp": "^0.2.1",
+        "laravel/sanctum": "^4.2",
         "laravel/socialite": "^5.19",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.4",
