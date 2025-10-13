@@ -8,6 +8,7 @@ use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Queue\Queueable;
 
 final class UpdateAccountBalance implements ShouldQueue
@@ -55,11 +56,11 @@ final class UpdateAccountBalance implements ShouldQueue
     private function updateRunningBalance(): void
     {
         $transactions = $this->account->transactions()
-            ->when($this->transaction instanceof Transaction, function ($query): void {
-                $query->where('transaction_date', '>=', $this->transaction->transaction_date)
-                    ->orWhere(function ($q): void {
-                        $q->where('transaction_date', $this->transaction->transaction_date)
-                            ->where('id', '>=', $this->transaction->id);
+            ->when($this->transaction instanceof Transaction, function (Builder $query): void {
+                $query->where('transaction_date', '>=', $this->transaction?->transaction_date)
+                    ->orWhere(function (Builder $q): void {
+                        $q->where('transaction_date', $this->transaction?->transaction_date)
+                            ->where('id', '>=', $this->transaction?->id);
                     });
             })
             ->orderBy('transaction_date')
@@ -69,13 +70,24 @@ final class UpdateAccountBalance implements ShouldQueue
         $runningBalance = 0.0;
 
         foreach ($transactions as $transaction) {
-            if (in_array($transaction->type, [TransactionType::INCOME, TransactionType::TRANSFER_IN, TransactionType::INITIAL], true)) {
+            /** @var TransactionType $type */
+            $type = $transaction->type;
+
+            if (in_array($type, [
+                TransactionType::INCOME,
+                TransactionType::TRANSFER_IN,
+                TransactionType::INITIAL,
+            ], true)) {
                 $runningBalance += $transaction->amount;
-            } elseif ($transaction->type === TransactionType::EXPENSE || $transaction->type === TransactionType::TRANSFER_OUT) {
+            } elseif (in_array($type, [
+                TransactionType::EXPENSE,
+                TransactionType::TRANSFER_OUT,
+            ], true)) {
                 $runningBalance -= $transaction->amount;
             }
 
             $transaction->update(['running_balance' => $runningBalance]);
+
         }
     }
 }
