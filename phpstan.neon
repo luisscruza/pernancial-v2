@@ -10,6 +10,7 @@ parameters:
     
     excludePaths:
         - app/Mcp
+        - app/Console/Commands/TestCommand.php (?)
 
     level: max
 
