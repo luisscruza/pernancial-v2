@@ -33,7 +33,7 @@ final class TestCommand extends Command
      */
     public function handle(): void
     {
-        $account = Account::find(2);
+        $account = Account::findOrFail(2);
 
         $transaction = Transaction::find(10);
 
