@@ -59,7 +59,7 @@ final class CategoryController
     /**
      * Display the specified category with its transactions.
      */
-    public function show(Category $category, #[CurrentUser] User $user): Response
+    public function show(Category $category): Response
     {
         $transactions = $category->transactions()
             ->with(['account.currency', 'fromAccount.currency', 'destinationAccount.currency'])
@@ -76,7 +76,7 @@ final class CategoryController
     /**
      * Show the form for editing the specified category.
      */
-    public function edit(Category $category, #[CurrentUser] User $user): Response
+    public function edit(Category $category): Response
     {
         return Inertia::render('categories/edit', [
             'category' => $category->only(['id', 'name', 'emoji', 'type']),
@@ -89,8 +89,7 @@ final class CategoryController
     public function update(
         UpdateCategoryRequest $request,
         Category $category,
-        UpdateCategoryAction $updateCategoryAction,
-        #[CurrentUser] User $user
+        UpdateCategoryAction $updateCategoryAction
     ): RedirectResponse {
         /** @var array{name: string, emoji: string, type: string} $data */
         $data = $request->validated();
