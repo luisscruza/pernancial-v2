@@ -67,7 +67,7 @@ final class GetCategoriesTool extends Tool
                 }
             }
 
-return Response::text($message);
+            return Response::text($message);
         } catch (Exception $e) {
             return Response::error("Failed to retrieve categories: {$e->getMessage()}");
         }
