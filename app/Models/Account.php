@@ -8,6 +8,7 @@ use App\Enums\AccountType;
 use App\Traits\BelongsToUser;
 use App\Traits\HasUuidRouting;
 use Database\Factories\AccountFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,12 @@ final class Account extends Model
 
     /** @use HasUuidRouting<Account> */
     use HasUuidRouting;
+
+    #[Scope]
+    public static function active($query): void
+    {
+        $query->where('is_active', true);
+    }
 
     /**
      * @return BelongsTo<Currency, $this>

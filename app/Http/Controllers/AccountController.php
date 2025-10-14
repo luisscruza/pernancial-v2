@@ -28,6 +28,7 @@ final class AccountController
     public function index(): Response
     {
         $accounts = Account::query()
+            ->active()
             ->with('currency')
             ->get();
 
@@ -79,6 +80,8 @@ final class AccountController
     {
         $page = $request->integer('page', 1);
         $per_page = $request->integer('per_page', 20);
+        $dateFrom = $request->string('date_from')->toString();
+        $dateTo = $request->string('date_to')->toString();
 
         $incomeCategories = $user->categories()
             ->where('type', CategoryType::INCOME)
@@ -112,6 +115,7 @@ final class AccountController
                 'currency' => [
                     'symbol' => $acc->currency?->symbol,
                     'name' => $acc->currency?->name,
+                    'rate' => $acc->currency?->currentRate(),
                 ],
             ]);
 
@@ -122,17 +126,31 @@ final class AccountController
                 'label' => $type->label(),
             ]);
 
+        $transactionsQuery = $account->transactions()
+            ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        // Apply date filters if provided
+        if ($dateFrom) {
+            $transactionsQuery->whereDate('transaction_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $transactionsQuery->whereDate('transaction_date', '<=', $dateTo);
+        }
+
         return Inertia::render('accounts/show', [
             'account' => AccountResource::make($account),
-            'transactions' => Inertia::deepMerge($account->transactions()
-                ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
-                ->orderBy('transaction_date', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate($per_page, page: $page)),
+            'transactions' => Inertia::deepMerge($transactionsQuery->paginate($per_page, page: $page)),
             'incomeCategories' => $incomeCategories,
             'expenseCategories' => $expenseCategories,
             'otherAccounts' => $otherAccounts,
             'transactionTypes' => $transactionTypes,
+            'filters' => [
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
         ]);
     }
 }

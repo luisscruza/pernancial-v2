@@ -21,6 +21,7 @@ final class CreateTransactionDto
         public ?Account $destination_account,
         public ?Category $category,
         public ?float $conversion_rate,
+        public ?float $received_amount = null,
     ) {
         //
     }

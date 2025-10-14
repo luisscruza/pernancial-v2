@@ -8,7 +8,6 @@ use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Queue\Queueable;
 
 final class UpdateAccountBalance implements ShouldQueue
@@ -55,19 +54,13 @@ final class UpdateAccountBalance implements ShouldQueue
      */
     private function updateRunningBalance(): void
     {
+
         $transactions = $this->account->transactions()
-            ->when($this->transaction instanceof Transaction, function (Builder $query): void {
-                $query->where('transaction_date', '>=', $this->transaction?->transaction_date)
-                    ->orWhere(function (Builder $q): void {
-                        $q->where('transaction_date', $this->transaction?->transaction_date)
-                            ->where('id', '>=', $this->transaction?->id);
-                    });
-            })
             ->orderBy('transaction_date')
             ->orderBy('id')
             ->get();
 
-        $runningBalance = 0.0;
+        $runningBalance = 0;
 
         foreach ($transactions as $transaction) {
             /** @var TransactionType $type */

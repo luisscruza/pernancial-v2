@@ -32,6 +32,16 @@ final class Category extends Model
     }
 
     /**
+     * Get the budgets for this category.
+     *
+     * @return HasMany<Budget, $this>
+     */
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array

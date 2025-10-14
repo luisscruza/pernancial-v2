@@ -65,11 +65,15 @@ final readonly class CreateTransactionAction
      */
     private function handleTransfer(Account $account, CreateTransactionDto $data): void
     {
-        $this->handleOutTransfer($account, $data);
-        $this->handleInTransfer($account, $data);
+        $outTransaction = $this->handleOutTransfer($account, $data);
+        $inTransaction = $this->handleInTransfer($account, $data);
+
+        // Link the two transactions together
+        $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
+        $inTransaction->update(['related_transaction_id' => $outTransaction->id]);
     }
 
-    private function handleOutTransfer(Account $account, CreateTransactionDto $data): void
+    private function handleOutTransfer(Account $account, CreateTransactionDto $data): Transaction
     {
         $transaction = $account->transactions()->create([
             'type' => TransactionType::TRANSFER_OUT,
@@ -83,18 +87,23 @@ final readonly class CreateTransactionAction
         ]);
 
         UpdateAccountBalance::dispatchSync($account, $transaction);
+
+        return $transaction;
     }
 
-    private function handleInTransfer(Account $account, CreateTransactionDto $data): void
+    private function handleInTransfer(Account $account, CreateTransactionDto $data): Transaction
     {
 
         if (! $data->destination_account instanceof Account) {
             throw new InvalidArgumentException('Destination account is required for transfer in transactions.');
         }
 
+        // Use received_amount if provided, otherwise use the same amount
+        $receivedAmount = $data->received_amount ?? $data->amount;
+
         $transaction = $data->destination_account->transactions()->create([
             'type' => TransactionType::TRANSFER_IN,
-            'amount' => $data->amount,
+            'amount' => $receivedAmount,
             'transaction_date' => $data->transaction_date,
             'description' => $data->description,
             'category_id' => $data->category?->id,
@@ -105,5 +114,7 @@ final readonly class CreateTransactionAction
         ]);
 
         UpdateAccountBalance::dispatchSync($data->destination_account, $transaction);
+
+        return $transaction;
     }
 }

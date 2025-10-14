@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { useForm, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ArrowRightLeft, Calendar } from 'lucide-react';
+import { X, Plus, Minus, ArrowRightLeft, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Account } from '@/types';
+import { Account, Transaction } from '@/types';
 
 interface Category {
     id: number;
@@ -23,6 +23,7 @@ interface OtherAccount {
     currency: {
         symbol: string;
         name: string;
+        rate: number;
     };
 }
 
@@ -39,6 +40,7 @@ interface TransactionModalProps {
     expenseCategories: Category[];
     otherAccounts: OtherAccount[];
     transactionTypes: TransactionType[];
+    transaction?: Transaction | null;
 }
 
 export default function TransactionModal({
@@ -49,28 +51,86 @@ export default function TransactionModal({
     expenseCategories,
     otherAccounts,
     transactionTypes,
+    transaction = null,
 }: TransactionModalProps) {
     const [selectedType, setSelectedType] = useState<string>('');
     
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors, reset } = useForm({
         type: '',
         amount: '',
+        received_amount: '',
         description: '',
         category_id: '',
         destination_account_id: '',
         transaction_date: new Date().toISOString().split('T')[0],
     });
 
+    useEffect(() => {
+        if (transaction && isOpen) {
+            // Ensure date is in YYYY-MM-DD format for input field
+            let formattedDate = transaction.transaction_date;
+            
+            // If date includes time (ISO string or datetime), extract just the date part
+            if (formattedDate.includes('T')) {
+                formattedDate = formattedDate.split('T')[0];
+            }
+
+            // Normalize transfer types: convert transfer_in/transfer_out to 'transfer'
+            const normalizedType = transaction.type === 'transfer_in' || transaction.type === 'transfer_out' 
+                ? 'transfer' 
+                : transaction.type;
+            
+            setData({
+                type: normalizedType,
+                amount: transaction.amount.toString(),
+                received_amount: '', 
+                description: transaction.description || '',
+                category_id: transaction.category?.id?.toString() || '',
+                destination_account_id: transaction.destination_account?.id?.toString() || '',
+                transaction_date: formattedDate,
+            });
+            setSelectedType(normalizedType);
+        } else if (!isOpen) {
+            reset();
+            setSelectedType('');
+        }
+    }, [transaction, isOpen]);
+
+    // automatically set received_amount when amount or destination_account_id changes for transfers
+    useEffect(() => {
+        if (selectedType === 'transfer' && data.destination_account_id && data.amount) {
+            const transferRate = otherAccounts.find(acc => acc.id.toString() === data.destination_account_id)?.currency.rate;
+            if (transferRate !== undefined) {
+                const calculatedAmount = parseFloat(data.amount) * transferRate;
+                setData('received_amount', calculatedAmount.toString());
+            }
+        } else {
+            setData('received_amount', '');
+        }
+    }, [data.amount, data.destination_account_id, selectedType]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
-        post(route('transactions.store', account.uuid), {
-            onSuccess: () => {
-                reset();
-                setSelectedType('');
-                onClose();
-            },
-        });
+        if (transaction) {
+            // Update existing transaction
+            put(route('transactions.update', { account: account.uuid, transaction: transaction.id }), {
+                onSuccess: () => {
+                    reset();
+                    setSelectedType('');
+                    onClose();
+                },
+            });
+        } else {
+            // Create new transaction
+            post(route('transactions.store', account.uuid), {
+                onSuccess: () => {
+                    reset();
+                    setSelectedType('');
+                    onClose();
+                },
+            });
+        }
     };
 
     const handleTypeChange = (type: string) => {
@@ -85,6 +145,18 @@ export default function TransactionModal({
         reset();
         setSelectedType('');
         onClose();
+    };
+
+    const handleDelete = () => {
+        if (!transaction) return;
+        
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
+            router.delete(route('transactions.destroy', [account.uuid, transaction.id]), {
+                onSuccess: () => {
+                    handleClose();
+                },
+            });
+        }
     };
 
     const getAvailableCategories = () => {
@@ -137,7 +209,9 @@ export default function TransactionModal({
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">Nueva transacción</h2>
+                            <h2 className="text-xl font-semibold">
+                                {transaction ? 'Editar transacción' : 'Nueva transacción'}
+                            </h2>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -178,7 +252,9 @@ export default function TransactionModal({
 
                             {/* Amount Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="amount">Monto</Label>
+                                <Label htmlFor="amount">
+                                    {selectedType === 'transfer' ? 'Monto a enviar' : 'Monto'}
+                                </Label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                                         {account.currency?.symbol || '$'}
@@ -229,7 +305,7 @@ export default function TransactionModal({
                             {/* Destination Account (for transfers) */}
                             {selectedType === 'transfer' && (
                                 <div className="space-y-2">
-                                    <Label>Cuenta de Destino</Label>
+                                    <Label>Cuenta de destino</Label>
                                     <Select
                                         value={data.destination_account_id}
                                         onValueChange={(value) => setData('destination_account_id', value)}
@@ -253,6 +329,30 @@ export default function TransactionModal({
                                     </Select>
                                     {errors.destination_account_id && (
                                         <p className="text-sm text-red-600">{errors.destination_account_id}</p>
+                                    )}
+                                </div>
+                            )}
+
+                              {/* Received Amount Input (for transfers only) */}
+                            {selectedType === 'transfer' && data.destination_account_id && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="received_amount">Monto a recibir</Label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                            {otherAccounts.find(acc => acc.id.toString() === data.destination_account_id)?.currency.symbol || '$'}
+                                        </span>
+                                        <Input
+                                            id="received_amount"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.received_amount}
+                                            onChange={(e) => setData('received_amount', e.target.value)}
+                                            className="pl-8"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    {errors.received_amount && (
+                                        <p className="text-sm text-red-600">{errors.received_amount}</p>
                                     )}
                                 </div>
                             )}
@@ -292,6 +392,17 @@ export default function TransactionModal({
 
                             {/* Submit Button */}
                             <div className="flex gap-3 pt-4">
+                                {transaction && (
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        onClick={handleDelete}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Eliminar
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -305,7 +416,10 @@ export default function TransactionModal({
                                     disabled={processing || !selectedType || !data.amount}
                                     className="flex-1"
                                 >
-                                    {processing ? 'Creando...' : 'Crear transacción'}
+                                    {processing 
+                                        ? (transaction ? 'Actualizando...' : 'Creando...') 
+                                        : (transaction ? 'Actualizar transacción' : 'Crear transacción')
+                                    }
                                 </Button>
                             </div>
                         </form>

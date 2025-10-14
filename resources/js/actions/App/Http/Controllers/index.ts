@@ -3,6 +3,9 @@ import TransactionController from './TransactionController'
 import CategoryController from './CategoryController'
 import CurrencyController from './CurrencyController'
 import CurrencyRateController from './CurrencyRateController'
+import BudgetPeriodController from './BudgetPeriodController'
+import BudgetPeriodDuplicateController from './BudgetPeriodDuplicateController'
+import BudgetController from './BudgetController'
 import OnboardingController from './OnboardingController'
 import OnboardingCategoryController from './OnboardingCategoryController'
 import OnboardingAccountController from './OnboardingAccountController'
@@ -16,6 +19,9 @@ const Controllers = {
     CategoryController: Object.assign(CategoryController, CategoryController),
     CurrencyController: Object.assign(CurrencyController, CurrencyController),
     CurrencyRateController: Object.assign(CurrencyRateController, CurrencyRateController),
+    BudgetPeriodController: Object.assign(BudgetPeriodController, BudgetPeriodController),
+    BudgetPeriodDuplicateController: Object.assign(BudgetPeriodDuplicateController, BudgetPeriodDuplicateController),
+    BudgetController: Object.assign(BudgetController, BudgetController),
     OnboardingController: Object.assign(OnboardingController, OnboardingController),
     OnboardingCategoryController: Object.assign(OnboardingCategoryController, OnboardingCategoryController),
     OnboardingAccountController: Object.assign(OnboardingAccountController, OnboardingAccountController),

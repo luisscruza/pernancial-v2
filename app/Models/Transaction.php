@@ -48,6 +48,14 @@ final class Transaction extends Model
     }
 
     /**
+     * @return BelongsTo<Transaction, $this>
+     */
+    public function relatedTransaction(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'related_transaction_id');
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array

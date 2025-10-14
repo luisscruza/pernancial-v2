@@ -49,7 +49,15 @@ final class Currency extends Model
             ->orderBy('effective_date', 'desc')
             ->first();
 
-        return $rate?->rate;
+        return $rate?->rate ?? 1;
+    }
+
+    /**
+     * Get the current rate.
+     */
+    public function currentRate(): ?float
+    {
+        return $this->rateForDate(Date::now()->toDateString());
     }
 
     /**

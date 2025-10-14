@@ -31,6 +31,7 @@ final class CreateTransactionRequest extends FormRequest
         return [
             'type' => ['required', 'string', Rule::enum(TransactionType::class)],
             'amount' => ['required', 'numeric', 'not_in:0'],
+            'received_amount' => ['nullable', 'numeric', 'not_in:0'],
             'description' => ['nullable', 'string', 'max:255'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'destination_account_id' => ['nullable', 'integer', 'exists:accounts,id'],
@@ -72,6 +73,7 @@ final class CreateTransactionRequest extends FormRequest
             destination_account: Account::find($this->integer('destination_account_id')),
             category: Category::find($this->integer('category_id')),
             conversion_rate: null,
+            received_amount: $this->float('received_amount'),
         );
     }
 }

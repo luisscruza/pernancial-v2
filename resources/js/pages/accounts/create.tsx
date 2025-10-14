@@ -49,7 +49,7 @@ export default function CreateAccount({ currencies, accountTypes }: Props) {
                             Necesitas tener al menos una moneda configurada antes de crear una cuenta.
                         </p>
                         <Button asChild>
-                            <Link href="/accounts">Volver a cuentas</Link>
+                            <Link href="/accounts">Volver</Link>
                         </Button>
                     </div>
                 </div>

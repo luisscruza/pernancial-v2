@@ -84,4 +84,24 @@ final class User extends Authenticatable
     {
         return $this->hasMany(Currency::class);
     }
+
+    /**
+     * Get the budget periods for the user.
+     *
+     * @return HasMany<BudgetPeriod, $this>
+     */
+    public function budgetPeriods(): HasMany
+    {
+        return $this->hasMany(BudgetPeriod::class);
+    }
+
+    /**
+     * Get the budgets for the user.
+     *
+     * @return HasMany<Budget, $this>
+     */
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
 }

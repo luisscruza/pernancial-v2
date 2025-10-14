@@ -13,6 +13,9 @@ enum AccountType: string
     case CREDIT_CARD = 'credit_card';
     case GENERAL = 'general';
     case INVESTMENT = 'investment';
+    case DEBIT_CARD = 'debit_card';
+    case CXC = 'cxc';
+    case CXP = 'cxp';
 
     public function label(): string
     {
@@ -24,6 +27,9 @@ enum AccountType: string
             self::CHECKING => 'Cuenta corriente',
             self::GENERAL => 'General',
             self::INVESTMENT => 'Inversión',
+            self::DEBIT_CARD => 'Tarjeta de débito',
+            self::CXC => 'Cuentas por cobrar',
+            self::CXP => 'Cuentas por pagar',
         };
     }
 
@@ -40,6 +46,8 @@ enum AccountType: string
             self::CHECKING => '💸',
             self::GENERAL => '💼',
             self::INVESTMENT => '💸',
+            self::DEBIT_CARD => '🏧',
+            self::CXC => '📥',
         };
     }
 

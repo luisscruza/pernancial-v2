@@ -39,6 +39,12 @@ export interface User {
     created_at: string;
     updated_at: string;
     currency: Currency;
+    accounts?: Array<{
+        id: number;
+        name: string;
+        emoji: string;
+        type: string;
+    }>;
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -118,6 +124,60 @@ export interface Category {
     emoji: string;
     type: 'expense' | 'income';
     user_id: number;
+}
+
+export interface BudgetPeriod {
+    id: number;
+    name: string;
+    type: 'monthly' | 'weekly' | 'yearly' | 'custom';
+    start_date: string;
+    end_date: string;
+    user_id: number;
+    budgets?: Budget[];
+    total_spent?: number;
+    total_expense_spent?: number;
+    total_income_received?: number;
+}
+
+export interface Budget {
+    id: number;
+    user_id: number;
+    budget_period_id: number;
+    name: string;
+    amount: number;
+    type: 'period' | 'one_time';
+    category_id: string;
+    start_date: string;
+    end_date: string;
+    description?: string;
+    category: Category;
+    budgetPeriod: BudgetPeriod;
+    budget_period: BudgetPeriod;
+}
+
+export interface BudgetSummary {
+    budget: Budget;
+    total_spent: number;
+    remaining: number;
+    percentage_used: number;
+    is_over_budget: boolean;
+    date_range: {
+        start: string;
+        end: string;
+    };
+    transaction_count: number;
+}
+
+export interface CreateBudgetData {
+    user_id: number;
+    name: string;
+    amount: number;
+    type: 'period' | 'one_time';
+    period_type: 'monthly' | 'weekly' | 'yearly' | 'custom';
+    category_id: string;
+    start_date: string;
+    end_date: string;
+    description?: string;
 }
 
 export interface CreateAccountData {

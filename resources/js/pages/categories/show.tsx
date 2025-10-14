@@ -1,11 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedProps, SharedData } from '@/types';
 import { Category, Transaction } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronLeft, Pencil, X } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -13,15 +15,26 @@ import { useState, useEffect } from 'react';
 interface Props extends SharedData {
     category: Category;
     transactions: PaginatedProps<Transaction>;
+    filters?: {
+        date_from: string;
+        date_to: string;
+        account_id: string;
+    };
 }
 
 export default function CategoryShow({
     category,
     transactions,
+    filters,
 }: Props) {
+      const { auth } = usePage<SharedData>().props
 
     const [tab, setTab] = useState('overview');
+    const [selectedAccountId, setSelectedAccountId] = useState<string>(filters?.account_id || 'all');
+    const [dateFrom, setDateFrom] = useState<string>(filters?.date_from || '');
+    const [dateTo, setDateTo] = useState<string>(filters?.date_to || '');
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
+    const totalTransactions = transactions.data.reduce((sum, transaction) => sum + (transaction.converted_amount || 0), 0);
 
     const typeColorMap: Record<string, string> = {
         expense: 'text-red-500',
@@ -41,6 +54,71 @@ export default function CategoryShow({
             default: return '';
         }
     }
+
+    // Filter transactions by account
+    const filteredTransactions = selectedAccountId === 'all' 
+        ? transactions.data 
+        : transactions.data.filter(t => t.account.id.toString() === selectedAccountId);
+
+    // Group filtered transactions by month
+    const filteredGroupedTransactions = filteredTransactions.reduce((groups, transaction) => {
+        const date = new Date(transaction.transaction_date);
+        const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+        
+        if (!groups[monthKey]) {
+            groups[monthKey] = [];
+        }
+        groups[monthKey].push(transaction);
+        return groups;
+    }, {} as Record<string, Transaction[]>);
+
+    const handleAccountChange = (value: string) => {
+        setSelectedAccountId(value);
+        router.get(
+            route('categories.show', category.uuid),
+            {
+                account_id: value !== 'all' ? value : undefined,
+                date_from: dateFrom || undefined,
+                date_to: dateTo || undefined,
+            },
+            {
+                only: ['transactions', 'filters'],
+                preserveState: true,
+                preserveScroll: false,
+            }
+        );
+    };
+
+    const handleDateFilter = () => {
+        router.get(
+            route('categories.show', category.uuid),
+            {
+                account_id: selectedAccountId !== 'all' ? selectedAccountId : undefined,
+                date_from: dateFrom || undefined,
+                date_to: dateTo || undefined,
+            },
+            {
+                only: ['transactions', 'filters'],
+                preserveState: true,
+                preserveScroll: false,
+            }
+        );
+    };
+
+    const handleClearFilters = () => {
+        setDateFrom('');
+        setDateTo('');
+        setSelectedAccountId('all');
+        router.get(
+            route('categories.show', category.uuid),
+            {},
+            {
+                only: ['transactions', 'filters'],
+                preserveState: true,
+                preserveScroll: false,
+            }
+        );
+    };
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -101,6 +179,15 @@ export default function CategoryShow({
                                     </p>
                                 </div>
                             </div>
+                             <div className="flex items-center gap-4">
+                                
+                                <div>
+                                    <h2 className="text-xl font-semibold">Total</h2>
+                                    <p className="text-muted-foreground capitalize">
+                                        {formatCurrency(totalTransactions,  auth.user.currency)}
+                                    </p>
+                                </div>
+                            </div>
                         </CardHeader>
 
                         <CardContent>
@@ -133,6 +220,48 @@ export default function CategoryShow({
                                 </TabsContent>
                                 
                                 <TabsContent value="transactions">
+                                    <div className="mb-4 flex flex-wrap gap-2">
+                                        <Input
+                                            type="date"
+                                            placeholder="Fecha desde"
+                                            value={dateFrom}
+                                            onChange={(e) => setDateFrom(e.target.value)}
+                                            className="w-[180px]"
+                                        />
+                                        <Input
+                                            type="date"
+                                            placeholder="Fecha hasta"
+                                            value={dateTo}
+                                            onChange={(e) => setDateTo(e.target.value)}
+                                            className="w-[180px]"
+                                        />
+                                        <Select value={selectedAccountId} onValueChange={handleAccountChange}>
+                                            <SelectTrigger className="w-[200px]">
+                                                <SelectValue placeholder="Filtrar por cuenta" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Todas las cuentas</SelectItem>
+                                                {auth.user?.accounts?.map((account) => (
+                                                    <SelectItem key={account.id} value={account.id.toString()}>
+                                                        <div className="flex items-center gap-2">
+                                                            <span>{account.emoji}</span>
+                                                            <span>{account.name}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button onClick={handleDateFilter} variant="default" size="sm">
+                                            Filtrar
+                                        </Button>
+                                        {(dateFrom || dateTo || selectedAccountId !== 'all') && (
+                                            <Button onClick={handleClearFilters} variant="outline" size="sm">
+                                                <X className="h-4 w-4 mr-1" />
+                                                Limpiar
+                                            </Button>
+                                        )}
+                                    </div>
+
                                     {transactions.data.length === 0 ? (
                                         <motion.div
                                             className="rounded-xl border border-dashed border-gray-200 p-8 text-center"
@@ -148,51 +277,63 @@ export default function CategoryShow({
                                         </motion.div>
                                     ) : (
                                         <>
-                                            {transactions.data.map((transaction) => (
-                                                <motion.div
-                                                    key={transaction.id}
-                                                    layout
-                                                    className="flex items-center justify-between border-b py-4 last:border-0"
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                                            <span className="text-lg">{transaction.account.emoji}</span>
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-medium">{transaction.account.name}</h3>
-                                                            
-                                                            {transaction.description && (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    {transaction.description}
-                                                                </p>
-                                                            )}
+                                            {Object.entries(filteredGroupedTransactions).map(([month, monthTransactions], monthIndex) => (
+                                                <div key={month} className="space-y-2">
+                                                    <motion.div
+                                                        className="sticky top-0 bg-background pt-4 pb-2"
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.3, delay: monthIndex * 0.05 }}
+                                                    >
+                                                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                                            {month}
+                                                        </h3>
+                                                    </motion.div>
 
-                                                            {transaction.type.startsWith('transfer') && (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    <span className="font-medium">Transferencia </span>
-                                                                    {transaction.type === 'transfer_in'
-                                                                        ? `Desde: ${transaction.from_account?.name} (${transaction.from_account?.currency.symbol})`
-                                                                        : `A: ${transaction.destination_account?.name} (${transaction.destination_account?.currency.symbol})`}
-                                                                </p>
-                                                            )}
+                                                    {monthTransactions.map((transaction, index) => (
+                                                        <motion.div
+                                                            key={transaction.id}
+                                                            layout
+                                                            className="flex items-center justify-between border-b py-4 last:border-0"
+                                                            initial={{ opacity: 0, y: 20 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            transition={{ duration: 0.3, delay: (monthIndex * 0.05) + (index * 0.02) }}
+                                                        >
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                                                    <span className="text-lg">{transaction.account.emoji}</span>
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="font-medium">{transaction.account.name}</h3>
+                                                                    
+                                                                    {transaction.description && (
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            {transaction.description}
+                                                                        </p>
+                                                                    )}
 
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {new Date(transaction.transaction_date).toLocaleDateString()}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <p className={`${typeColorMap[transaction.type]} text-md font-medium`}>
-                                                            {getSymbol(transaction.type)}
-                                                            {formatCurrency(transaction.amount, transaction.account.currency)}
-                                                        </p>
-                                                        <span className="text-xs text-gray-500">
-                                                            {formatCurrency(transaction.running_balance, transaction.account.currency)}
-                                                        </span>
-                                                    </div>
-                                                </motion.div>
+                                                                    {transaction.type.startsWith('transfer') && (
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            <span className="font-medium">Transferencia </span>
+                                                                            {transaction.type === 'transfer_in'
+                                                                                ? `Desde: ${transaction.from_account?.name} (${transaction.from_account?.currency.symbol})`
+                                                                                : `A: ${transaction.destination_account?.name} (${transaction.destination_account?.currency.symbol})`}
+                                                                        </p>
+                                                                    )}
+
+                                                                    <p className="text-sm text-muted-foreground">
+                                                                        {new Date(transaction.transaction_date).toLocaleDateString()}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col items-end">
+                                                                <p className={`${typeColorMap[transaction.type]} text-md font-medium`}>
+                                                                    {formatCurrency(transaction.amount, transaction.account.currency)}
+                                                                </p>
+                                                            </div>
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
                                             ))}
 
                                             {transactions.next_page_url && (

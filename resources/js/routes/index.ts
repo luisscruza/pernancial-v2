@@ -45,7 +45,7 @@ accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:23
+* @see app/Http/Controllers/CategoryController.php:24
 * @route '/categories'
 */
 export const categories = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ categories.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:23
+* @see app/Http/Controllers/CategoryController.php:24
 * @route '/categories'
 */
 categories.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ categories.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:23
+* @see app/Http/Controllers/CategoryController.php:24
 * @route '/categories'
 */
 categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:23
+* @see app/Http/Controllers/CategoryController.php:24
 * @route '/categories'
 */
 categories.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

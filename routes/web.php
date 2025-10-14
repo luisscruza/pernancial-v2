@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\BudgetPeriodController;
+use App\Http\Controllers\BudgetPeriodDuplicateController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrencyRateController;
@@ -19,6 +22,8 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
     Route::get('/accounts/{account}', [AccountController::class, 'show'])->name('accounts.show');
     Route::post('/accounts/{account}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::put('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
+    Route::delete('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
@@ -34,6 +39,21 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/currencies/{currency}/edit', [CurrencyController::class, 'edit'])->name('currencies.edit');
     Route::put('/currencies/{currency}', [CurrencyController::class, 'update'])->name('currencies.update');
     Route::post('/currencies/{currency}/rates', [CurrencyRateController::class, 'store'])->name('currencies.rates.store');
+
+    // Budget Periods (main interface)
+    Route::get('/budgets', [BudgetPeriodController::class, 'index'])->name('budgets.index');
+    Route::get('/budget-periods/create', [BudgetPeriodController::class, 'create'])->name('budget-periods.create');
+    Route::post('/budget-periods', [BudgetPeriodController::class, 'store'])->name('budget-periods.store');
+    Route::get('/budget-periods/{budgetPeriod}', [BudgetPeriodController::class, 'show'])->name('budget-periods.show');
+    Route::get('/budget-periods/{budgetPeriod}/edit', [BudgetPeriodController::class, 'edit'])->name('budget-periods.edit');
+    Route::get('/budget-periods/{budgetPeriod}/duplicate', BudgetPeriodDuplicateController::class)->name('budget-periods.duplicate');
+    Route::put('/budget-periods/{budgetPeriod}', [BudgetPeriodController::class, 'update'])->name('budget-periods.update');
+
+    // Individual Budgets (for editing within periods)
+    Route::get('/budgets/{budget}', [BudgetController::class, 'show'])->name('budgets.show');
+    Route::get('/budgets/{budget}/edit', [BudgetController::class, 'edit'])->name('budgets.edit');
+    Route::put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
+    Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function () {

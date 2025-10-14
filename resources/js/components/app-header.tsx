@@ -31,6 +31,11 @@ const mainNavItems: NavItem[] = [
         href: '/currencies',
         icon: DollarSign,
     },
+    {
+        title: 'Presupuestos',
+        href: '/budgets',
+        icon: BookOpen,
+    },
 ];
 
 const rightNavItems: NavItem[] = [

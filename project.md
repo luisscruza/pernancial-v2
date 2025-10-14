@@ -34,7 +34,7 @@
 ### Budgeting System
 -- Support for category-based budgeting
 -- Budget types:
--- Period budgets. (This must be aligned with the custom accounting periods.)
+-- Period budgets. (We can start with monthly budgets, but should be extendable to weekly, yearly, etc.)
 -- One-time budgets. (Period of time defined by the user.)
 ### Custom accounting periods
 -- Define start date for monthly cycles (e.g., 23rd of each month)

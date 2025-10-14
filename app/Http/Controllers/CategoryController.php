@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -59,17 +60,39 @@ final class CategoryController
     /**
      * Display the specified category with its transactions.
      */
-    public function show(Category $category): Response
+    public function show(Request $request, Category $category): Response
     {
-        $transactions = $category->transactions()
+        $dateFrom = $request->string('date_from')->toString();
+        $dateTo = $request->string('date_to')->toString();
+        $accountId = $request->string('account_id')->toString();
+
+        $transactionsQuery = $category->transactions()
             ->with(['account.currency', 'fromAccount.currency', 'destinationAccount.currency'])
             ->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc');
+
+        // Apply date filters if provided
+        if ($dateFrom) {
+            $transactionsQuery->whereDate('transaction_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $transactionsQuery->whereDate('transaction_date', '<=', $dateTo);
+        }
+
+        // Apply account filter if provided
+        if ($accountId) {
+            $transactionsQuery->where('account_id', $accountId);
+        }
 
         return Inertia::render('categories/show', [
             'category' => $category->only(['id', 'uuid', 'name', 'emoji', 'type']),
-            'transactions' => $transactions,
+            'transactions' => $transactionsQuery->paginate(20),
+            'filters' => [
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+                'account_id' => $accountId,
+            ],
         ]);
     }
 

@@ -1,12 +1,12 @@
-import { PaginatedProps, SharedData } from '@/types';
+import { Currency, PaginatedProps, SharedData } from '@/types';
 import { Account, Transaction } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pencil, Trash2, Plus } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Plus, X, Edit2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import { formatCurrency} from '@/utils/currency';
+import { formatCurrency } from '@/utils/currency';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import TransactionModal from '@/components/transaction-modal';
@@ -40,6 +40,10 @@ interface Props extends SharedData {
     expenseCategories: Category[];
     otherAccounts: OtherAccount[];
     transactionTypes: TransactionType[];
+    filters: {
+        date_from: string;
+        date_to: string;
+    };
 }
 
 export default function Show({
@@ -48,16 +52,20 @@ export default function Show({
     incomeCategories,
     expenseCategories,
     otherAccounts,
-    transactionTypes
+    transactionTypes,
+    filters
 }: Props) {
 
     const [tab, setTab] = useState('balance');
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [dateFrom, setDateFrom] = useState<string>(filters?.date_from || '');
+    const [dateTo, setDateTo] = useState<string>(filters?.date_to || '');
 
-        const page = usePage<SharedData>();
-        const { base_currency } = page.props;
+    const page = usePage<SharedData>();
+    const { base_currency } = page.props;
 
     const typeColorMap: Record<string, string> = {
         expense: 'text-red-500',
@@ -65,9 +73,9 @@ export default function Show({
         initial: 'text-gray-500',
         transfer_in: 'text-green-500',
         transfer_out: 'text-red-500',
-        };
+    };
 
-        const getSymbol = (type: string) => {
+    const getSymbol = (type: string) => {
         switch (type) {
             case 'expense': return '-';
             case 'income': return '+';
@@ -88,6 +96,28 @@ export default function Show({
                 onFinish: () => setIsLoadingMore(false),
             });
         }
+    };
+
+    // Group transactions by month
+    const groupedTransactions = transactions.data.reduce((groups, transaction) => {
+        const date = new Date(transaction.transaction_date);
+        const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+
+        if (!groups[monthKey]) {
+            groups[monthKey] = [];
+        }
+        groups[monthKey].push(transaction);
+        return groups;
+    }, {} as Record<string, Transaction[]>);
+
+    const handleEditTransaction = (transaction: Transaction) => {
+        setEditingTransaction(transaction);
+        setIsTransactionModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsTransactionModalOpen(false);
+        setEditingTransaction(null);
     };
 
 
@@ -162,7 +192,7 @@ export default function Show({
                             <Tabs value={tab} onValueChange={setTab} className="w-full">
                                 <TabsList className="w-full justify-start">
                                     <TabsTrigger value="balance">Balance</TabsTrigger>
-                                    <TabsTrigger  value="records">Transacciones</TabsTrigger>
+                                    <TabsTrigger value="records">Transacciones</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="balance" className="space-y-4">
                                     <div className="mt-6">
@@ -175,21 +205,53 @@ export default function Show({
                                     </div>
                                 </TabsContent>
                                 <TabsContent value="records">
-                                                    {transactions.data.map((transaction) => (
+
+                                    {transactions.data.length === 0 ? (
+                                        <motion.div
+                                            className="rounded-xl border border-dashed border-gray-200 p-8 text-center"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <div className="text-4xl mb-4">💸</div>
+                                            <h3 className="text-lg font-medium mb-2">Sin transacciones</h3>
+                                            <p className="text-sm text-gray-500">
+                                                No hay transacciones para esta cuenta aún.
+                                            </p>
+                                        </motion.div>
+                                    ) : (
+                                        <>
+                                            {Object.entries(groupedTransactions).map(([month, monthTransactions], monthIndex) => (
+                                                <div key={month} className="space-y-2">
+                                                    <motion.div
+                                                        className="sticky top-0 bg-background pt-4 pb-2"
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.3, delay: monthIndex * 0.05 }}
+                                                    >
+                                                        <h3 className="text-sm font-semibold text-muted-foreground capitalize tracking-wide">
+                                                            {month}
+                                                        </h3>
+                                                    </motion.div>
+
+                                                    {monthTransactions.map((transaction) => (
                                                         <motion.div
                                                             key={transaction.id}
                                                             layout
-                                                            className="flex items-center justify-between border-b py-4 last:border-0"
+                                                            className="group flex items-center justify-between border-b py-4 last:border-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 -mx-2 rounded-lg transition-colors"
                                                             initial={{ opacity: 0, y: 20 }}
                                                             animate={{ opacity: 1, y: 0 }}
+                                                            onClick={() => handleEditTransaction(transaction)}
                                                         >
                                                             <div className="flex items-center gap-4">
                                                                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                                                    { transaction.category ? (
+                                                                    {transaction.category ? (
                                                                         <span className="text-lg">{transaction.category.emoji}</span>
+                                                                    ) : transaction.type === 'transfer_in' ? (
+                                                                        <span className="text-lg">⬅️</span>
+                                                                    ) : transaction.type === 'transfer_out' ? (
+                                                                        <span className="text-lg">➡️</span>
                                                                     ) : (
-                                                                        transaction.type === 'transfer_in' ? <span className="text-lg">⬅️</span> :
-                                                                        transaction.type === 'transfer_out' ? <span className="text-lg">➡️</span> :
                                                                         <span className="text-lg">❓</span>
                                                                     )}
                                                                 </div>
@@ -203,8 +265,6 @@ export default function Show({
                                                                             {transaction.description}
                                                                         </p>
                                                                     )}
-
-
 
                                                                     {transaction.type.startsWith('transfer') && (
                                                                         <p className="text-sm text-muted-foreground">
@@ -220,36 +280,51 @@ export default function Show({
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
-                                                               <span >{getSymbol(transaction.type)}
-                                                                   {formatCurrency(transaction.amount, account.currency!)}
-                                                                   {! account.currency.is_base && <span className="text-xs text-gray-500">({formatCurrency(transaction.converted_amount!, base_currency!)})</span>}
-                                                                   </span>
-                                                                <span className="text-xs text-gray-500">{formatCurrency(transaction.running_balance, account.currency!)}</span>
-                                                            </p>
 
+                                                            <div className="flex items-center gap-3">
+                                                                <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
+                                                                    <span>
+                                                                        {getSymbol(transaction.type)}
+                                                                        {formatCurrency(transaction.amount, account.currency!)}
+                                                                        {!account.currency.is_base && (
+                                                                            <span className="text-xs text-gray-500">
+                                                                                ({formatCurrency(transaction.converted_amount!, base_currency as Currency)})
+                                                                            </span>
+                                                                        )}
+                                                                    </span>
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {formatCurrency(transaction.running_balance, account.currency!)}
+                                                                    </span>
+                                                                </p>
+                                                                <Edit2 className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            </div>
                                                         </motion.div>
                                                     ))}
+                                                </div>
+                                            ))}
 
-                                                    {transactions.next_page_url && (
-                                                        <div className="flex justify-center pt-6">
-                                                            <Button
-                                                                onClick={handleLoadMore}
-                                                                disabled={isLoadingMore}
-                                                                variant="outline"
-                                                                className="min-w-32"
-                                                            >
-                                                                {isLoadingMore ? 'Cargando...' : 'Cargar más'}
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                            {transactions.next_page_url && (
+                                                <div className="flex justify-center pt-6">
+                                                    <Button
+                                                        onClick={handleLoadMore}
+                                                        disabled={isLoadingMore}
+                                                        variant="outline"
+                                                        className="min-w-32"
+                                                    >
+                                                        {isLoadingMore ? 'Cargando...' : 'Cargar más'}
+                                                    </Button>
+                                                </div>
+                                            )}
 
-                                    {hasReachedEnd ? (
-                                        <p className="text-center text-sm text-muted-foreground">
-                                            No hay más registros que mostrar.
-                                        </p>
-                                    ) : null}
+                                            {hasReachedEnd && (
+                                                <p className="text-center text-sm text-muted-foreground">
+                                                    No hay más registros que mostrar.
+                                                </p>
+                                            )}
+                                        </>
+                                    )}
                                 </TabsContent>
+
                             </Tabs>
                         </CardContent>
                     </Card>
@@ -258,12 +333,13 @@ export default function Show({
                 {/* Transaction Modal */}
                 <TransactionModal
                     isOpen={isTransactionModalOpen}
-                    onClose={() => setIsTransactionModalOpen(false)}
+                    onClose={handleCloseModal}
                     account={account}
                     incomeCategories={incomeCategories}
                     expenseCategories={expenseCategories}
                     otherAccounts={otherAccounts}
                     transactionTypes={transactionTypes}
+                    transaction={editingTransaction}
                 />
             </div>
         </AppLayout>
