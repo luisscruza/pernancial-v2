@@ -41,6 +41,9 @@ final class TestCommand extends Command
     public function handle(): void
     {
         // $this->createCurrencies();
+            DB::table('accounts')->truncate();
+        DB::table('budgets')->truncate();
+        DB::table('budget_periods')->truncate();
         $this->importAccounts();
         $this->importBudgets();
         DB::table('transactions')->truncate();
