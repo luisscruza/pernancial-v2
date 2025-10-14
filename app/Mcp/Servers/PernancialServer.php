@@ -8,6 +8,8 @@ use App\Mcp\Resources\AccountsResource;
 use App\Mcp\Resources\CategoriesResource;
 use App\Mcp\Resources\TransactionsResource;
 use App\Mcp\Tools\CreateTransactionTool;
+use App\Mcp\Tools\GetAccountsTool;
+use App\Mcp\Tools\GetCategoriesTool;
 use Laravel\Mcp\Server;
 
 final class PernancialServer extends Server
@@ -78,6 +80,8 @@ final class PernancialServer extends Server
      */
     protected array $tools = [
         CreateTransactionTool::class,
+        GetAccountsTool::class,
+        GetCategoriesTool::class,
     ];
 
     /**
