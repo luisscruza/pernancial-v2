@@ -51,7 +51,13 @@ final class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'currency' => $user->currency,
-                    'accounts' => $user->accounts()->active()->get(['id', 'name', 'emoji', 'type']),
+                    'accounts' => $user->accounts()->active()->get()->map(fn ($account) => [
+                        'id' => $account->id,
+                        'uuid' => $account->uuid,
+                        'name' => $account->name,
+                        'emoji' => $account->emoji,
+                        'type' => $account->type->label(),
+                    ])->values(),
                 ] : null,
             ],
             'ziggy' => fn (): array => [

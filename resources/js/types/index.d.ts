@@ -41,6 +41,8 @@ export interface User {
     currency: Currency;
     accounts?: Array<{
         id: number;
+        label: string;
+        uuid: string;
         name: string;
         emoji: string;
         type: string;
