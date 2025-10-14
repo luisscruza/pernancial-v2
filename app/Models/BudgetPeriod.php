@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\BudgetPeriodType;
 use App\Traits\BelongsToUser;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,6 +26,30 @@ final class BudgetPeriod extends Model
     public function budgets(): HasMany
     {
         return $this->hasMany(Budget::class);
+    }
+
+    /**
+     * Check if this budget period is currently active.
+     */
+    public function isCurrent(): bool
+    {
+        $now = now();
+
+        return $now->between($this->start_date, $this->end_date);
+    }
+
+    /**
+     * Scope to get only current budget periods.
+     *
+     * @param  Builder<BudgetPeriod>  $query
+     * @return Builder<BudgetPeriod>
+     */
+    public function scopeCurrent(Builder $query): Builder
+    {
+        $now = now();
+
+        return $query->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now);
     }
 
     /**

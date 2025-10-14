@@ -226,7 +226,7 @@ final class TestCommand extends Command
 
     private function importBudgets(): void
     {
-         $path = storage_path('app/budgets.json');
+        $path = storage_path('app/budgets.json');
 
         if (! is_file($path)) {
             $this->error(sprintf('File not found: %s', $path));

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Actions\CalculateBudgetSummaryAction;
 use App\Actions\CreateBudgetPeriodAction;
-use App\Enums\CategoryType;
 use App\Http\Requests\CreateBudgetPeriodRequest;
 use App\Models\BudgetPeriod;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +18,7 @@ use Inertia\Response;
 
 final class BudgetPeriodController extends Controller
 {
-    public function index(Request $request, CalculateBudgetSummaryAction $calculateAction): Response
+    public function index(Request $request, CacheBudgetPeriodSummaryAction $cacheAction): Response
     {
         $user = $request->user();
 
@@ -28,37 +28,20 @@ final class BudgetPeriodController extends Controller
             ->orderBy('start_date', 'desc')
             ->get();
 
-        // Calculate spending for each period, separated by expense/income
-        $budgetPeriods = $budgetPeriods->map(function ($period) use ($calculateAction) {
-            $totalExpenseSpent = 0;
-            $totalIncomeReceived = 0;
-
-            if ($period->budgets) {
-                foreach ($period->budgets as $budget) {
-                    $summary = $calculateAction->handle($budget);
-
-                    if ($budget->category->type === CategoryType::EXPENSE) {
-                        $totalExpenseSpent += $summary->totalSpent;
-                    } elseif ($budget->category->type === CategoryType::INCOME) {
-                        $totalIncomeReceived += $summary->totalSpent; // For income, "spent" means "received"
-                    }
-                }
-            }
+        // Calculate spending for each period using cache
+        $budgetPeriods = $budgetPeriods->map(function ($period) use ($cacheAction) {
+            $summary = $cacheAction->handle($period);
 
             // Add spending data to the period
-            $period->total_expense_spent = $totalExpenseSpent;
-            $period->total_income_received = $totalIncomeReceived;
-            $period->total_spent = $totalExpenseSpent; // Keep for backward compatibility
+            $period->total_expense_spent = $summary['total_expense_spent'];
+            $period->total_income_received = $summary['total_income_received'];
+            $period->total_spent = $summary['total_spent'];
 
             return $period;
         });
 
         // Get current period (if any)
-        $currentPeriod = $budgetPeriods->first(function ($period) {
-            $now = now();
-
-            return $now->between($period->start_date, $period->end_date);
-        });
+        $currentPeriod = $budgetPeriods->first(fn ($period) => $period->isCurrent());
 
         return Inertia::render('budgets/index', [
             'budgetPeriods' => $budgetPeriods,
