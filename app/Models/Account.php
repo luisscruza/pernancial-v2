@@ -67,6 +67,18 @@ final class Account extends Model
         );
     }
 
+       /**
+     * Balance in the base currency.
+     *
+     * @return Attribute<string, never>
+     */
+    public function accountingType(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): string => $this->type->accountingType(),
+        );
+    }
+
     /**
      * @return array<string, string>
      */

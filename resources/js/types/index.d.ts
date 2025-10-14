@@ -91,6 +91,7 @@ export interface Account {
     currency_id: number;
     name: string;
     type: 'savings' | 'cash' | 'investment' | 'credit_card';
+    accounting_type: 'normal' | 'cxc' | 'cxp';
     emoji: string;
     color: string;
     balance: number;

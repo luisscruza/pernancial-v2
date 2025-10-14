@@ -79,4 +79,24 @@ enum AccountType: string
             self::INVESTMENT => 'Para inversiones y portafolios',
         };
     }
+
+    /**
+     * The accounting type.
+     */
+    public function accountingType(): string
+    {
+        return match ($this) {
+            self::CXC => 'cxc',
+            self::CXP => 'cxp',
+            self::CREDIT_CARD => 'cxp',
+            self::DEBIT_CARD => 'normal',
+            self::SAVINGS => 'normal',
+            self::CHECKING => 'normal',
+            self::CASH => 'normal',
+            self::BANK => 'normal',
+            self::GENERAL => 'normal',
+            self::INVESTMENT => 'normal',
+            default => 'normal',
+        };
+    }
 }

@@ -27,6 +27,7 @@ final class AccountResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             'type' => $this->type->label(),
+            'accounting_type' => $this->accounting_type,
             'emoji' => $this->emoji,
             'color' => $this->color,
             'balance' => $this->balance,

@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { type Account } from '@/types';
+import { SharedData, type Account } from '@/types';
 import { formatCurrency } from '@/utils/currency';
 import { cn } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { EllipsisVerticalIcon } from 'lucide-react';
 
@@ -12,6 +12,7 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account, className }: AccountCardProps) {
+    const { auth } = usePage<SharedData>().props;
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -43,7 +44,8 @@ export function AccountCard({ account, className }: AccountCardProps) {
                     <div className="text-right">
                         <p className="text-base font-semibold text-gray-900">
                             {formatCurrency(account.balance, account.currency!)}
-                        </p>
+                        </p> { account.currency!.is_base ? null : <span className="text-sm text-gray-500"> {formatCurrency(account.balance_in_base, auth.user.currency!)} </span>
+                        }
                     </div>
                     <EllipsisVerticalIcon className="h-6 w-6 text-gray-400" />
                 </div>
