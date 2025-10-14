@@ -63,7 +63,7 @@ final class Account extends Model
     public function balanceInBase(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => $this->currency?->is_base ? $this->balance : $this->balance * $this->currency?->rateForDate(now()->format('Y-m-d')) ?? 1,
+            get: fn (): float => (float) ($this->currency?->is_base ? $this->balance : $this->balance * $this->currency?->rateForDate(now()->format('Y-m-d')) ?? 1) 
         );
     }
 
