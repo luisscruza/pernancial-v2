@@ -166,14 +166,14 @@ final class CreateTransactionTool extends Tool
             'transaction_date' => $schema->string()
                 ->description('The date of the transaction in YYYY-MM-DD format')
                 ->required(),
-            'account_id' => $schema->integer()
+            'account_id' => $schema->string()
                 ->description('The ID of the account for the transaction')
                 ->required(),
             'description' => $schema->string()
                 ->description('A brief description of the transaction'),
-            'category_id' => $schema->integer()
+            'category_id' => $schema->string()
                 ->description('The ID of the category associated with the transaction'),
-            'destination_account_id' => $schema->integer()
+            'destination_account_id' => $schema->string()
                 ->description('The ID of the destination account (required for transfers)'),
         ];
     }
