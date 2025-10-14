@@ -53,10 +53,6 @@ final class GetCategoriesTool extends Tool
                 $message .= "**💰 Income Categories**\n";
                 foreach ($incomeCategories as $category) {
                     $message .= "• {$category->name} (ID: {$category->id})";
-                    if ($category->description) {
-                        $message .= " - {$category->description}";
-                    }
-                    $message .= "\n";
                 }
                 $message .= "\n";
             }
@@ -65,9 +61,6 @@ final class GetCategoriesTool extends Tool
                 $message .= "**💸 Expense Categories**\n";
                 foreach ($expenseCategories as $category) {
                     $message .= "• {$category->name} (ID: {$category->id})";
-                    if ($category->description) {
-                        $message .= " - {$category->description}";
-                    }
                     $message .= "\n";
                 }
             }
