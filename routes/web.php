@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
+    Route::get('/token', function (): string {
+        return request()->user()->createToken('api-token')->plainTextToken;
+    })->name('token');
     Route::get('/', [AccountController::class, 'index'])->name('accounts');
     Route::get('/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
