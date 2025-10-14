@@ -29,7 +29,12 @@ final class GetAccountsTool extends Tool
      */
     public function handle(Request $request): Response
     {
+        // For now, use hardcoded user until auth is properly set up
         $user = User::where('email', 'cruzmediaorg@gmail.com')->first();
+
+        if (! $user) {
+            return Response::error('User not found. Please ensure you are authenticated.');
+        }
 
         try {
             $accounts = Account::where('user_id', $user->id)
@@ -47,7 +52,7 @@ final class GetAccountsTool extends Tool
                         'name' => $account->currency->name,
                         'symbol' => $account->currency->symbol,
                     ],
-                    'balance' => number_format($account->balance, 2),
+                    'balance' => number_format((float) $account->balance, 2),
                     'created_at' => $account->created_at?->toISOString(),
                 ]);
 

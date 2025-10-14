@@ -30,7 +30,12 @@ final class GetCategoriesTool extends Tool
      */
     public function handle(Request $request): Response
     {
+        // For now, use hardcoded user until auth is properly set up
         $user = User::where('email', 'cruzmediaorg@gmail.com')->first();
+
+        if (! $user) {
+            return Response::error('User not found. Please ensure you are authenticated.');
+        }
 
         try {
             $categories = Category::where('user_id', $user->id)
