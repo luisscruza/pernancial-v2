@@ -80,6 +80,11 @@ final class GetAccountsTool extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        // n8n's MCP client requires explicit properties field, even if empty
+        // Adding a dummy optional parameter to ensure compatibility
+        return [
+            '_dummy' => $schema->string()
+                ->description('Not used - this tool requires no parameters'),
+        ];
     }
 }
