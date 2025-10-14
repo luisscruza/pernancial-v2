@@ -40,6 +40,8 @@ final class TestCommand extends Command
      */
     public function handle(): void
     {
+        $this->importAccounts();
+        $this->importBudgets();
         DB::table('transactions')->truncate();
         $this->importTransactions();
         $this->recalculateBalance();
@@ -160,122 +162,122 @@ final class TestCommand extends Command
 
     }
 
-    // private function importAccounts(): void
-    // {
-    //     $path = storage_path('app/accounts.json');
+    private function importAccounts(): void
+    {
+        $path = storage_path('app/accounts.json');
 
-    //     if (! is_file($path)) {
-    //         $this->error(sprintf('File not found: %s', $path));
+        if (! is_file($path)) {
+            $this->error(sprintf('File not found: %s', $path));
 
-    //         return;
-    //     }
+            return;
+        }
 
-    //     $json = file_get_contents($path);
-    //     $data = json_decode($json, true);
+        $json = file_get_contents($path);
+        $data = json_decode($json, true);
 
-    //     if (! is_array($data)) {
-    //         $this->error('Invalid JSON structure');
+        if (! is_array($data)) {
+            $this->error('Invalid JSON structure');
 
-    //         return;
-    //     }
+            return;
+        }
 
-    //     foreach ($data as $item) {
-    //         // Create or fetch the account
-    //         Account::firstOrCreate([
-    //             'user_id' => 1,
-    //             'name' => $item['name'],
-    //         ], [
-    //             'currency_id' => Currency::where('code', $item['code'])->first()->id,
-    //             'type' => $this->getType($item['type']),
-    //             'balance' => $item['current_balance'],
-    //             'emoji' => $this->getEmoji($item['type']),
-    //             'color' => '#f59e0b',
-    //         ]);
-    //     }
+        foreach ($data as $item) {
+            // Create or fetch the account
+            Account::firstOrCreate([
+                'user_id' => 1,
+                'name' => $item['name'],
+            ], [
+                'currency_id' => Currency::where('code', $item['code'])->first()->id,
+                'type' => $this->getType($item['type']),
+                'balance' => $item['current_balance'],
+                'emoji' => $this->getEmoji($item['type']),
+                'color' => '#f59e0b',
+            ]);
+        }
 
-    //     $this->info('Accounts imported successfully.');
-    // }
+        $this->info('Accounts imported successfully.');
+    }
 
-    // private function getType(string $type): string
-    // {
-    //     return match (mb_strtolower($type)) {
-    //         'credit' => 'credit_card',
-    //         'cash' => 'cash',
-    //         'cxc' => 'cxc',
-    //         'debit' => 'debit_card',
-    //         default => 'other',
-    //     };
-    // }
+    private function getType(string $type): string
+    {
+        return match (mb_strtolower($type)) {
+            'credit' => 'credit_card',
+            'cash' => 'cash',
+            'cxc' => 'cxc',
+            'debit' => 'debit_card',
+            default => 'other',
+        };
+    }
 
-    // private function getEmoji(string $type): string
-    // {
-    //     return match (mb_strtolower($type)) {
-    //         'credit' => '💳',
-    //         'cash' => '💵',
-    //         'cxc' => '📥',
-    //         'debit' => '🏧',
-    //         default => '🏦',
-    //     };
-    // }
+    private function getEmoji(string $type): string
+    {
+        return match (mb_strtolower($type)) {
+            'credit' => '💳',
+            'cash' => '💵',
+            'cxc' => '📥',
+            'debit' => '🏧',
+            default => '🏦',
+        };
+    }
 
     private function importBudgets(): void
     {
-        //  $path = storage_path('app/budgets.json');
+         $path = storage_path('app/budgets.json');
 
-        // if (! is_file($path)) {
-        //     $this->error(sprintf('File not found: %s', $path));
+        if (! is_file($path)) {
+            $this->error(sprintf('File not found: %s', $path));
 
-        //     return;
-        // }
+            return;
+        }
 
-        // $json = file_get_contents($path);
-        // $data = json_decode($json, true);
+        $json = file_get_contents($path);
+        $data = json_decode($json, true);
 
-        // if (! is_array($data)) {
-        //     $this->error('Invalid JSON structure');
+        if (! is_array($data)) {
+            $this->error('Invalid JSON structure');
 
-        //     return;
-        // }
+            return;
+        }
 
-        // // --- Group by "name"
-        // $grouped = collect($data)->groupBy('name');
+        // --- Group by "name"
+        $grouped = collect($data)->groupBy('name');
 
-        // foreach ($grouped as $name => $items) {
-        //     $this->info("Processing budget: {$name}");
+        foreach ($grouped as $name => $items) {
+            $this->info("Processing budget: {$name}");
 
-        //     // Extract first record to reuse shared info like dates
-        //     $first = $items->first();
-        //     $start = $first['start_date'];
-        //     $end = $first['end_date'];
+            // Extract first record to reuse shared info like dates
+            $first = $items->first();
+            $start = $first['start_date'];
+            $end = $first['end_date'];
 
-        //     // Create or fetch the budget
-        //     $budget = BudgetPeriod::firstOrCreate([
-        //         'user_id' => 1,
-        //         'name' => $name,
-        //     ], [
-        //         'type' => 'monthly',
-        //         'start_date' => $start,
-        //         'end_date' => $end,
-        //     ]);
+            // Create or fetch the budget
+            $budget = BudgetPeriod::firstOrCreate([
+                'user_id' => 1,
+                'name' => $name,
+            ], [
+                'type' => 'monthly',
+                'start_date' => $start,
+                'end_date' => $end,
+            ]);
 
-        //     foreach ($items as $item) {
-        //         // Create or fetch category
-        //         $category = Category::firstOrCreate(['name' => $item['category']]);
+            foreach ($items as $item) {
+                // Create or fetch category
+                $category = Category::firstOrCreate(['name' => $item['category']]);
 
-        //         // Create detail
-        //         Budget::updateOrCreate([
-        //             'user_id' => 1,
-        //             'budget_period_id' => $budget->id,
-        //             'category_id' => $category->id,
-        //         ], [
-        //             'amount' => $item['amount'],
-        //             'type' => 'period',
-        //             'name' => $category->name.' - '.$budget->name,
-        //             'is_active' => true,
-        //         ]);
-        //     }
-        // }
+                // Create detail
+                Budget::updateOrCreate([
+                    'user_id' => 1,
+                    'budget_period_id' => $budget->id,
+                    'category_id' => $category->id,
+                ], [
+                    'amount' => $item['amount'],
+                    'type' => 'period',
+                    'name' => $category->name.' - '.$budget->name,
+                    'is_active' => true,
+                ]);
+            }
+        }
 
-        // $this->info('Budgets imported successfully.');
+        $this->info('Budgets imported successfully.');
     }
 }
