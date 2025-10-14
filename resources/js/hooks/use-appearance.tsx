@@ -1,14 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Appearance = 'light' | 'dark' | 'light';
-
-const prefersDark = () => {
-    if (typeof window === 'undefined') {
-        return false;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
+export type Appearance = 'light';
 
 const setCookie = (name: string, value: string, days = 365) => {
     if (typeof document === 'undefined') {
@@ -20,31 +12,13 @@ const setCookie = (name: string, value: string, days = 365) => {
 };
 
 const applyTheme = (appearance: Appearance) => {
-    const isDark = appearance === 'dark' || (appearance === 'light' && prefersDark());
-
-    document.documentElement.classList.toggle('dark', isDark);
-};
-
-const mediaQuery = () => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: dark)');
-};
-
-const handleSystemThemeChange = () => {
-    const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'light');
+    // Always force light mode
+    document.documentElement.classList.remove('dark');
 };
 
 export function initializeTheme() {
-    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'light';
-
-    applyTheme(savedAppearance);
-
-    // Add the event listener for system theme changes...
-    mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    // Always apply light theme
+    applyTheme('light');
 }
 
 export function useAppearance() {
@@ -63,10 +37,8 @@ export function useAppearance() {
     }, []);
 
     useEffect(() => {
-        const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-        updateAppearance(savedAppearance || 'light');
-
-        return () => mediaQuery()?.removeEventListener('change', handleSystemThemeChange);
+        // Always set to light mode
+        updateAppearance('light');
     }, [updateAppearance]);
 
     return { appearance, updateAppearance } as const;
