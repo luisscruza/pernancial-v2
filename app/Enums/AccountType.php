@@ -48,6 +48,7 @@ enum AccountType: string
             self::INVESTMENT => '💸',
             self::DEBIT_CARD => '🏧',
             self::CXC => '📥',
+            self::CXP => '📤',
         };
     }
 
