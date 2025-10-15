@@ -27,7 +27,7 @@ export default function AccountPage({ accounts }: { accounts: Account[] }) {
             .filter(account => account.accounting_type === 'normal')
             .reduce((acc, account) => acc + account.balance_in_base, 0);
         
-        const totalGeneral = balanceEnCuenta + cuentasPorCobrar - cuentasPorPagar;
+        const totalGeneral = balanceEnCuenta + cuentasPorCobrar + cuentasPorPagar;
         
         return {
             cuentasPorPagar,
