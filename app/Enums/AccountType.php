@@ -64,6 +64,9 @@ enum AccountType: string
             self::CHECKING => '#0000FF',
             self::GENERAL => '#0EA5E9',
             self::INVESTMENT => '#84CC16',
+            self::DEBIT_CARD => '#10B981',
+            self::CXC => '#8B5CF6',
+            self::CXP => '#EC4899',
         };
     }
 
@@ -77,6 +80,9 @@ enum AccountType: string
             self::CHECKING => 'Para cuentas corrientes',
             self::GENERAL => 'Para propósitos generales',
             self::INVESTMENT => 'Para inversiones y portafolios',
+            self::DEBIT_CARD => 'Para tarjetas de débito',
+            self::CXC => 'Para cuentas por cobrar',
+            self::CXP => 'Para cuentas por pagar',
         };
     }
 
