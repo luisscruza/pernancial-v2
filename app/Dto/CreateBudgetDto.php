@@ -16,8 +16,8 @@ final class CreateBudgetDto
         public readonly BudgetPeriodType $periodType,
         public readonly string $name,
         public readonly float $amount,
-        public readonly string $startDate,
-        public readonly string $endDate,
+        public readonly ?string $startDate,
+        public readonly ?string $endDate,
         public readonly ?string $description = null,
     ) {}
 

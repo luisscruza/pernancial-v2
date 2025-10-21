@@ -110,8 +110,8 @@ final class BudgetController extends Controller
             'type' => $validated['type'] ?? $budget->type->value,
             'period_type' => $validated['period_type'] ?? $budget->budgetPeriod->type->value,
             'category_id' => $validated['category_id'] ?? $budget->category_id,
-            'start_date' => $validated['start_date'] ?? $budget->start_date->toDateString(),
-            'end_date' => $validated['end_date'] ?? $budget->end_date->toDateString(),
+            'start_date' => $validated['start_date'] ?? $budget->start_date?->toDateString(),
+            'end_date' => $validated['end_date'] ?? $budget->end_date?->toDateString(),
             'description' => $validated['description'] ?? $budget->description,
         ]);
 
