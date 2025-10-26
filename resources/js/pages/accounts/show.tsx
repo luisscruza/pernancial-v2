@@ -4,7 +4,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pencil, Trash2, Plus, X, Edit2 } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Plus, Edit2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency } from '@/utils/currency';
 import { motion } from 'framer-motion';
@@ -53,7 +53,6 @@ export default function Show({
     expenseCategories,
     otherAccounts,
     transactionTypes,
-    filters
 }: Props) {
 
     const [tab, setTab] = useState('balance');
@@ -61,8 +60,6 @@ export default function Show({
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [dateFrom, setDateFrom] = useState<string>(filters?.date_from || '');
-    const [dateTo, setDateTo] = useState<string>(filters?.date_to || '');
 
     const page = usePage<SharedData>();
     const { base_currency } = page.props;

@@ -8,7 +8,7 @@ use App\Enums\AccountType;
 
 test('cases', function () {
     expect(AccountType::cases())->toBeArray()
-        ->and(AccountType::cases())->toHaveCount(7)
+        ->and(AccountType::cases())->toHaveCount(10)
         ->and(AccountType::cases())->toBe([
             AccountType::SAVINGS,
             AccountType::CHECKING,
@@ -17,6 +17,9 @@ test('cases', function () {
             AccountType::CREDIT_CARD,
             AccountType::GENERAL,
             AccountType::INVESTMENT,
+            AccountType::DEBIT_CARD,
+            AccountType::CXC,
+            AccountType::CXP,
         ]);
 });
 

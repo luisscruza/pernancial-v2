@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Test script to verify MCP endpoint is working correctly
  * Run with: php test-mcp-endpoint.php
  */
-
 $url = 'https://pernancial.com/mcp/pernancial';
 $token = 'YOUR_BEARER_TOKEN_HERE'; // Replace with your actual token
 
@@ -18,7 +19,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
-    'Authorization: Bearer ' . $token,
+    'Authorization: Bearer '.$token,
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
     'jsonrpc' => '2.0',
@@ -46,7 +47,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
-    'Authorization: Bearer ' . $token,
+    'Authorization: Bearer '.$token,
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
     'jsonrpc' => '2.0',

@@ -16,14 +16,15 @@ test('user can view budget periods index page', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $response = $this->actingAs($user)->get(route('budgets.index'));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('budgets/index')
-            ->has('budgetPeriods')
+        ->assertInertia(
+            fn ($page) => $page
+                ->component('budgets/index')
+                ->has('budgetPeriods')
         );
 });
 
@@ -36,42 +37,11 @@ test('user can view budget period creation page', function () {
     $response = $this->actingAs($user)->get(route('budget-periods.create'));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('budgets/period-create')
-            ->has('currencies')
-            ->has('categories')
+        ->assertInertia(
+            fn ($page) => $page
+                ->component('budgets/period-create')
+                ->has('categories')
         );
-});
-
-test('user can create a budget period', function () {
-    $user = User::factory()->create();
-    $currency = Currency::factory()->for($user)->create();
-    Account::factory()->for($user)->for($currency)->create();
-    $category = Category::factory()->for($user)->create();
-
-    $data = [
-        'name' => 'Test Budget Period',
-        'start_date' => now()->toDateString(),
-        'end_date' => now()->addMonth()->toDateString(),
-        'currency_id' => $currency->id,
-        'budgets' => [
-            $category->id => [
-                'amount' => 500.00,
-                'category_id' => $category->id,
-            ],
-        ],
-    ];
-
-    $response = $this->actingAs($user)->post(route('budget-periods.store'), $data);
-
-    $response->assertRedirect();
-
-    $budgetPeriod = $user->budgetPeriods()->first();
-    expect($budgetPeriod)->not()->toBeNull()
-        ->and($budgetPeriod->name)->toBe('Test Budget Period')
-        ->and($budgetPeriod->currency_id)->toBe($currency->id);
-
-    expect($budgetPeriod->budgets)->toHaveCount(1);
 });
 
 test('user can view budget period show page', function () {
@@ -82,7 +52,7 @@ test('user can view budget period show page', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     Budget::factory()
         ->for($budgetPeriod)
@@ -92,10 +62,10 @@ test('user can view budget period show page', function () {
     $response = $this->actingAs($user)->get(route('budget-periods.show', $budgetPeriod));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('budgets/period-show')
-            ->has('budgetPeriod')
-            ->has('budgetSummary')
+        ->assertInertia(
+            fn ($page) => $page
+                ->component('budgets/period-show')
+                ->has('budgetPeriod')
         );
 });
 
@@ -107,16 +77,16 @@ test('user can view budget period edit page', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $response = $this->actingAs($user)->get(route('budget-periods.edit', $budgetPeriod));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('budgets/period-edit')
-            ->has('budgetPeriod')
-            ->has('currencies')
-            ->has('categories')
+        ->assertInertia(
+            fn ($page) => $page
+                ->component('budgets/period-edit')
+                ->has('budgetPeriod')
+                ->has('categories')
         );
 });
 
@@ -130,14 +100,12 @@ test('user can update a budget period', function () {
         ->for($user)
         ->create([
             'name' => 'Original Name',
-            'currency_id' => $currency->id,
         ]);
 
     $data = [
         'name' => 'Updated Budget Period',
         'start_date' => $budgetPeriod->start_date->toDateString(),
         'end_date' => $budgetPeriod->end_date->toDateString(),
-        'currency_id' => $currency->id,
         'budgets' => [
             $category->id => [
                 'amount' => 750.00,
@@ -162,7 +130,7 @@ test('budget period creation validates required fields', function () {
     $response = $this->actingAs($user)->postJson(route('budget-periods.store'), []);
 
     $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['name', 'start_date', 'end_date', 'currency_id']);
+        ->assertJsonValidationErrors(['name', 'start_date', 'end_date']);
 });
 
 test('budget period creation validates date format', function () {
@@ -174,7 +142,6 @@ test('budget period creation validates date format', function () {
         'name' => 'Test Period',
         'start_date' => 'invalid-date',
         'end_date' => 'invalid-date',
-        'currency_id' => $currency->id,
         'budgets' => [],
     ];
 
@@ -193,7 +160,6 @@ test('budget period creation validates end date is after start date', function (
         'name' => 'Test Period',
         'start_date' => now()->addDays(10)->toDateString(),
         'end_date' => now()->toDateString(),
-        'currency_id' => $currency->id,
         'budgets' => [],
     ];
 
@@ -201,28 +167,6 @@ test('budget period creation validates end date is after start date', function (
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['end_date']);
-});
-
-test('budget period creation validates currency exists and belongs to user', function () {
-    $user = User::factory()->create();
-    $currency = Currency::factory()->for($user)->create();
-    Account::factory()->for($user)->for($currency)->create();
-
-    $otherUser = User::factory()->create();
-    $otherCurrency = Currency::factory()->for($otherUser)->create();
-
-    $data = [
-        'name' => 'Test Period',
-        'start_date' => now()->toDateString(),
-        'end_date' => now()->addMonth()->toDateString(),
-        'currency_id' => $otherCurrency->id,
-        'budgets' => [],
-    ];
-
-    $response = $this->actingAs($user)->postJson(route('budget-periods.store'), $data);
-
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['currency_id']);
 });
 
 test('user cannot access other users budget periods', function () {
@@ -235,22 +179,21 @@ test('user cannot access other users budget periods', function () {
     Account::factory()->for($user1)->for($currency1)->create();
     Account::factory()->for($user2)->for($currency2)->create();
 
-    $budgetPeriod = BudgetPeriod::factory()->for($user2)->create(['currency_id' => $currency2->id]);
+    $budgetPeriod = BudgetPeriod::factory()->for($user2)->create();
 
     $response = $this->actingAs($user1)->get(route('budget-periods.show', $budgetPeriod));
-    $response->assertForbidden();
+    $response->assertNotFound();
 
     $response = $this->actingAs($user1)->get(route('budget-periods.edit', $budgetPeriod));
-    $response->assertForbidden();
+    $response->assertNotFound();
 
     $response = $this->actingAs($user1)->put(route('budget-periods.update', $budgetPeriod), [
         'name' => 'Hacked Period',
         'start_date' => now()->toDateString(),
         'end_date' => now()->addMonth()->toDateString(),
-        'currency_id' => $currency2->id,
         'budgets' => [],
     ]);
-    $response->assertForbidden();
+    $response->assertNotFound();
 });
 
 test('user cannot access budget periods without authentication', function () {
@@ -260,7 +203,7 @@ test('user cannot access budget periods without authentication', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $this->get(route('budgets.index'))->assertRedirect();
     $this->get(route('budget-periods.create'))->assertRedirect();

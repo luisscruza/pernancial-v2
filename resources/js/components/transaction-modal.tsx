@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useForm, router } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ArrowRightLeft, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Account, Transaction } from '@/types';
+import { router, useForm } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRightLeft, Calendar, Minus, Plus, Trash2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Category {
     id: number;
@@ -54,7 +54,8 @@ export default function TransactionModal({
     transaction = null,
 }: TransactionModalProps) {
     const [selectedType, setSelectedType] = useState<string>('');
-    
+    const [categorySearch, setCategorySearch] = useState<string>('');
+
     const { data, setData, post, put, processing, errors, reset } = useForm({
         type: '',
         amount: '',
@@ -69,21 +70,19 @@ export default function TransactionModal({
         if (transaction && isOpen) {
             // Ensure date is in YYYY-MM-DD format for input field
             let formattedDate = transaction.transaction_date;
-            
+
             // If date includes time (ISO string or datetime), extract just the date part
             if (formattedDate.includes('T')) {
                 formattedDate = formattedDate.split('T')[0];
             }
 
             // Normalize transfer types: convert transfer_in/transfer_out to 'transfer'
-            const normalizedType = transaction.type === 'transfer_in' || transaction.type === 'transfer_out' 
-                ? 'transfer' 
-                : transaction.type;
-            
+            const normalizedType = transaction.type === 'transfer_in' || transaction.type === 'transfer_out' ? 'transfer' : transaction.type;
+
             setData({
                 type: normalizedType,
                 amount: transaction.amount.toString(),
-                received_amount: '', 
+                received_amount: '',
                 description: transaction.description || '',
                 category_id: transaction.category?.id?.toString() || '',
                 destination_account_id: transaction.destination_account?.id?.toString() || '',
@@ -93,13 +92,14 @@ export default function TransactionModal({
         } else if (!isOpen) {
             reset();
             setSelectedType('');
+            setCategorySearch('');
         }
     }, [transaction, isOpen]);
 
     // automatically set received_amount when amount or destination_account_id changes for transfers
     useEffect(() => {
         if (selectedType === 'transfer' && data.destination_account_id && data.amount) {
-            const transferRate = otherAccounts.find(acc => acc.id.toString() === data.destination_account_id)?.currency.rate;
+            const transferRate = otherAccounts.find((acc) => acc.id.toString() === data.destination_account_id)?.currency.rate;
             if (transferRate !== undefined) {
                 const calculatedAmount = parseFloat(data.amount) * transferRate;
                 setData('received_amount', calculatedAmount.toString());
@@ -111,7 +111,7 @@ export default function TransactionModal({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (transaction) {
             // Update existing transaction
             put(route('transactions.update', { account: account.uuid, transaction: transaction.id }), {
@@ -139,17 +139,19 @@ export default function TransactionModal({
         // Reset category and destination account when changing type
         setData('category_id', '');
         setData('destination_account_id', '');
+        setCategorySearch('');
     };
 
     const handleClose = () => {
         reset();
         setSelectedType('');
+        setCategorySearch('');
         onClose();
     };
 
     const handleDelete = () => {
         if (!transaction) return;
-        
+
         if (window.confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
             router.delete(route('transactions.destroy', [account.uuid, transaction.id]), {
                 onSuccess: () => {
@@ -160,9 +162,14 @@ export default function TransactionModal({
     };
 
     const getAvailableCategories = () => {
-        if (selectedType === 'income') return incomeCategories;
-        if (selectedType === 'expense') return expenseCategories;
-        return [];
+        const categories = selectedType === 'income' ? incomeCategories : selectedType === 'expense' ? expenseCategories : [];
+
+        if (!categorySearch.trim()) {
+            return categories;
+        }
+
+        const searchLower = categorySearch.toLowerCase();
+        return categories.filter((category) => category.name.toLowerCase().includes(searchLower) || category.emoji.includes(searchLower));
     };
 
     const getTypeIcon = (type: string) => {
@@ -209,15 +216,8 @@ export default function TransactionModal({
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">
-                                {transaction ? 'Editar transacción' : 'Nueva transacción'}
-                            </h2>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleClose}
-                                className="h-8 w-8"
-                            >
+                            <h2 className="text-xl font-semibold">{transaction ? 'Editar transacción' : 'Nueva transacción'}</h2>
+                            <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8">
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
@@ -245,20 +245,14 @@ export default function TransactionModal({
                                         </motion.button>
                                     ))}
                                 </div>
-                                {errors.type && (
-                                    <p className="text-sm text-red-600">{errors.type}</p>
-                                )}
+                                {errors.type && <p className="text-sm text-red-600">{errors.type}</p>}
                             </div>
 
                             {/* Amount Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="amount">
-                                    {selectedType === 'transfer' ? 'Monto a enviar' : 'Monto'}
-                                </Label>
+                                <Label htmlFor="amount">{selectedType === 'transfer' ? 'Monto a enviar' : 'Monto'}</Label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                        {account.currency?.symbol || '$'}
-                                    </span>
+                                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">{account.currency?.symbol || '$'}</span>
                                     <Input
                                         id="amount"
                                         type="number"
@@ -269,36 +263,46 @@ export default function TransactionModal({
                                         placeholder="0.00"
                                     />
                                 </div>
-                                {errors.amount && (
-                                    <p className="text-sm text-red-600">{errors.amount}</p>
-                                )}
+                                {errors.amount && <p className="text-sm text-red-600">{errors.amount}</p>}
                             </div>
 
                             {/* Category Selection (for income/expense) */}
                             {(selectedType === 'income' || selectedType === 'expense') && (
                                 <div className="space-y-2">
                                     <Label>Categoría</Label>
-                                    <Select
-                                        value={data.category_id}
-                                        onValueChange={(value) => setData('category_id', value)}
-                                    >
+                                    <Select value={data.category_id} onValueChange={(value) => setData('category_id', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar categoría" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {getAvailableCategories().map((category) => (
-                                                <SelectItem key={category.id} value={category.id.toString()}>
-                                                    <div className="flex items-center gap-2">
-                                                        <span>{category.emoji}</span>
-                                                        <span>{category.name}</span>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
+                                            <div className="sticky top-0 z-10 bg-white px-2 pb-2">
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Buscar categoría..."
+                                                    value={categorySearch}
+                                                    onChange={(e) => setCategorySearch(e.target.value)}
+                                                    className="h-8"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                />
+                                            </div>
+                                            {getAvailableCategories().length > 0 ? (
+                                                getAvailableCategories().map((category) => (
+                                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                                        <div className="flex items-center gap-2">
+                                                            <span>{category.emoji}</span>
+                                                            <span>{category.name}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="text-muted-foreground px-2 py-6 text-center text-sm">
+                                                    No se encontraron categorías
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
-                                    {errors.category_id && (
-                                        <p className="text-sm text-red-600">{errors.category_id}</p>
-                                    )}
+                                    {errors.category_id && <p className="text-sm text-red-600">{errors.category_id}</p>}
                                 </div>
                             )}
 
@@ -306,10 +310,7 @@ export default function TransactionModal({
                             {selectedType === 'transfer' && (
                                 <div className="space-y-2">
                                     <Label>Cuenta de destino</Label>
-                                    <Select
-                                        value={data.destination_account_id}
-                                        onValueChange={(value) => setData('destination_account_id', value)}
-                                    >
+                                    <Select value={data.destination_account_id} onValueChange={(value) => setData('destination_account_id', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar cuenta" />
                                         </SelectTrigger>
@@ -319,27 +320,23 @@ export default function TransactionModal({
                                                     <div className="flex items-center gap-2">
                                                         <span>{acc.emoji}</span>
                                                         <span>{acc.name}</span>
-                                                        <span className="text-sm text-gray-500">
-                                                            ({acc.currency.symbol})
-                                                        </span>
+                                                        <span className="text-sm text-gray-500">({acc.currency.symbol})</span>
                                                     </div>
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.destination_account_id && (
-                                        <p className="text-sm text-red-600">{errors.destination_account_id}</p>
-                                    )}
+                                    {errors.destination_account_id && <p className="text-sm text-red-600">{errors.destination_account_id}</p>}
                                 </div>
                             )}
 
-                              {/* Received Amount Input (for transfers only) */}
+                            {/* Received Amount Input (for transfers only) */}
                             {selectedType === 'transfer' && data.destination_account_id && (
                                 <div className="space-y-2">
                                     <Label htmlFor="received_amount">Monto a recibir</Label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                            {otherAccounts.find(acc => acc.id.toString() === data.destination_account_id)?.currency.symbol || '$'}
+                                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                            {otherAccounts.find((acc) => acc.id.toString() === data.destination_account_id)?.currency.symbol || '$'}
                                         </span>
                                         <Input
                                             id="received_amount"
@@ -351,9 +348,7 @@ export default function TransactionModal({
                                             placeholder="0.00"
                                         />
                                     </div>
-                                    {errors.received_amount && (
-                                        <p className="text-sm text-red-600">{errors.received_amount}</p>
-                                    )}
+                                    {errors.received_amount && <p className="text-sm text-red-600">{errors.received_amount}</p>}
                                 </div>
                             )}
 
@@ -367,16 +362,14 @@ export default function TransactionModal({
                                     placeholder="Descripción de la transacción..."
                                     rows={3}
                                 />
-                                {errors.description && (
-                                    <p className="text-sm text-red-600">{errors.description}</p>
-                                )}
+                                {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
                             </div>
 
                             {/* Date */}
                             <div className="space-y-2">
                                 <Label htmlFor="transaction_date">Fecha</Label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                    <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
                                     <Input
                                         id="transaction_date"
                                         type="date"
@@ -385,41 +378,28 @@ export default function TransactionModal({
                                         className="pl-10"
                                     />
                                 </div>
-                                {errors.transaction_date && (
-                                    <p className="text-sm text-red-600">{errors.transaction_date}</p>
-                                )}
+                                {errors.transaction_date && <p className="text-sm text-red-600">{errors.transaction_date}</p>}
                             </div>
 
                             {/* Submit Button */}
                             <div className="flex gap-3 pt-4">
                                 {transaction && (
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        onClick={handleDelete}
-                                        className="flex items-center gap-2"
-                                    >
+                                    <Button type="button" variant="destructive" onClick={handleDelete} className="flex items-center gap-2">
                                         <Trash2 className="h-4 w-4" />
                                         Eliminar
                                     </Button>
                                 )}
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleClose}
-                                    className="flex-1"
-                                >
+                                <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
                                     Cancelar
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={processing || !selectedType || !data.amount}
-                                    className="flex-1"
-                                >
-                                    {processing 
-                                        ? (transaction ? 'Actualizando...' : 'Creando...') 
-                                        : (transaction ? 'Actualizar transacción' : 'Crear transacción')
-                                    }
+                                <Button type="submit" disabled={processing || !selectedType || !data.amount} className="flex-1">
+                                    {processing
+                                        ? transaction
+                                            ? 'Actualizando...'
+                                            : 'Creando...'
+                                        : transaction
+                                          ? 'Actualizar transacción'
+                                          : 'Crear transacción'}
                                 </Button>
                             </div>
                         </form>

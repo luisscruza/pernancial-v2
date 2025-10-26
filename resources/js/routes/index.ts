@@ -1,5 +1,45 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../wayfinder'
 /**
+* @see routes/web.php:20
+* @route '/token'
+*/
+export const token = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: token.url(options),
+    method: 'get',
+})
+
+token.definition = {
+    methods: ["get","head"],
+    url: '/token',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see routes/web.php:20
+* @route '/token'
+*/
+token.url = (options?: RouteQueryOptions) => {
+    return token.definition.url + queryParams(options)
+}
+
+/**
+* @see routes/web.php:20
+* @route '/token'
+*/
+token.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: token.url(options),
+    method: 'get',
+})
+
+/**
+* @see routes/web.php:20
+* @route '/token'
+*/
+token.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: token.url(options),
+    method: 'head',
+})
+
+/**
 * @see \App\Http\Controllers\AccountController::accounts
 * @see app/Http/Controllers/AccountController.php:28
 * @route '/'

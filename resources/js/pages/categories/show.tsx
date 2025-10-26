@@ -44,23 +44,10 @@ export default function CategoryShow({
         transfer_out: 'text-red-500',
     };
 
-    const getSymbol = (type: string) => {
-        switch (type) {
-            case 'expense': return '-';
-            case 'income': return '+';
-            case 'initial': return '';
-            case 'transfer_in': return '+';
-            case 'transfer_out': return '-';
-            default: return '';
-        }
-    }
-
-    // Filter transactions by account
     const filteredTransactions = selectedAccountId === 'all' 
         ? transactions.data 
         : transactions.data.filter(t => t.account.id.toString() === selectedAccountId);
 
-    // Group filtered transactions by month
     const filteredGroupedTransactions = filteredTransactions.reduce((groups, transaction) => {
         const date = new Date(transaction.transaction_date);
         const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });

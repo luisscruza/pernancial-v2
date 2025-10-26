@@ -24,6 +24,7 @@ test('to array', function () {
         'description',
         'created_at',
         'updated_at',
+        'is_active',
     ]);
 });
 

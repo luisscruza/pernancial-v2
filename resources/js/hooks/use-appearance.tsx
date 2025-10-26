@@ -12,12 +12,14 @@ const setCookie = (name: string, value: string, days = 365) => {
 };
 
 const applyTheme = (appearance: Appearance) => {
-    // Always force light mode
-    document.documentElement.classList.remove('dark');
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    document.documentElement.setAttribute('data-theme', appearance);
 };
 
 export function initializeTheme() {
-    // Always apply light theme
     applyTheme('light');
 }
 

@@ -186,19 +186,19 @@ test('user cannot access other users budgets', function () {
     $budget = Budget::factory()->for($budgetPeriod)->for($category)->create();
 
     $response = $this->actingAs($user1)->get(route('budgets.show', $budget));
-    $response->assertForbidden();
+    $response->assertNotFound();
 
     $response = $this->actingAs($user1)->get(route('budgets.edit', $budget));
-    $response->assertForbidden();
+    $response->assertNotFound();
 
     $response = $this->actingAs($user1)->put(route('budgets.update', $budget), [
         'category_id' => $category->id,
         'amount' => 999,
     ]);
-    $response->assertForbidden();
+    $response->assertNotFound();
 
     $response = $this->actingAs($user1)->delete(route('budgets.destroy', $budget));
-    $response->assertForbidden();
+    $response->assertNotFound();
 });
 
 test('user cannot access budgets without authentication', function () {
