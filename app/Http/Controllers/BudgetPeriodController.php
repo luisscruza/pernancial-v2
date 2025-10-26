@@ -16,6 +16,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 
 final class BudgetPeriodController extends Controller
 {
@@ -50,16 +52,13 @@ final class BudgetPeriodController extends Controller
         ]);
     }
 
-    public function show(BudgetPeriod $budgetPeriod, Request $request, CalculateBudgetSummaryAction $calculateAction): Response
+    public function show(BudgetPeriod $budgetPeriod, CalculateBudgetSummaryAction $calculateAction, #[CurrentUser] User $user): Response
     {
-        // Load budgets with categories
         $budgetPeriod->load(['budgets.category']);
 
-        // Calculate summaries for all budgets in this period
         $budgetSummaries = $budgetPeriod->budgets->map(fn ($budget): BudgetSummaryDto => $calculateAction->handle($budget));
 
-        // Get all categories for this user to show available categories
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'emoji', 'type']);
 
@@ -70,9 +69,9 @@ final class BudgetPeriodController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(#[CurrentUser] User $user): Response
     {
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'emoji', 'type']);
 
@@ -81,11 +80,11 @@ final class BudgetPeriodController extends Controller
         ]);
     }
 
-    public function store(CreateBudgetPeriodRequest $request, CreateBudgetPeriodAction $action): RedirectResponse
+    public function store(CreateBudgetPeriodRequest $request, CreateBudgetPeriodAction $action, #[CurrentUser] User $user): RedirectResponse
     {
         $data = [
             ...$request->validated(),
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
         ];
 
         $budgetPeriod = $action->handle($data);
@@ -97,13 +96,11 @@ final class BudgetPeriodController extends Controller
             ]);
     }
 
-    public function edit(BudgetPeriod $budgetPeriod): Response
+    public function edit(BudgetPeriod $budgetPeriod, #[CurrentUser] User $user): Response
     {
-        // Load budgets with categories
         $budgetPeriod->load(['budgets.category']);
 
-        // Get all categories for this user
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'emoji', 'type']);
 
@@ -113,8 +110,9 @@ final class BudgetPeriodController extends Controller
         ]);
     }
 
-    public function update(BudgetPeriod $budgetPeriod, Request $request): RedirectResponse
+    public function update(BudgetPeriod $budgetPeriod, Request $request, #[CurrentUser] User $user): RedirectResponse
     {
+        // @TODO: Refactor to Form Request and Actions, AI crap...
         $request->validate([
             'name' => 'required|string|max:255',
             'budgets' => 'required|array',
@@ -123,15 +121,12 @@ final class BudgetPeriodController extends Controller
             'budgets.*.budget_id' => 'nullable|exists:budgets,id',
         ]);
 
-        // Update the budget period name
         $budgetPeriod->update([
             'name' => $request->input('name'),
         ]);
 
-        // Process budget updates
         foreach ($request->input('budgets', []) as $budgetData) {
             if (isset($budgetData['budget_id'])) {
-                // Update existing budget
                 $budget = $budgetPeriod->budgets()->find($budgetData['budget_id']);
                 if ($budget) {
                     $budget->update([
@@ -139,20 +134,18 @@ final class BudgetPeriodController extends Controller
                     ]);
                 }
             } else {
-                // Create new budget
                 $budgetPeriod->budgets()->create([
-                    'user_id' => Auth::id(),
+                    'user_id' => $user->id,
                     'category_id' => $budgetData['category_id'],
                     'amount' => $budgetData['amount'],
                     'type' => \App\Enums\BudgetType::PERIOD,
                     'start_date' => $budgetPeriod->start_date,
                     'end_date' => $budgetPeriod->end_date,
-                    'name' => Auth::user()->categories()->find($budgetData['category_id'])->name.' - '.$budgetPeriod->name,
+                    'name' => $user->categories()->find($budgetData['category_id'])->name.' - '.$budgetPeriod->name,
                 ]);
             }
         }
 
-        // Remove budgets that were deleted (not present in the update)
         $updatedBudgetIds = collect($request->input('budgets', []))
             ->pluck('budget_id')
             ->filter();

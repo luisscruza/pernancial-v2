@@ -15,18 +15,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy([BudgetObserver::class])]
 /**
  * @property-read int $id
- * @property-read int $user_id
+ * @property int $user_id
  * @property-read int $category_id
  * @property-read int $budget_period_id
  * @property-read BudgetType $type
  * @property-read string|null $name
  * @property-read string|null $description
  * @property-read float|null $amount
- * @property-read Carbon|null $start_date
- * @property-read Carbon|null $end_date
+ * @property-read \Carbon\Carbon|null $start_date
+ * @property-read \Carbon\Carbon|null $end_date
  * @property-read bool $is_active
- * @property-read Carbon|null $created_at
- * @property-read Carbon|null $updated_at
+ * @property-read \Carbon\Carbon|null $created_at
+ * @property-read \Carbon\Carbon|null $updated_at
  */
 final class Budget extends Model
 {

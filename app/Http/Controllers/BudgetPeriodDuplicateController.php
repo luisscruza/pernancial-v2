@@ -8,15 +8,17 @@ use App\Models\BudgetPeriod;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 
 final class BudgetPeriodDuplicateController
 {
-    public function __invoke(BudgetPeriod $budgetPeriod): Response
+    public function __invoke(BudgetPeriod $budgetPeriod, #[CurrentUser] User $user): Response
     {
 
         $budgetPeriod->load(['budgets.category']);
 
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'emoji', 'type']);
 

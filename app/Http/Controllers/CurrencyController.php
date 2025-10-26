@@ -13,7 +13,8 @@ use App\Models\Currency;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,11 +39,11 @@ final class CurrencyController extends Controller
         return Inertia::render('currencies/create');
     }
 
-    public function store(CreateCurrencyRequest $request, CreateCurrencyAction $action): RedirectResponse
+    public function store(CreateCurrencyRequest $request, CreateCurrencyAction $action, #[CurrentUser] User $user): RedirectResponse
     {
         $dto = CreateCurrencyDto::fromArray($request->validated());
 
-        $action->handle($dto, Auth::id());
+        $action->handle($dto, $user->id);
 
         return redirect()->route('currencies.index')
             ->with('flash', [

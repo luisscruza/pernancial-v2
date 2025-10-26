@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 /**
  * @template TModel of Model
  *
+ * @phpstan-require-extends Model
+ *
  * @mixin TModel
  */
 trait HasUuidRouting
@@ -18,18 +20,17 @@ trait HasUuidRouting
     public static function bootHasUuidRouting(): void
     {
         static::creating(function (Model $model): void {
-            if (Schema::hasColumn($model->getTable(), $model->getUuidColumnName()) && is_null($model->{$model->getUuidColumnName()})) {
-                $model->{$model->getUuidColumnName()} = Str::orderedUuid();
+            if (! Schema::hasColumn($model->getTable(), 'uuid')) {
+                return;
+            }
+
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::orderedUuid(); // @phpstan-ignore-line
             }
         });
     }
 
     public function getRouteKeyName(): string
-    {
-        return $this->getUuidColumnName();
-    }
-
-    public function getUuidColumnName(): string
     {
         return 'uuid';
     }

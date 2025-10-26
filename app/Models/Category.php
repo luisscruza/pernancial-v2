@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
- * @property-read string $uuid
+ * @property string $uuid
  * @property-read string $name
  * @property-read string $emoji
  * @property-read CategoryType $type
- * @property-read int $user_id
- * @property-read Carbon|null $created_at
- * @property-read Carbon|null $updated_at
+ * @property int $user_id
+ * @property-read \Carbon\Carbon|null $created_at
+ * @property-read \Carbon\Carbon|null $updated_at
  */
 final class Category extends Model
 {

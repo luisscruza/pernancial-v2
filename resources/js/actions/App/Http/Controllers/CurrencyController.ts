@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CurrencyController::index
-* @see app/Http/Controllers/CurrencyController.php:22
+* @see app/Http/Controllers/CurrencyController.php:23
 * @route '/currencies'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::index
-* @see app/Http/Controllers/CurrencyController.php:22
+* @see app/Http/Controllers/CurrencyController.php:23
 * @route '/currencies'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::index
-* @see app/Http/Controllers/CurrencyController.php:22
+* @see app/Http/Controllers/CurrencyController.php:23
 * @route '/currencies'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CurrencyController::index
-* @see app/Http/Controllers/CurrencyController.php:22
+* @see app/Http/Controllers/CurrencyController.php:23
 * @route '/currencies'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CurrencyController::create
-* @see app/Http/Controllers/CurrencyController.php:36
+* @see app/Http/Controllers/CurrencyController.php:37
 * @route '/currencies/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::create
-* @see app/Http/Controllers/CurrencyController.php:36
+* @see app/Http/Controllers/CurrencyController.php:37
 * @route '/currencies/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::create
-* @see app/Http/Controllers/CurrencyController.php:36
+* @see app/Http/Controllers/CurrencyController.php:37
 * @route '/currencies/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CurrencyController::create
-* @see app/Http/Controllers/CurrencyController.php:36
+* @see app/Http/Controllers/CurrencyController.php:37
 * @route '/currencies/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -89,7 +89,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CurrencyController::store
-* @see app/Http/Controllers/CurrencyController.php:41
+* @see app/Http/Controllers/CurrencyController.php:42
 * @route '/currencies'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -104,7 +104,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::store
-* @see app/Http/Controllers/CurrencyController.php:41
+* @see app/Http/Controllers/CurrencyController.php:42
 * @route '/currencies'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -113,7 +113,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::store
-* @see app/Http/Controllers/CurrencyController.php:41
+* @see app/Http/Controllers/CurrencyController.php:42
 * @route '/currencies'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\CurrencyController::show
-* @see app/Http/Controllers/CurrencyController.php:54
+* @see app/Http/Controllers/CurrencyController.php:55
 * @route '/currencies/{currency}'
 */
 export const show = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::show
-* @see app/Http/Controllers/CurrencyController.php:54
+* @see app/Http/Controllers/CurrencyController.php:55
 * @route '/currencies/{currency}'
 */
 show.url = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ show.url = (args: { currency: number | { id: number } } | [currency: number | { 
 
 /**
 * @see \App\Http\Controllers\CurrencyController::show
-* @see app/Http/Controllers/CurrencyController.php:54
+* @see app/Http/Controllers/CurrencyController.php:55
 * @route '/currencies/{currency}'
 */
 show.get = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.get = (args: { currency: number | { id: number } } | [currency: number | { 
 
 /**
 * @see \App\Http\Controllers\CurrencyController::show
-* @see app/Http/Controllers/CurrencyController.php:54
+* @see app/Http/Controllers/CurrencyController.php:55
 * @route '/currencies/{currency}'
 */
 show.head = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -191,7 +191,7 @@ show.head = (args: { currency: number | { id: number } } | [currency: number | {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::edit
-* @see app/Http/Controllers/CurrencyController.php:65
+* @see app/Http/Controllers/CurrencyController.php:66
 * @route '/currencies/{currency}/edit'
 */
 export const edit = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -206,7 +206,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::edit
-* @see app/Http/Controllers/CurrencyController.php:65
+* @see app/Http/Controllers/CurrencyController.php:66
 * @route '/currencies/{currency}/edit'
 */
 edit.url = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -239,7 +239,7 @@ edit.url = (args: { currency: number | { id: number } } | [currency: number | { 
 
 /**
 * @see \App\Http\Controllers\CurrencyController::edit
-* @see app/Http/Controllers/CurrencyController.php:65
+* @see app/Http/Controllers/CurrencyController.php:66
 * @route '/currencies/{currency}/edit'
 */
 edit.get = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -249,7 +249,7 @@ edit.get = (args: { currency: number | { id: number } } | [currency: number | { 
 
 /**
 * @see \App\Http\Controllers\CurrencyController::edit
-* @see app/Http/Controllers/CurrencyController.php:65
+* @see app/Http/Controllers/CurrencyController.php:66
 * @route '/currencies/{currency}/edit'
 */
 edit.head = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -259,7 +259,7 @@ edit.head = (args: { currency: number | { id: number } } | [currency: number | {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::update
-* @see app/Http/Controllers/CurrencyController.php:72
+* @see app/Http/Controllers/CurrencyController.php:73
 * @route '/currencies/{currency}'
 */
 export const update = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -274,7 +274,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\CurrencyController::update
-* @see app/Http/Controllers/CurrencyController.php:72
+* @see app/Http/Controllers/CurrencyController.php:73
 * @route '/currencies/{currency}'
 */
 update.url = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ update.url = (args: { currency: number | { id: number } } | [currency: number | 
 
 /**
 * @see \App\Http\Controllers\CurrencyController::update
-* @see app/Http/Controllers/CurrencyController.php:72
+* @see app/Http/Controllers/CurrencyController.php:73
 * @route '/currencies/{currency}'
 */
 update.put = (args: { currency: number | { id: number } } | [currency: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({

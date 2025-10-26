@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::index
-* @see app/Http/Controllers/BudgetPeriodController.php:22
+* @see app/Http/Controllers/BudgetPeriodController.php:24
 * @route '/budgets'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::index
-* @see app/Http/Controllers/BudgetPeriodController.php:22
+* @see app/Http/Controllers/BudgetPeriodController.php:24
 * @route '/budgets'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::index
-* @see app/Http/Controllers/BudgetPeriodController.php:22
+* @see app/Http/Controllers/BudgetPeriodController.php:24
 * @route '/budgets'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::index
-* @see app/Http/Controllers/BudgetPeriodController.php:22
+* @see app/Http/Controllers/BudgetPeriodController.php:24
 * @route '/budgets'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::create
-* @see app/Http/Controllers/BudgetPeriodController.php:73
+* @see app/Http/Controllers/BudgetPeriodController.php:72
 * @route '/budget-periods/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::create
-* @see app/Http/Controllers/BudgetPeriodController.php:73
+* @see app/Http/Controllers/BudgetPeriodController.php:72
 * @route '/budget-periods/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::create
-* @see app/Http/Controllers/BudgetPeriodController.php:73
+* @see app/Http/Controllers/BudgetPeriodController.php:72
 * @route '/budget-periods/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::create
-* @see app/Http/Controllers/BudgetPeriodController.php:73
+* @see app/Http/Controllers/BudgetPeriodController.php:72
 * @route '/budget-periods/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -89,7 +89,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::store
-* @see app/Http/Controllers/BudgetPeriodController.php:84
+* @see app/Http/Controllers/BudgetPeriodController.php:83
 * @route '/budget-periods'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -104,7 +104,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::store
-* @see app/Http/Controllers/BudgetPeriodController.php:84
+* @see app/Http/Controllers/BudgetPeriodController.php:83
 * @route '/budget-periods'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -113,7 +113,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::store
-* @see app/Http/Controllers/BudgetPeriodController.php:84
+* @see app/Http/Controllers/BudgetPeriodController.php:83
 * @route '/budget-periods'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::show
-* @see app/Http/Controllers/BudgetPeriodController.php:53
+* @see app/Http/Controllers/BudgetPeriodController.php:55
 * @route '/budget-periods/{budgetPeriod}'
 */
 export const show = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::show
-* @see app/Http/Controllers/BudgetPeriodController.php:53
+* @see app/Http/Controllers/BudgetPeriodController.php:55
 * @route '/budget-periods/{budgetPeriod}'
 */
 show.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ show.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: num
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::show
-* @see app/Http/Controllers/BudgetPeriodController.php:53
+* @see app/Http/Controllers/BudgetPeriodController.php:55
 * @route '/budget-periods/{budgetPeriod}'
 */
 show.get = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.get = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: num
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::show
-* @see app/Http/Controllers/BudgetPeriodController.php:53
+* @see app/Http/Controllers/BudgetPeriodController.php:55
 * @route '/budget-periods/{budgetPeriod}'
 */
 show.head = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -191,7 +191,7 @@ show.head = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: nu
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::edit
-* @see app/Http/Controllers/BudgetPeriodController.php:100
+* @see app/Http/Controllers/BudgetPeriodController.php:99
 * @route '/budget-periods/{budgetPeriod}/edit'
 */
 export const edit = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -206,7 +206,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::edit
-* @see app/Http/Controllers/BudgetPeriodController.php:100
+* @see app/Http/Controllers/BudgetPeriodController.php:99
 * @route '/budget-periods/{budgetPeriod}/edit'
 */
 edit.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -239,7 +239,7 @@ edit.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: num
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::edit
-* @see app/Http/Controllers/BudgetPeriodController.php:100
+* @see app/Http/Controllers/BudgetPeriodController.php:99
 * @route '/budget-periods/{budgetPeriod}/edit'
 */
 edit.get = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -249,7 +249,7 @@ edit.get = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: num
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::edit
-* @see app/Http/Controllers/BudgetPeriodController.php:100
+* @see app/Http/Controllers/BudgetPeriodController.php:99
 * @route '/budget-periods/{budgetPeriod}/edit'
 */
 edit.head = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -259,7 +259,7 @@ edit.head = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: nu
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::update
-* @see app/Http/Controllers/BudgetPeriodController.php:116
+* @see app/Http/Controllers/BudgetPeriodController.php:113
 * @route '/budget-periods/{budgetPeriod}'
 */
 export const update = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -274,7 +274,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::update
-* @see app/Http/Controllers/BudgetPeriodController.php:116
+* @see app/Http/Controllers/BudgetPeriodController.php:113
 * @route '/budget-periods/{budgetPeriod}'
 */
 update.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ update.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: n
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodController::update
-* @see app/Http/Controllers/BudgetPeriodController.php:116
+* @see app/Http/Controllers/BudgetPeriodController.php:113
 * @route '/budget-periods/{budgetPeriod}'
 */
 update.put = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
- * @property-read int $user_id
+ * @property int $user_id
  * @property int $currency_id
  * @property float $rate
  * @property string $effective_date
