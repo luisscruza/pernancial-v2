@@ -98,21 +98,8 @@ final class TestCommand extends Command
 
     private function processTransaction(array $item, ?Account $account): void
     {
-        //      array:11 [
-        //   "id" => 44
-        //   "description" => "Lisboa"
-        //   "category" => "Vacaciones"
-        //   "amount" => 1.5
-        //   "type" => "expense"
-        //   "running_balance" => 2939.1
-        //   "transaction_date" => "2024-07-30"
-        //   "from_account" => null
-        //   "to_account" => null
-        //   "account" => "Santander (Luis)"
-        //   "currency" => "EUR"
-        // ] // app/Console/Commands/TestCommand.php:103
 
-        $type = match (mb_strtolower($item['type'])) {
+        $type = match (mb_strtolower((string) $item['type'])) {
             'expense' => TransactionType::EXPENSE,
             'income' => TransactionType::INCOME,
             'transfer-in' => TransactionType::TRANSFER_IN,

@@ -22,7 +22,7 @@ final class CurrencyController extends Controller
     public function index(Request $request): Response
     {
         $currencies = $request->user()->currencies()
-            ->with(['rates' => function ($query) {
+            ->with(['rates' => function ($query): void {
                 $query->latest('effective_date')->limit(1);
             }])
             ->orderBy('created_at', 'desc')
@@ -53,7 +53,7 @@ final class CurrencyController extends Controller
 
     public function show(Currency $currency): Response
     {
-        $currency->load(['rates' => function ($query) {
+        $currency->load(['rates' => function ($query): void {
             $query->orderBy('effective_date', 'desc');
         }]);
 

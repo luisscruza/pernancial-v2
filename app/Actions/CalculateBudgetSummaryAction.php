@@ -27,9 +27,7 @@ final class CalculateBudgetSummaryAction
             ->get();
 
         // Sum up the spending (convert to user's base currency if needed)
-        $totalSpent = $transactions->sum(function ($transaction) {
-            return $this->convertToBaseCurrency($transaction);
-        });
+        $totalSpent = $transactions->sum(fn ($transaction): float => $this->convertToBaseCurrency($transaction));
 
         $remaining = $budget->amount - $totalSpent;
         $percentageUsed = $budget->amount > 0 ? ($totalSpent / $budget->amount) * 100 : 0;

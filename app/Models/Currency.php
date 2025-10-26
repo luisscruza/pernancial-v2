@@ -42,7 +42,7 @@ final class Currency extends Model
     /**
      * Get the rate for a specific date.
      */
-    public function rateForDate(string $date): ?float
+    public function rateForDate(string $date): float
     {
         $rate = $this->rates()
             ->where('effective_date', '<=', $date)
@@ -55,7 +55,7 @@ final class Currency extends Model
     /**
      * Get the current rate.
      */
-    public function currentRate(): ?float
+    public function currentRate(): float
     {
         return $this->rateForDate(Date::now()->toDateString());
     }

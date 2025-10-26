@@ -39,7 +39,7 @@ final class CreateBudgetPeriodAction
             foreach ($data['budgets'] as $budgetData) {
                 $budgetPeriod->budgets()->create([
                     'user_id' => $data['user_id'],
-                    'name' => $budgetData['name'] ?? $this->generateBudgetName($budgetData['category_id'], $data),
+                    'name' => $budgetData['name'] ?? $this->generateBudgetName($data),
                     'amount' => $budgetData['amount'],
                     'type' => BudgetType::PERIOD,
                     'category_id' => $budgetData['category_id'],
@@ -56,7 +56,7 @@ final class CreateBudgetPeriodAction
     /**
      * Generate a budget name based on category and period.
      */
-    private function generateBudgetName($categoryId, array $periodData): string
+    private function generateBudgetName(array $periodData): string
     {
         // This would ideally load the category to get its name
         // For now, we'll use a generic name

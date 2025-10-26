@@ -33,11 +33,11 @@ test('user can visit account page', function () {
 
     $this->actingAs($user)->get(route('accounts.show', $account))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('accounts/show')
                 ->has(
                     'account',
-                    fn(Assert $page) => $page
+                    fn (Assert $page) => $page
                         ->where('id', $account->id)
                         ->whereNotNull('uuid')
                         ->whereNotNull('balance_in_base')
@@ -52,10 +52,10 @@ test('user can visit account page', function () {
                 )
                 ->has(
                     'transactions',
-                    fn(Assert $page) => $page
+                    fn (Assert $page) => $page
                         ->has(
                             'data',
-                            fn(Assert $page) => $page
+                            fn (Assert $page) => $page
                                 ->where('0', $account->transactions()->with('category', 'fromAccount', 'destinationAccount')->first()->toArray())
                         )
                         ->hasAll([
@@ -85,7 +85,7 @@ test('user can view account creation page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('accounts/create')
                 ->has('currencies', 1)
                 ->has('accountTypes')

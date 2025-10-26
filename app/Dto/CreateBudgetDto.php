@@ -7,18 +7,18 @@ namespace App\Dto;
 use App\Enums\BudgetPeriodType;
 use App\Enums\BudgetType;
 
-final class CreateBudgetDto
+final readonly class CreateBudgetDto
 {
     public function __construct(
-        public readonly int $userId,
-        public readonly int $categoryId,
-        public readonly BudgetType $type,
-        public readonly BudgetPeriodType $periodType,
-        public readonly ?string $name,
-        public readonly ?float $amount,
-        public readonly ?string $startDate,
-        public readonly ?string $endDate,
-        public readonly ?string $description = null,
+        public int $userId,
+        public int $categoryId,
+        public BudgetType $type,
+        public BudgetPeriodType $periodType,
+        public ?string $name,
+        public ?float $amount,
+        public ?string $startDate,
+        public ?string $endDate,
+        public ?string $description = null,
     ) {}
 
     /**

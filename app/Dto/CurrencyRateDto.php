@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
-final class CurrencyRateDto
+final readonly class CurrencyRateDto
 {
     public function __construct(
-        public readonly int $currencyId,
-        public readonly float $rate,
-        public readonly string $effectiveDate,
+        public int $currencyId,
+        public float $rate,
+        public string $effectiveDate,
     ) {}
 
     /**

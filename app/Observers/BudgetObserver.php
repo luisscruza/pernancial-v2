@@ -7,10 +7,10 @@ namespace App\Observers;
 use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Models\Budget;
 
-final class BudgetObserver
+final readonly class BudgetObserver
 {
     public function __construct(
-        private readonly CacheBudgetPeriodSummaryAction $cacheAction
+        private CacheBudgetPeriodSummaryAction $cacheAction
     ) {}
 
     /**

@@ -115,7 +115,7 @@ final class BudgetController extends Controller
             'description' => $validated['description'] ?? $budget->description,
         ]);
 
-        $updatedBudget = $action->handle($budget, $dto);
+        $action->handle($budget, $dto);
 
         return redirect()->route('budgets.show', $budget)
             ->with('flash', [

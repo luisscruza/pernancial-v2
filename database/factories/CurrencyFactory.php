@@ -21,7 +21,7 @@ final class CurrencyFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'code' => fake()->currencyCode() . '_' . fake()->unique()->randomNumber(5, true),
+            'code' => fake()->currencyCode().'_'.fake()->unique()->randomNumber(5, true),
             'name' => fake()->unique()->name(),
             'symbol' => fake()->randomElement(['$', '€', '£', '¥']),
             'decimal_places' => fake()->numberBetween(0, 2),

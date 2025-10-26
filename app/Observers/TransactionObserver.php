@@ -8,10 +8,10 @@ use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Models\BudgetPeriod;
 use App\Models\Transaction;
 
-final class TransactionObserver
+final readonly class TransactionObserver
 {
     public function __construct(
-        private readonly CacheBudgetPeriodSummaryAction $cacheAction
+        private CacheBudgetPeriodSummaryAction $cacheAction
     ) {}
 
     /**

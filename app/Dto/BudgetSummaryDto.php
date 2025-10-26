@@ -6,16 +6,16 @@ namespace App\Dto;
 
 use App\Models\Budget;
 
-final class BudgetSummaryDto
+final readonly class BudgetSummaryDto
 {
     public function __construct(
-        public readonly Budget $budget,
-        public readonly float $totalSpent,
-        public readonly float $remaining,
-        public readonly float $percentageUsed,
-        public readonly bool $isOverBudget,
-        public readonly array $dateRange,
-        public readonly int $transactionCount,
+        public Budget $budget,
+        public float $totalSpent,
+        public float $remaining,
+        public float $percentageUsed,
+        public bool $isOverBudget,
+        public array $dateRange,
+        public int $transactionCount,
     ) {}
 
     /**

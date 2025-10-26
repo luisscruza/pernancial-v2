@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Actions\CalculateBudgetSummaryAction;
 use App\Actions\CreateBudgetPeriodAction;
+use App\Dto\BudgetSummaryDto;
 use App\Http\Requests\CreateBudgetPeriodRequest;
 use App\Models\BudgetPeriod;
 use Illuminate\Http\RedirectResponse;
@@ -55,9 +56,7 @@ final class BudgetPeriodController extends Controller
         $budgetPeriod->load(['budgets.category']);
 
         // Calculate summaries for all budgets in this period
-        $budgetSummaries = $budgetPeriod->budgets->map(function ($budget) use ($calculateAction) {
-            return $calculateAction->handle($budget);
-        });
+        $budgetSummaries = $budgetPeriod->budgets->map(fn ($budget): BudgetSummaryDto => $calculateAction->handle($budget));
 
         // Get all categories for this user to show available categories
         $categories = Auth::user()->categories()

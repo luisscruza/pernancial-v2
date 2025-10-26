@@ -8,10 +8,10 @@ use App\Enums\CategoryType;
 use App\Models\BudgetPeriod;
 use Illuminate\Support\Facades\Cache;
 
-final class CacheBudgetPeriodSummaryAction
+final readonly class CacheBudgetPeriodSummaryAction
 {
     public function __construct(
-        private readonly CalculateBudgetSummaryAction $calculateAction
+        private CalculateBudgetSummaryAction $calculateAction
     ) {}
 
     /**
@@ -30,9 +30,7 @@ final class CacheBudgetPeriodSummaryAction
         // For old periods, use cache with a long TTL (30 days)
         $cacheKey = $this->getCacheKey($period);
 
-        return Cache::remember($cacheKey, now()->addDays(30), function () use ($period) {
-            return $this->calculateSummary($period);
-        });
+        return Cache::remember($cacheKey, now()->addDays(30), fn (): array => $this->calculateSummary($period));
     }
 
     /**

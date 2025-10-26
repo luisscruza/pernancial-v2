@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
-final class CreateCurrencyDto
+final readonly class CreateCurrencyDto
 {
     public function __construct(
-        public readonly string $code,
-        public readonly string $name,
-        public readonly string $symbol,
-        public readonly int $decimalPlaces,
-        public readonly string $decimalSeparator,
-        public readonly string $thousandsSeparator,
-        public readonly string $symbolPosition,
-        public readonly float $conversionRate,
-        public readonly bool $isBase,
+        public string $code,
+        public string $name,
+        public string $symbol,
+        public int $decimalPlaces,
+        public string $decimalSeparator,
+        public string $thousandsSeparator,
+        public string $symbolPosition,
+        public float $conversionRate,
+        public bool $isBase,
     ) {}
 
     /**
