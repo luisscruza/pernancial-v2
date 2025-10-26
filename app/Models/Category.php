@@ -12,6 +12,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read int $id
+ * @property-read string $uuid
+ * @property-read string $name
+ * @property-read string $emoji
+ * @property-read CategoryType $type
+ * @property-read int $user_id
+ * @property-read Carbon|null $created_at
+ * @property-read Carbon|null $updated_at
+ */
 final class Category extends Model
 {
     /** @use BelongsToUser<Category> */
@@ -47,7 +57,14 @@ final class Category extends Model
     public function casts(): array
     {
         return [
+            'id' => 'integer',
+            'uuid' => 'string',
+            'name' => 'string',
+            'emoji' => 'string',
             'type' => CategoryType::class,
+            'user_id' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 }

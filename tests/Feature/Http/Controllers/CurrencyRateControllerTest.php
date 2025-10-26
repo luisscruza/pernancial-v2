@@ -31,7 +31,7 @@ test('user can add currency rate', function () {
 
     $rate = $currency->rates()->first();
     expect($rate->rate)->toBe(1.25)
-        ->and($rate->effective_date)->toBe('2024-07-13')
+        ->and($rate->effective_date->toDateString())->toBe('2024-07-13')
         ->and($rate->currency_id)->toBe($currency->id);
 });
 

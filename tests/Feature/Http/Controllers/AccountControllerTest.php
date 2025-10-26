@@ -140,7 +140,7 @@ test('user can create account with negative balance', function () {
 
     $account = $user->accounts()->where('name', 'Credit Card')->first();
     expect($account)->not()->toBeNull()
-        ->and($account->balance)->toBe(-500);
+        ->and($account->balance)->toBe(-500.0);
 });
 
 test('user can create account with zero balance', function () {
@@ -161,7 +161,7 @@ test('user can create account with zero balance', function () {
 
     $account = $user->accounts()->where('name', 'New Checking Account')->first();
     expect($account)->not()->toBeNull()
-        ->and($account->balance)->toBe(0);
+        ->and($account->balance)->toBe(0.0);
 });
 
 test('account creation validates required fields', function () {

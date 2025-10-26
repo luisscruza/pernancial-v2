@@ -55,8 +55,7 @@ final readonly class TransactionObserver
             return;
         }
 
-        // Find all budget periods that contain this transaction date
-        $affectedPeriods = BudgetPeriod::where('user_id', $transaction->account->user_id)
+        $affectedPeriods = BudgetPeriod::where('user_id', $transaction->account?->user_id)
             ->where('start_date', '<=', $transaction->transaction_date)
             ->where('end_date', '>=', $transaction->transaction_date)
             ->get();

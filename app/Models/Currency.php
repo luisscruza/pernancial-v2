@@ -49,7 +49,7 @@ final class Currency extends Model
             ->orderBy('effective_date', 'desc')
             ->first();
 
-        return (float) $rate?->rate ?? 1;
+        return (float) $rate?->rate;
     }
 
     /**

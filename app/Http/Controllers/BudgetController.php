@@ -6,24 +6,25 @@ namespace App\Http\Controllers;
 
 use App\Actions\CalculateBudgetSummaryAction;
 use App\Actions\CreateBudgetAction;
+use App\Actions\DeleteBudgetAction;
 use App\Actions\UpdateBudgetAction;
 use App\Dto\CreateBudgetDto;
 use App\Http\Requests\CreateBudgetRequest;
 use App\Http\Requests\UpdateBudgetRequest;
 use App\Models\Budget;
 use App\Models\Transaction;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class BudgetController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(#[CurrentUser] User $user): Response
     {
-        $budgets = $request->user()->budgets()
+        $budgets = $user->budgets()
             ->with(['category', 'budgetPeriod'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -33,9 +34,9 @@ final class BudgetController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(#[CurrentUser] User $user): Response
     {
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'color']);
 
@@ -44,11 +45,11 @@ final class BudgetController extends Controller
         ]);
     }
 
-    public function store(CreateBudgetRequest $request, CreateBudgetAction $action): RedirectResponse
+    public function store(CreateBudgetRequest $request, CreateBudgetAction $action, #[CurrentUser] User $user): RedirectResponse
     {
         $dto = CreateBudgetDto::fromArray([
             ...$request->validated(),
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
         ]);
 
         $budget = $action->handle($dto);
@@ -60,13 +61,13 @@ final class BudgetController extends Controller
             ]);
     }
 
-    public function show(Budget $budget, CalculateBudgetSummaryAction $calculateAction): Response
+    public function show(Budget $budget, CalculateBudgetSummaryAction $calculateAction, #[CurrentUser] User $user): Response
     {
         $budget->load(['category', 'budgetPeriod']);
+
         $summary = $calculateAction->handle($budget);
 
-        $accountIds = Auth::user()
-            ->accounts()
+        $accountIds = $user->accounts()
             ->pluck('id');
 
         $transactions = Transaction::query()
@@ -84,11 +85,11 @@ final class BudgetController extends Controller
         ]);
     }
 
-    public function edit(Budget $budget): Response
+    public function edit(Budget $budget, #[CurrentUser] User $user): Response
     {
         $budget->load(['category', 'budgetPeriod']);
 
-        $categories = Auth::user()->categories()
+        $categories = $user->categories()
             ->orderBy('name')
             ->get(['id', 'name', 'emoji', 'type']);
 
@@ -101,6 +102,7 @@ final class BudgetController extends Controller
     public function update(UpdateBudgetRequest $request, Budget $budget, UpdateBudgetAction $action): RedirectResponse
     {
         $budget->load('budgetPeriod');
+
         $validated = $request->validated();
 
         $dto = CreateBudgetDto::fromArray([
@@ -124,9 +126,9 @@ final class BudgetController extends Controller
             ]);
     }
 
-    public function destroy(Budget $budget): RedirectResponse
+    public function destroy(Budget $budget, DeleteBudgetAction $action): RedirectResponse
     {
-        $budget->delete();
+        $action->handle($budget);
 
         return redirect()->route('budgets.index')
             ->with('flash', [

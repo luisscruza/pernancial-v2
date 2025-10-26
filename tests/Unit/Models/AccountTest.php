@@ -25,6 +25,9 @@ test('to array', function () {
         'created_at',
         'updated_at',
         'is_active',
+        'accounting_type',
+        'balance_in_base',
+        'currency',
     ]);
 });
 

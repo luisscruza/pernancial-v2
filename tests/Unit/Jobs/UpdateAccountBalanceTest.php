@@ -35,10 +35,10 @@ it('correctly updates running balances for mixed transaction types', function ()
     $balances = $this->account->transactions()->orderBy('transaction_date')->pluck('running_balance')->toArray();
 
     expect($balances)->toBe([
-        100, // initial +100
-        150, // income +50
-        120, // expense -30
-        140, // transfer_in +20
+        100.0, // initial +100
+        150.0, // income +50
+        120.0, // expense -30
+        140.0, // transfer_in +20
         129.5, // transfer_out -10.5
     ]);
 });

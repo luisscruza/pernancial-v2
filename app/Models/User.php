@@ -16,6 +16,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read int $id
  * @property-read string $name
  * @property-read string $email
+ * @property-read string $google_id
+ * @property-read int $base_currency_id
+ * @property-read Carbon|null $created_at
+ * @property-read Carbon|null $updated_at
  */
 final class User extends Authenticatable
 {
@@ -40,8 +44,16 @@ final class User extends Authenticatable
     public function casts(): array
     {
         return [
+            'id' => 'integer',
+            'name' => 'string',
+            'email' => 'string',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'google_id' => 'string',
+            'base_currency_id' => 'integer',
+            'remember_token' => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

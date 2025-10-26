@@ -48,7 +48,7 @@ test('user can create an account', function () {
         ->and($user->accounts()->count())->toBe(1)
         ->and($user->accounts()->first()->name)->toBe('Test Account')
         ->and($user->accounts()->first()->type)->toBe(AccountType::BANK)
-        ->and($user->accounts()->first()->balance)->toBe(1000)
+        ->and($user->accounts()->first()->balance)->toBe(1000.0)
         ->and($user->currency->code)->toBe('USD')
         ->and($user->accounts()->first()->currency_id)->toBe($user->currency->id)
         ->and($user->accounts()->first()->description)->toBe('Test Description')

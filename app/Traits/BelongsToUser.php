@@ -8,6 +8,7 @@ use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @template TModel of Model
@@ -32,8 +33,8 @@ trait BelongsToUser
 
         static::creating(function (Model $model): void {
             /** @var TModel $model */
-            if (auth()->check() && empty($model->user_id)) {
-                $model->user_id = (int) auth()->id();
+            if (Auth::check() && empty($model->user_id)) {
+                $model->user_id = (int) Auth::id();
             }
         });
     }
