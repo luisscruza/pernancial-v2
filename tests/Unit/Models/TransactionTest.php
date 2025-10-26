@@ -25,6 +25,7 @@ test('to array', function () {
         'created_at',
         'updated_at',
         'deleted_at',
+        'related_transaction_id',
     ]);
 });
 

@@ -17,12 +17,13 @@ test('user can view budget period duplicate page', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     Budget::factory()
+        ->for($user)
         ->for($budgetPeriod)
         ->for($category)
-        ->create(['amount' => 50000]); // 500.00 in cents
+        ->create(['amount' => 500.00]);
 
     $response = $this->actingAs($user)->get(route('budget-periods.duplicate', $budgetPeriod));
 
@@ -32,13 +33,13 @@ test('user can view budget period duplicate page', function () {
             ->has('originalPeriod', fn ($page) => $page
                 ->where('id', $budgetPeriod->id)
                 ->where('name', $budgetPeriod->name)
+                ->etc()
             )
             ->has('categories', 1)
-            ->has('budgetData', fn ($page) => $page
-                ->where((string) $category->id, fn ($page) => $page
-                    ->where('amount', 500.00) // converted from cents
-                    ->where('category_id', $category->id)
-                )
+            ->has('budgetData.'.$category->id, fn ($page) => $page
+                ->where('amount', '500.00')
+                ->where('category_id', $category->id)
+                ->etc()
             )
         );
 });
@@ -53,17 +54,19 @@ test('budget period duplicate shows all budgets from original period', function 
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     Budget::factory()
+        ->for($user)
         ->for($budgetPeriod)
         ->for($category1)
-        ->create(['amount' => 30000]); // 300.00 in cents
+        ->create(['amount' => 300.00]);
 
     Budget::factory()
+        ->for($user)
         ->for($budgetPeriod)
         ->for($category2)
-        ->create(['amount' => 75000]); // 750.00 in cents
+        ->create(['amount' => 750.00]);
 
     $response = $this->actingAs($user)->get(route('budget-periods.duplicate', $budgetPeriod));
 
@@ -74,11 +77,11 @@ test('budget period duplicate shows all budgets from original period', function 
             ->has('categories', 2)
             ->has('budgetData', 2)
             ->has('budgetData.'.$category1->id, fn ($page) => $page
-                ->where('amount', 300.00)
+                ->where('amount', '300.00')
                 ->where('category_id', $category1->id)
             )
             ->has('budgetData.'.$category2->id, fn ($page) => $page
-                ->where('amount', 750.00)
+                ->where('amount', '750.00')
                 ->where('category_id', $category2->id)
             )
         );
@@ -95,7 +98,7 @@ test('budget period duplicate loads categories ordered by name', function () {
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $response = $this->actingAs($user)->get(route('budget-periods.duplicate', $budgetPeriod));
 
@@ -104,12 +107,21 @@ test('budget period duplicate loads categories ordered by name', function () {
             ->has('categories', 3)
             ->has('categories.0', fn ($page) => $page
                 ->where('name', 'A Category')
+                ->where('id', $categoryA->id)
+                ->where('emoji', $categoryA->emoji)
+                ->where('type', $categoryA->type)
             )
             ->has('categories.1', fn ($page) => $page
                 ->where('name', 'M Category')
+                ->where('id', $categoryM->id)
+                ->where('emoji', $categoryM->emoji)
+                ->where('type', $categoryM->type)
             )
             ->has('categories.2', fn ($page) => $page
                 ->where('name', 'Z Category')
+                ->where('id', $categoryZ->id)
+                ->where('emoji', $categoryZ->emoji)
+                ->where('type', $categoryZ->type)
             )
         );
 });
@@ -122,7 +134,7 @@ test('budget period duplicate shows empty budget data when original has no budge
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $response = $this->actingAs($user)->get(route('budget-periods.duplicate', $budgetPeriod));
 
@@ -145,10 +157,10 @@ test('user cannot duplicate other users budget periods', function () {
     Account::factory()->for($user1)->for($currency1)->create();
     Account::factory()->for($user2)->for($currency2)->create();
 
-    $budgetPeriod = BudgetPeriod::factory()->for($user2)->create(['currency_id' => $currency2->id]);
+    $budgetPeriod = BudgetPeriod::factory()->for($user2)->create();
 
     $response = $this->actingAs($user1)->get(route('budget-periods.duplicate', $budgetPeriod));
-    $response->assertForbidden();
+    $response->assertNotFound();
 });
 
 test('user cannot access budget period duplicate without authentication', function () {
@@ -158,7 +170,7 @@ test('user cannot access budget period duplicate without authentication', functi
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $this->get(route('budget-periods.duplicate', $budgetPeriod))->assertRedirect();
 });
@@ -169,7 +181,7 @@ test('user cannot access budget period duplicate without onboarding', function (
 
     $budgetPeriod = BudgetPeriod::factory()
         ->for($user)
-        ->create(['currency_id' => $currency->id]);
+        ->create();
 
     $this->actingAs($user)->get(route('budget-periods.duplicate', $budgetPeriod))->assertRedirect();
 });

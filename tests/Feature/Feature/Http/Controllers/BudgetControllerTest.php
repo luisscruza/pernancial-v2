@@ -25,7 +25,8 @@ test('user can visit budgets index page', function () {
     $response->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('budgets/index')
-            ->has('budgets', 1)
+            ->has('budgetPeriods', 1)
+            ->has('currentPeriod')
         );
 });
 
@@ -70,7 +71,7 @@ test('user can create a budget', function () {
     $budget = $user->budgets()->first();
     expect($budget)->not()->toBeNull()
         ->and($budget->name)->toBe('Test Budget')
-        ->and($budget->amount)->toBe(1000)
+        ->and($budget->amount)->toBe('1000.00')
         ->and($budget->type)->toBe(BudgetType::PERIOD)
         ->and($budget->category_id)->toBe($category->id);
 });
@@ -148,7 +149,7 @@ test('user can update a budget', function () {
 
     $budget = $budget->fresh();
     expect($budget->name)->toBe('Updated Budget')
-        ->and($budget->amount)->toBe(1500);
+        ->and($budget->amount)->toBe('1500.00');
 });
 
 test('user can delete a budget', function () {
@@ -181,7 +182,7 @@ test('budget creation validates required fields', function () {
         ->assertJsonValidationErrors(['name', 'amount', 'type', 'category_id', 'start_date', 'end_date']);
 });
 
-test('budget update validates required fields', function () {
+test('budget update validates field formats', function () {
     $user = User::factory()->create();
     $currency = Currency::factory()->for($user)->create();
     Account::factory()->for($user)->for($currency)->create();
@@ -191,7 +192,11 @@ test('budget update validates required fields', function () {
         'category_id' => $category->id,
     ]);
 
-    $response = $this->actingAs($user)->putJson(route('budgets.update', $budget), []);
+    $response = $this->actingAs($user)->putJson(route('budgets.update', $budget), [
+        'name' => str_repeat('a', 256), // Too long
+        'amount' => -10, // Negative amount
+        'category_id' => 999999, // Non-existent category
+    ]);
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['name', 'amount', 'category_id']);

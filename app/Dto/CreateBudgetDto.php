@@ -14,15 +14,15 @@ final class CreateBudgetDto
         public readonly int $categoryId,
         public readonly BudgetType $type,
         public readonly BudgetPeriodType $periodType,
-        public readonly string $name,
-        public readonly float $amount,
+        public readonly ?string $name,
+        public readonly ?float $amount,
         public readonly ?string $startDate,
         public readonly ?string $endDate,
         public readonly ?string $description = null,
     ) {}
 
     /**
-     * @param  array{user_id: int, category_id: int, type: string, period_type: string, name: string, amount: float, start_date: string, end_date: string, description: string|null}  $data
+     * @param  array{user_id: int, category_id: int, type: string, period_type: string, name: string|null, amount: float|string|null, start_date: string, end_date: string, description: string|null}  $data
      */
     public static function fromArray(array $data): self
     {
@@ -31,8 +31,8 @@ final class CreateBudgetDto
             categoryId: $data['category_id'],
             type: BudgetType::from($data['type']),
             periodType: BudgetPeriodType::from($data['period_type']),
-            name: $data['name'],
-            amount: $data['amount'],
+            name: $data['name'] ?? null,
+            amount: isset($data['amount']) ? (float) $data['amount'] : null,
             startDate: $data['start_date'],
             endDate: $data['end_date'],
             description: $data['description'] ?? null,

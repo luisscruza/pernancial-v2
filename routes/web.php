@@ -52,9 +52,11 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/budget-periods/{budgetPeriod}/duplicate', BudgetPeriodDuplicateController::class)->name('budget-periods.duplicate');
     Route::put('/budget-periods/{budgetPeriod}', [BudgetPeriodController::class, 'update'])->name('budget-periods.update');
 
-    // Individual Budgets (for editing within periods)
-    Route::get('/budgets/{budget}', [BudgetController::class, 'show'])->name('budgets.show');
+    // Individual Budgets (for editing within periods) - create must come before {budget} to avoid conflicts
+    Route::get('/budgets/create', [BudgetController::class, 'create'])->name('budgets.create');
+    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::get('/budgets/{budget}/edit', [BudgetController::class, 'edit'])->name('budgets.edit');
+    Route::get('/budgets/{budget}', [BudgetController::class, 'show'])->name('budgets.show');
     Route::put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
     Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
 });
@@ -73,5 +75,5 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function ()
     })->name('onboarding.setting-up');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

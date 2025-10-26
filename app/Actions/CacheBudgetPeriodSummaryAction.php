@@ -53,6 +53,11 @@ final class CacheBudgetPeriodSummaryAction
 
         if ($period->budgets) {
             foreach ($period->budgets as $budget) {
+                // Skip budgets without a category
+                if (! $budget->category) {
+                    continue;
+                }
+
                 $summary = $this->calculateAction->handle($budget);
 
                 if ($budget->category->type === CategoryType::EXPENSE) {

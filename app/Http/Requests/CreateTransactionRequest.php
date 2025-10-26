@@ -65,6 +65,12 @@ final class CreateTransactionRequest extends FormRequest
      */
     public function getDto(): CreateTransactionDto
     {
+        $receivedAmount = null;
+
+        if (array_key_exists('received_amount', $this->all()) && $this->get('received_amount') !== null) {
+            $receivedAmount = (float) $this->get('received_amount');
+        }
+
         return new CreateTransactionDto(
             type: TransactionType::from($this->string('type')->value()),
             amount: $this->float('amount'),
@@ -73,7 +79,7 @@ final class CreateTransactionRequest extends FormRequest
             destination_account: Account::find($this->integer('destination_account_id')),
             category: Category::find($this->integer('category_id')),
             conversion_rate: null,
-            received_amount: $this->float('received_amount'),
+            received_amount: $receivedAmount,
         );
     }
 }

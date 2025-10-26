@@ -1,70 +1,80 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
-* @see \App\Http\Controllers\BudgetController::show
-* @see app/Http/Controllers/BudgetController.php:63
-* @route '/budgets/{budget}'
+* @see \App\Http\Controllers\BudgetController::create
+* @see app/Http/Controllers/BudgetController.php:36
+* @route '/budgets/create'
 */
-export const show = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: show.url(args, options),
+export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: create.url(options),
     method: 'get',
 })
 
-show.definition = {
+create.definition = {
     methods: ["get","head"],
-    url: '/budgets/{budget}',
+    url: '/budgets/create',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \App\Http\Controllers\BudgetController::show
-* @see app/Http/Controllers/BudgetController.php:63
-* @route '/budgets/{budget}'
+* @see \App\Http\Controllers\BudgetController::create
+* @see app/Http/Controllers/BudgetController.php:36
+* @route '/budgets/create'
 */
-show.url = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
-    if (typeof args === 'string' || typeof args === 'number') {
-        args = { budget: args }
-    }
-
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { budget: args.id }
-    }
-
-    if (Array.isArray(args)) {
-        args = {
-            budget: args[0],
-        }
-    }
-
-    args = applyUrlDefaults(args)
-
-    const parsedArgs = {
-        budget: typeof args.budget === 'object'
-        ? args.budget.id
-        : args.budget,
-    }
-
-    return show.definition.url
-            .replace('{budget}', parsedArgs.budget.toString())
-            .replace(/\/+$/, '') + queryParams(options)
+create.url = (options?: RouteQueryOptions) => {
+    return create.definition.url + queryParams(options)
 }
 
 /**
-* @see \App\Http\Controllers\BudgetController::show
-* @see app/Http/Controllers/BudgetController.php:63
-* @route '/budgets/{budget}'
+* @see \App\Http\Controllers\BudgetController::create
+* @see app/Http/Controllers/BudgetController.php:36
+* @route '/budgets/create'
 */
-show.get = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: show.url(args, options),
+create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: create.url(options),
     method: 'get',
 })
 
 /**
-* @see \App\Http\Controllers\BudgetController::show
-* @see app/Http/Controllers/BudgetController.php:63
-* @route '/budgets/{budget}'
+* @see \App\Http\Controllers\BudgetController::create
+* @see app/Http/Controllers/BudgetController.php:36
+* @route '/budgets/create'
 */
-show.head = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: show.url(args, options),
+create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: create.url(options),
     method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\BudgetController::store
+* @see app/Http/Controllers/BudgetController.php:47
+* @route '/budgets'
+*/
+export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: store.url(options),
+    method: 'post',
+})
+
+store.definition = {
+    methods: ["post"],
+    url: '/budgets',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\BudgetController::store
+* @see app/Http/Controllers/BudgetController.php:47
+* @route '/budgets'
+*/
+store.url = (options?: RouteQueryOptions) => {
+    return store.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\BudgetController::store
+* @see app/Http/Controllers/BudgetController.php:47
+* @route '/budgets'
+*/
+store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: store.url(options),
+    method: 'post',
 })
 
 /**
@@ -132,6 +142,74 @@ edit.get = (args: { budget: number | { id: number } } | [budget: number | { id: 
 */
 edit.head = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\BudgetController::show
+* @see app/Http/Controllers/BudgetController.php:63
+* @route '/budgets/{budget}'
+*/
+export const show = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: show.url(args, options),
+    method: 'get',
+})
+
+show.definition = {
+    methods: ["get","head"],
+    url: '/budgets/{budget}',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\BudgetController::show
+* @see app/Http/Controllers/BudgetController.php:63
+* @route '/budgets/{budget}'
+*/
+show.url = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { budget: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { budget: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            budget: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        budget: typeof args.budget === 'object'
+        ? args.budget.id
+        : args.budget,
+    }
+
+    return show.definition.url
+            .replace('{budget}', parsedArgs.budget.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\BudgetController::show
+* @see app/Http/Controllers/BudgetController.php:63
+* @route '/budgets/{budget}'
+*/
+show.get = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: show.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\BudgetController::show
+* @see app/Http/Controllers/BudgetController.php:63
+* @route '/budgets/{budget}'
+*/
+show.head = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: show.url(args, options),
     method: 'head',
 })
 
@@ -251,6 +329,6 @@ destroy.delete = (args: { budget: number | { id: number } } | [budget: number | 
     method: 'delete',
 })
 
-const BudgetController = { show, edit, update, destroy }
+const BudgetController = { create, store, edit, show, update, destroy }
 
 export default BudgetController

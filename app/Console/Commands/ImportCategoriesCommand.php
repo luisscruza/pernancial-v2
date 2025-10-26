@@ -7,7 +7,7 @@ namespace App\Console\Commands;
 use App\Models\Category;
 use Illuminate\Console\Command;
 
-final class ImportCategories extends Command
+final class ImportCategoriesCommand extends Command
 {
     /**
      * The name and signature of the console command.
