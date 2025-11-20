@@ -50,7 +50,7 @@ export default function TransactionModal({
     incomeCategories,
     expenseCategories,
     otherAccounts,
-    transactionTypes,
+    transactionTypes = [],
     transaction = null,
 }: TransactionModalProps) {
     const [selectedType, setSelectedType] = useState<string>('');
@@ -239,23 +239,24 @@ export default function TransactionModal({
                             <div className="space-y-3">
                                 <Label>Tipo de Transacción</Label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    {transactionTypes.map((type) => (
-                                        <motion.button
-                                            key={type.value}
-                                            type="button"
-                                            className={`flex flex-col items-center justify-center rounded-lg border p-3 text-sm transition-colors ${
-                                                selectedType === type.value
-                                                    ? getTypeColor(type.value).replace('hover:', '')
-                                                    : 'border-gray-200 bg-white hover:bg-gray-50'
-                                            }`}
-                                            onClick={() => handleTypeChange(type.value)}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                        >
-                                            {getTypeIcon(type.value)}
-                                            <span className="mt-1 font-medium">{type.label}</span>
-                                        </motion.button>
-                                    ))}
+                                    {Array.isArray(transactionTypes) &&
+                                        transactionTypes.map((type) => (
+                                            <motion.button
+                                                key={type.value}
+                                                type="button"
+                                                className={`flex flex-col items-center justify-center rounded-lg border p-3 text-sm transition-colors ${
+                                                    selectedType === type.value
+                                                        ? getTypeColor(type.value).replace('hover:', '')
+                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                }`}
+                                                onClick={() => handleTypeChange(type.value)}
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                {getTypeIcon(type.value)}
+                                                <span className="mt-1 font-medium">{type.label}</span>
+                                            </motion.button>
+                                        ))}
                                 </div>
                                 {errors.type && <p className="text-sm text-red-600">{errors.type}</p>}
                             </div>

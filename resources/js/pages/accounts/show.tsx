@@ -1,15 +1,14 @@
-import { Currency, PaginatedProps, SharedData } from '@/types';
-import { Account, Transaction } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import TransactionModal from '@/components/transaction-modal';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pencil, Trash2, Plus, Edit2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
+import { Account, Currency, PaginatedProps, SharedData, Transaction } from '@/types';
 import { formatCurrency } from '@/utils/currency';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import TransactionModal from '@/components/transaction-modal';
+import { ChevronLeft, Edit2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Category {
     id: number;
@@ -25,6 +24,7 @@ interface OtherAccount {
     currency: {
         symbol: string;
         name: string;
+        rate: number;
     };
 }
 
@@ -46,20 +46,20 @@ interface Props extends SharedData {
     };
 }
 
-export default function Show({
-    account,
-    transactions,
-    incomeCategories,
-    expenseCategories,
-    otherAccounts,
-    transactionTypes,
-}: Props) {
-
+export default function Show({ account, transactions, incomeCategories, expenseCategories, otherAccounts, transactionTypes }: Props) {
     const [tab, setTab] = useState('balance');
+    const [previousTab, setPreviousTab] = useState<string | null>(null);
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    useEffect(() => {
+        if (tab === 'balance' && previousTab === 'records') {
+            router.reload({ only: ['account'] });
+        }
+        setPreviousTab(tab);
+    }, [tab]);
 
     const page = usePage<SharedData>();
     const { base_currency } = page.props;
@@ -70,18 +70,30 @@ export default function Show({
         initial: 'text-gray-500',
         transfer_in: 'text-green-500',
         transfer_out: 'text-red-500',
+        adjustment_negative: 'text-red-500',
+        adjustment_positive: 'text-green-500',
     };
 
     const getSymbol = (type: string) => {
         switch (type) {
-            case 'expense': return '-';
-            case 'income': return '+';
-            case 'initial': return '';
-            case 'transfer_in': return '+';
-            case 'transfer_out': return '-';
-            default: return '';
+            case 'expense':
+                return '-';
+            case 'income':
+                return '+';
+            case 'initial':
+                return '';
+            case 'transfer_in':
+                return '+';
+            case 'transfer_out':
+                return '-';
+            case 'adjustment_negative':
+                return '-';
+            case 'adjustment_positive':
+                return '+';
+            default:
+                return '';
         }
-    }
+    };
 
     const handleLoadMore = () => {
         if (transactions.next_page_url && !isLoadingMore) {
@@ -96,16 +108,19 @@ export default function Show({
     };
 
     // Group transactions by month
-    const groupedTransactions = transactions.data.reduce((groups, transaction) => {
-        const date = new Date(transaction.transaction_date);
-        const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+    const groupedTransactions = transactions.data.reduce(
+        (groups, transaction) => {
+            const date = new Date(transaction.transaction_date);
+            const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
 
-        if (!groups[monthKey]) {
-            groups[monthKey] = [];
-        }
-        groups[monthKey].push(transaction);
-        return groups;
-    }, {} as Record<string, Transaction[]>);
+            if (!groups[monthKey]) {
+                groups[monthKey] = [];
+            }
+            groups[monthKey].push(transaction);
+            return groups;
+        },
+        {} as Record<string, Transaction[]>,
+    );
 
     const handleEditTransaction = (transaction: Transaction) => {
         setEditingTransaction(transaction);
@@ -116,7 +131,6 @@ export default function Show({
         setIsTransactionModalOpen(false);
         setEditingTransaction(null);
     };
-
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -135,7 +149,7 @@ export default function Show({
         <AppLayout title={account.name}>
             <Head title={account.name} />
 
-            <div className="mx-auto w-full max-w-4xl p-4 space-y-6">
+            <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
                 <motion.div
                     className="flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}
@@ -151,36 +165,31 @@ export default function Show({
                         <h1 className="text-2xl font-semibold text-gray-600">Detalle</h1>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button
-                            onClick={() => setIsTransactionModalOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700"
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
+                        <Button onClick={() => setIsTransactionModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="mr-2 h-4 w-4" />
                             Nueva transacción
                         </Button>
-                        <Button variant="ghost" size="icon">
-                            <Pencil className="h-4 w-4" />
-                        </Button>
+                        <Link href={route('accounts.edit', account.uuid)}>
+                            <Button variant="ghost" size="icon">
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        </Link>
                         <Button variant="ghost" size="icon" className="text-destructive">
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
                     <Card>
                         <CardHeader className="flex-row items-start justify-between space-y-0">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                                <div className="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-lg">
                                     <span className="text-2xl">{account.emoji}</span>
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-semibold">{account.name}</h2>
-                                    <p className="text-muted-foreground">{account.type}</p>
+                                    <p className="text-muted-foreground">{account.type_label || account.type}</p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -194,15 +203,12 @@ export default function Show({
                                 <TabsContent value="balance" className="space-y-4">
                                     <div className="mt-6">
                                         <div className="space-y-1">
-                                            <p className="text-sm text-muted-foreground">TODAY</p>
-                                            <p className="text-3xl font-semibold">
-                                                {formatCurrency(account.balance, account.currency!)}
-                                            </p>
+                                            <p className="text-muted-foreground text-sm">TODAY</p>
+                                            <p className="text-3xl font-semibold">{formatCurrency(account.balance, account.currency!)}</p>
                                         </div>
                                     </div>
                                 </TabsContent>
                                 <TabsContent value="records">
-
                                     {transactions.data.length === 0 ? (
                                         <motion.div
                                             className="rounded-xl border border-dashed border-gray-200 p-8 text-center"
@@ -210,23 +216,21 @@ export default function Show({
                                             animate={{ opacity: 1 }}
                                             transition={{ duration: 0.3 }}
                                         >
-                                            <div className="text-4xl mb-4">💸</div>
-                                            <h3 className="text-lg font-medium mb-2">Sin transacciones</h3>
-                                            <p className="text-sm text-gray-500">
-                                                No hay transacciones para esta cuenta aún.
-                                            </p>
+                                            <div className="mb-4 text-4xl">💸</div>
+                                            <h3 className="mb-2 text-lg font-medium">Sin transacciones</h3>
+                                            <p className="text-sm text-gray-500">No hay transacciones para esta cuenta aún.</p>
                                         </motion.div>
                                     ) : (
                                         <>
                                             {Object.entries(groupedTransactions).map(([month, monthTransactions], monthIndex) => (
                                                 <div key={month} className="space-y-2">
                                                     <motion.div
-                                                        className="sticky top-0 bg-background pt-4 pb-2"
+                                                        className="bg-background sticky top-0 pt-4 pb-2"
                                                         initial={{ opacity: 0, x: -20 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ duration: 0.3, delay: monthIndex * 0.05 }}
                                                     >
-                                                        <h3 className="text-sm font-semibold text-muted-foreground capitalize tracking-wide">
+                                                        <h3 className="text-muted-foreground text-sm font-semibold tracking-wide capitalize">
                                                             {month}
                                                         </h3>
                                                     </motion.div>
@@ -235,13 +239,13 @@ export default function Show({
                                                         <motion.div
                                                             key={transaction.id}
                                                             layout
-                                                            className="group flex items-center justify-between border-b py-4 last:border-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 -mx-2 rounded-lg transition-colors"
+                                                            className="group -mx-2 flex cursor-pointer items-center justify-between rounded-lg border-b px-2 py-4 transition-colors last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800"
                                                             initial={{ opacity: 0, y: 20 }}
                                                             animate={{ opacity: 1, y: 0 }}
                                                             onClick={() => handleEditTransaction(transaction)}
                                                         >
                                                             <div className="flex items-center gap-4">
-                                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                                                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
                                                                     {transaction.category ? (
                                                                         <span className="text-lg">{transaction.category.emoji}</span>
                                                                     ) : transaction.type === 'transfer_in' ? (
@@ -258,13 +262,11 @@ export default function Show({
                                                                     )}
 
                                                                     {transaction.description && (
-                                                                        <p className="text-sm text-muted-foreground">
-                                                                            {transaction.description}
-                                                                        </p>
+                                                                        <p className="text-muted-foreground text-sm">{transaction.description}</p>
                                                                     )}
 
                                                                     {transaction.type.startsWith('transfer') && (
-                                                                        <p className="text-sm text-muted-foreground">
+                                                                        <p className="text-muted-foreground text-sm">
                                                                             <span className="font-medium">Transferencia </span>
                                                                             {transaction.type === 'transfer_in'
                                                                                 ? `Desde: ${transaction.from_account?.name} (${transaction.from_account?.currency.symbol})`
@@ -272,20 +274,27 @@ export default function Show({
                                                                         </p>
                                                                     )}
 
-                                                                    <p className="text-sm text-muted-foreground">
+                                                                    <p className="text-muted-foreground text-sm">
                                                                         {new Date(transaction.transaction_date).toLocaleDateString()}
                                                                     </p>
                                                                 </div>
                                                             </div>
 
                                                             <div className="flex items-center gap-3">
-                                                                <p className={`${typeColorMap[transaction.type]} text-md font-medium flex flex-col items-end`}>
+                                                                <p
+                                                                    className={`${typeColorMap[transaction.type]} text-md flex flex-col items-end font-medium`}
+                                                                >
                                                                     <span>
                                                                         {getSymbol(transaction.type)}
                                                                         {formatCurrency(transaction.amount, account.currency!)}
                                                                         {!account.currency.is_base && (
                                                                             <span className="text-xs text-gray-500">
-                                                                                ({formatCurrency(transaction.converted_amount!, base_currency as Currency)})
+                                                                                (
+                                                                                {formatCurrency(
+                                                                                    transaction.converted_amount!,
+                                                                                    base_currency as Currency,
+                                                                                )}
+                                                                                )
                                                                             </span>
                                                                         )}
                                                                     </span>
@@ -293,7 +302,7 @@ export default function Show({
                                                                         {formatCurrency(transaction.running_balance, account.currency!)}
                                                                     </span>
                                                                 </p>
-                                                                <Edit2 className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                <Edit2 className="h-4 w-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100" />
                                                             </div>
                                                         </motion.div>
                                                     ))}
@@ -302,26 +311,18 @@ export default function Show({
 
                                             {transactions.next_page_url && (
                                                 <div className="flex justify-center pt-6">
-                                                    <Button
-                                                        onClick={handleLoadMore}
-                                                        disabled={isLoadingMore}
-                                                        variant="outline"
-                                                        className="min-w-32"
-                                                    >
+                                                    <Button onClick={handleLoadMore} disabled={isLoadingMore} variant="outline" className="min-w-32">
                                                         {isLoadingMore ? 'Cargando...' : 'Cargar más'}
                                                     </Button>
                                                 </div>
                                             )}
 
                                             {hasReachedEnd && (
-                                                <p className="text-center text-sm text-muted-foreground">
-                                                    No hay más registros que mostrar.
-                                                </p>
+                                                <p className="text-muted-foreground text-center text-sm">No hay más registros que mostrar.</p>
                                             )}
                                         </>
                                     )}
                                 </TabsContent>
-
                             </Tabs>
                         </CardContent>
                     </Card>

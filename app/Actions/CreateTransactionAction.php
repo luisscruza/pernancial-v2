@@ -27,6 +27,8 @@ final readonly class CreateTransactionAction
                 return;
             }
 
+            $runningBalance = $account->balance + ($data->type === TransactionType::INCOME || $data->type === TransactionType::ADJUSTMENT_POSITIVE ? $data->amount : -$data->amount);
+
             $transaction = $account->transactions()->create([
                 'type' => $data->type,
                 'amount' => $data->amount,
@@ -36,14 +38,14 @@ final readonly class CreateTransactionAction
                 'destination_account_id' => $data->destination_account?->id,
                 'conversion_rate' => 1,
                 'converted_amount' => $data->amount,
-                'running_balance' => 0,
+                'running_balance' => $runningBalance,
             ]);
 
             if (! $account->currency->is_base) {
                 $this->handleConversion($account, $transaction);
             }
 
-            UpdateAccountBalance::dispatchSync($account, $transaction);
+            UpdateAccountBalance::dispatch($account, $transaction);
         });
     }
 
@@ -75,6 +77,8 @@ final readonly class CreateTransactionAction
 
     private function handleOutTransfer(Account $account, CreateTransactionDto $data): Transaction
     {
+        $runningBalance = $account->balance - $data->amount;
+
         $transaction = $account->transactions()->create([
             'type' => TransactionType::TRANSFER_OUT,
             'amount' => $data->amount,
@@ -83,10 +87,10 @@ final readonly class CreateTransactionAction
             'category_id' => $data->category?->id,
             'destination_account_id' => $data->destination_account?->id,
             'conversion_rate' => $data->conversion_rate,
-            'running_balance' => 0,
+            'running_balance' => $runningBalance,
         ]);
 
-        UpdateAccountBalance::dispatchSync($account, $transaction);
+        UpdateAccountBalance::dispatch($account, $transaction);
 
         return $transaction;
     }
@@ -101,6 +105,8 @@ final readonly class CreateTransactionAction
         // Use received_amount if provided, otherwise use the same amount
         $receivedAmount = $data->received_amount ?? $data->amount;
 
+        $runningBalance = $data->destination_account->balance + $receivedAmount;
+
         $transaction = $data->destination_account->transactions()->create([
             'type' => TransactionType::TRANSFER_IN,
             'amount' => $receivedAmount,
@@ -110,10 +116,10 @@ final readonly class CreateTransactionAction
             'destination_account_id' => null,
             'from_account_id' => $account->id,
             'conversion_rate' => $data->conversion_rate,
-            'running_balance' => 0,
+            'running_balance' => $runningBalance,
         ]);
 
-        UpdateAccountBalance::dispatchSync($data->destination_account, $transaction);
+        UpdateAccountBalance::dispatch($data->destination_account, $transaction);
 
         return $transaction;
     }

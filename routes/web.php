@@ -24,6 +24,8 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
     Route::get('/accounts/{account}', [AccountController::class, 'show'])->name('accounts.show');
+    Route::get('/accounts/{account}/edit', [AccountController::class, 'edit'])->name('accounts.edit');
+    Route::put('/accounts/{account}', [AccountController::class, 'update'])->name('accounts.update');
     Route::post('/accounts/{account}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::put('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
     Route::delete('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
@@ -75,5 +77,5 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function ()
     })->name('onboarding.setting-up');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

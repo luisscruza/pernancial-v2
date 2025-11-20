@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Enums\BudgetType;
-use App\Models\BudgetPeriod;
-use Illuminate\Support\Facades\DB;
 use App\Models\Budget;
+use App\Models\BudgetPeriod;
 use App\Models\User;
-
+use Illuminate\Support\Facades\DB;
 
 final readonly class UpdateBudgetPeriodAction
 {
     /**
      * Execute the action.
-     * @param array<int, array{category_id: int, amount: float}> $budgets
+     *
+     * @param  array<int, array{category_id: int, amount: float}>  $budgets
      */
     public function handle(BudgetPeriod $budgetPeriod, array $budgets, User $user, string $name): void
     {

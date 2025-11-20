@@ -43,9 +43,10 @@ final class UpdateAccountBalance implements ShouldQueue
         $transfersIn = $this->account->transactions()->where('type', TransactionType::TRANSFER_IN)->sum('amount');
         $transfersOut = $this->account->transactions()->where('type', TransactionType::TRANSFER_OUT)->sum('amount');
         $initial = $this->account->transactions()->where('type', TransactionType::INITIAL)->sum('amount');
-
+        $adjustmentsNegative = $this->account->transactions()->where('type', TransactionType::ADJUSTMENT_NEGATIVE)->sum('amount');
+        $adjustmentsPositive = $this->account->transactions()->where('type', TransactionType::ADJUSTMENT_POSITIVE)->sum('amount');
         $this->account->update([
-            'balance' => $incomes - $expenses + $transfersIn - $transfersOut + $initial,
+            'balance' => $incomes - $expenses + $transfersIn - $transfersOut + $initial + $adjustmentsPositive - $adjustmentsNegative,
         ]);
     }
 
@@ -54,7 +55,7 @@ final class UpdateAccountBalance implements ShouldQueue
      */
     private function updateRunningBalance(): void
     {
-
+        // Then this will be a queued job to avoid slowing down the main process...
         $transactions = $this->account->transactions()
             ->orderBy('transaction_date')
             ->orderBy('id')
@@ -63,24 +64,15 @@ final class UpdateAccountBalance implements ShouldQueue
         $runningBalance = 0;
 
         foreach ($transactions as $transaction) {
-            /** @var TransactionType $type */
-            $type = $transaction->type;
+            $type = $transaction->type; // Instance of TransactionType
 
-            if (in_array($type, [
-                TransactionType::INCOME,
-                TransactionType::TRANSFER_IN,
-                TransactionType::INITIAL,
-            ], true)) {
-                $runningBalance += $transaction->amount;
-            } elseif (in_array($type, [
-                TransactionType::EXPENSE,
-                TransactionType::TRANSFER_OUT,
-            ], true)) {
-                $runningBalance -= $transaction->amount;
-            }
+            $runningBalance += $type->isPositive()
+                ? $transaction->amount
+                : -$transaction->amount;
 
-            $transaction->update(['running_balance' => $runningBalance]);
-
+            $transaction->update([
+                'running_balance' => $runningBalance,
+            ]);
         }
     }
 }

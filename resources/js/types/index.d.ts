@@ -27,6 +27,11 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     ziggy: Config & { location: string };
+    flash?: {
+        success?: string;
+        error?: string;
+        message?: string;
+    };
     [key: string]: unknown;
 }
 
@@ -89,15 +94,17 @@ export interface BaseCurrency {
 export interface Account {
     id: number;
     uuid: string;
-    user_id: number;
-    currency_id: number;
+    user_id?: number;
+    currency_id?: number;
     name: string;
-    type: 'savings' | 'cash' | 'investment' | 'credit_card';
+    type: 'savings' | 'cash' | 'investment' | 'credit_card' | 'bank' | 'checking' | 'general' | 'debit_card' | 'cxc' | 'cxp';
+    type_label?: string;
     accounting_type: 'normal' | 'cxc' | 'cxp';
     emoji: string;
     color: string;
     balance: number;
     balance_in_base: number;
+    is_active: boolean;
     description?: string;
     currency: Currency;
     transactions?: Transaction[];
@@ -202,7 +209,7 @@ export interface PaginatedProps<T> {
         url: string | null;
         label: string;
         active: boolean;
-    }
+    };
     next_page_url: string | null;
     path: string;
     per_page: number;

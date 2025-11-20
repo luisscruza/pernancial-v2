@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\CreateAccountAction;
+use App\Actions\UpdateAccountAction;
 use App\Enums\AccountType;
 use App\Enums\CategoryType;
 use App\Enums\TransactionType;
 use App\Http\Requests\CreateAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
 use App\Models\Category;
@@ -42,13 +44,13 @@ final class AccountController
      */
     public function create(#[CurrentUser] User $user): Response
     {
-        $currencies = $user->currencies()->get()->map(fn (Currency $currency): array => [
+        $currencies = $user->currencies()->get()->map(fn(Currency $currency): array => [
             'id' => $currency->id,
             'name' => $currency->name,
             'symbol' => $currency->symbol,
         ]);
 
-        $accountTypes = collect(AccountType::cases())->map(fn (AccountType $type): array => [
+        $accountTypes = collect(AccountType::cases())->map(fn(AccountType $type): array => [
             'value' => $type->value,
             'label' => $type->label(),
             'emoji' => $type->emoji(),
@@ -74,6 +76,36 @@ final class AccountController
     }
 
     /**
+     * Show the form for editing the specified account.
+     */
+    public function edit(Account $account): Response
+    {
+        $accountTypes = collect(AccountType::cases())->map(fn(AccountType $type): array => [
+            'value' => $type->value,
+            'label' => $type->label(),
+            'emoji' => $type->emoji(),
+            'description' => $type->description(),
+        ]);
+
+        return Inertia::render('accounts/edit', [
+            'account' => AccountResource::make($account),
+            'accountTypes' => $accountTypes,
+        ]);
+    }
+
+    /**
+     * Update the specified account in storage.
+     */
+    public function update(UpdateAccountRequest $request, Account $account, UpdateAccountAction $action): RedirectResponse
+    {
+        $data = $request->getDto();
+
+        $action->handle($account, $data);
+
+        return to_route('accounts.show', $account)->with('success', 'Cuenta actualizada exitosamente.');
+    }
+
+    /**
      * Display the specified account.
      */
     public function show(Request $request, Account $account, #[CurrentUser] User $user): Response
@@ -86,7 +118,7 @@ final class AccountController
         $incomeCategories = $user->categories()
             ->where('type', CategoryType::INCOME)
             ->get()
-            ->map(fn (Category $category): array => [
+            ->map(fn(Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'emoji' => $category->emoji,
@@ -96,7 +128,7 @@ final class AccountController
         $expenseCategories = $user->categories()
             ->where('type', CategoryType::EXPENSE)
             ->get()
-            ->map(fn (Category $category): array => [
+            ->map(fn(Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'emoji' => $category->emoji,
@@ -107,7 +139,7 @@ final class AccountController
             ->where('id', '!=', $account->id)
             ->with('currency')
             ->get()
-            ->map(fn (Account $acc): array => [
+            ->map(fn(Account $acc): array => [
                 'id' => $acc->id,
                 'uuid' => $acc->uuid,
                 'name' => $acc->name,
@@ -120,29 +152,23 @@ final class AccountController
             ]);
 
         $transactionTypes = collect(TransactionType::cases())
-            ->filter(fn (TransactionType $type): bool => ! in_array($type, [TransactionType::TRANSFER_IN, TransactionType::TRANSFER_OUT, TransactionType::INITIAL], true))
-            ->map(fn (TransactionType $type): array => [
+            ->filter(fn(TransactionType $type): bool => $type->isCreatable())
+            ->map(fn(TransactionType $type): array => [
                 'value' => $type->value,
                 'label' => $type->label(),
             ]);
 
-        $transactionsQuery = $account->transactions()
-            ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc');
-
-        // Apply date filters if provided
-        if ($dateFrom) {
-            $transactionsQuery->whereDate('transaction_date', '>=', $dateFrom);
-        }
-
-        if ($dateTo) {
-            $transactionsQuery->whereDate('transaction_date', '<=', $dateTo);
-        }
-
         return Inertia::render('accounts/show', [
             'account' => AccountResource::make($account),
-            'transactions' => Inertia::deepMerge($transactionsQuery->paginate($per_page, page: $page)),
+            'transactions' => fn() => Inertia::deepMerge(
+                $account->transactions()
+                    ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
+                    ->when($dateFrom, fn($query) => $query->whereDate('transaction_date', '>=', $dateFrom))
+                    ->when($dateTo, fn($query) => $query->whereDate('transaction_date', '<=', $dateTo))
+                    ->orderBy('transaction_date', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($per_page, page: $page)
+            ),
             'incomeCategories' => $incomeCategories,
             'expenseCategories' => $expenseCategories,
             'otherAccounts' => $otherAccounts,

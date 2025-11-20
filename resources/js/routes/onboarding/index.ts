@@ -90,7 +90,7 @@ accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see routes/web.php:73
+* @see routes/web.php:75
 * @route '/onboarding/setting-up'
 */
 export const settingUp = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -104,7 +104,7 @@ settingUp.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:73
+* @see routes/web.php:75
 * @route '/onboarding/setting-up'
 */
 settingUp.url = (options?: RouteQueryOptions) => {
@@ -112,7 +112,7 @@ settingUp.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:73
+* @see routes/web.php:75
 * @route '/onboarding/setting-up'
 */
 settingUp.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -121,7 +121,7 @@ settingUp.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:73
+* @see routes/web.php:75
 * @route '/onboarding/setting-up'
 */
 settingUp.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

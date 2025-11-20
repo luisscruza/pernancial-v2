@@ -1,15 +1,8 @@
-import { useState, useEffect } from 'react';
-import { router, usePage } from '@inertiajs/react';
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { SharedData } from '@/types';
+import { router, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function QuickTransactionCommand() {
     const [open, setOpen] = useState(false);
@@ -29,7 +22,7 @@ export function QuickTransactionCommand() {
 
     const handleSelectAccount = (accountId: number) => {
         // Find the account to get its UUID
-        const account = page.props.auth.user?.accounts?.find(acc => acc.id === accountId);
+        const account = page.props.auth.user?.accounts?.find((acc) => acc.id === accountId);
         if (account) {
             router.visit(`/accounts/${account.uuid}`);
             setOpen(false);
@@ -57,12 +50,10 @@ export function QuickTransactionCommand() {
                                 </div>
                                 <div className="flex flex-1 flex-col">
                                     <span className="font-medium">{account.name}</span>
-                                    <span className="text-xs text-muted-foreground">
-                                        {account.type}
-                                    </span>
+                                    <span className="text-muted-foreground text-xs">{account.type_label}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <Plus className="h-4 w-4 text-muted-foreground" />
+                                    <Plus className="text-muted-foreground h-4 w-4" />
                                 </div>
                             </CommandItem>
                         ))}
