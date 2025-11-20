@@ -7,9 +7,11 @@ namespace App\Http\Controllers;
 use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Actions\CalculateBudgetSummaryAction;
 use App\Actions\CreateBudgetPeriodAction;
+use App\Actions\UpdateBudgetPeriodAction;
 use App\Dto\BudgetSummaryDto;
 use App\Enums\BudgetType;
 use App\Http\Requests\CreateBudgetPeriodRequest;
+use App\Http\Requests\UpdateBudgetPeriodRequest;
 use App\Models\Budget;
 use App\Models\BudgetPeriod;
 use App\Models\User;
@@ -26,17 +28,14 @@ final class BudgetPeriodController extends Controller
     {
         $user = $request->user();
 
-        // Get all budget periods with their budgets
         $budgetPeriods = $user->budgetPeriods()
             ->with(['budgets.category'])
             ->orderBy('start_date', 'desc')
             ->get();
 
-        // Calculate spending for each period using cache
         $budgetPeriods = $budgetPeriods->map(function ($period) use ($cacheAction) {
             $summary = $cacheAction->handle($period);
 
-            // Add spending data to the period
             $period->total_expense_spent = $summary['total_expense_spent'];
             $period->total_income_received = $summary['total_income_received'];
             $period->total_spent = $summary['total_spent'];
@@ -111,33 +110,11 @@ final class BudgetPeriodController extends Controller
         ]);
     }
 
-    public function update(BudgetPeriod $budgetPeriod, Request $request, #[CurrentUser] User $user): RedirectResponse
+    public function update(BudgetPeriod $budgetPeriod, UpdateBudgetPeriodRequest $request, UpdateBudgetPeriodAction $action, #[CurrentUser] User $user): RedirectResponse
     {
-        // @TODO: Refactor to Form Request and Actions, AI crap...
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'budgets' => 'required|array',
-            'budgets.*.amount' => 'required|numeric|min:0',
-            'budgets.*.category_id' => 'required|exists:categories,id',
-            'budgets.*.budget_id' => 'nullable|exists:budgets,id',
-        ]);
+        $budgets = $request->array('budgets');
 
-        $budgetPeriod->update([
-            'name' => $request->input('name'),
-        ]);
-
-        $budgets = $request->input('budgets', []);
-
-        foreach ($budgets as $budget) {
-            Budget::updateOrCreate([
-                'category_id' => $budget['category_id'],
-                'user_id' => $user->id,
-                'budget_period_id' => $budgetPeriod->id,
-                'type' => BudgetType::PERIOD,
-            ], [
-                'amount' => $budget['amount'],
-            ]);
-        }
+        $action->handle($budgetPeriod, $budgets, $user, $request->input('name'));
 
         return back()->with([
             'message' => 'Período de presupuesto actualizado exitosamente.',
