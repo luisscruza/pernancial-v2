@@ -67,7 +67,12 @@ export default function TransactionModal({
     });
 
     useEffect(() => {
-        if (transaction && isOpen) {
+        if (!isOpen) {
+            // Reset when modal closes
+            return;
+        }
+
+        if (transaction) {
             // Ensure date is in YYYY-MM-DD format for input field
             let formattedDate = transaction.transaction_date;
 
@@ -89,12 +94,21 @@ export default function TransactionModal({
                 transaction_date: formattedDate,
             });
             setSelectedType(normalizedType);
-        } else if (!isOpen) {
-            reset();
+        } else {
+            // Reset form when opening modal for new transaction
+            setData({
+                type: '',
+                amount: '',
+                received_amount: '',
+                description: '',
+                category_id: '',
+                destination_account_id: '',
+                transaction_date: new Date().toISOString().split('T')[0],
+            });
             setSelectedType('');
             setCategorySearch('');
         }
-    }, [transaction, isOpen]);
+    }, [isOpen, transaction]);
 
     // automatically set received_amount when amount or destination_account_id changes for transfers
     useEffect(() => {
@@ -116,18 +130,14 @@ export default function TransactionModal({
             // Update existing transaction
             put(route('transactions.update', { account: account.uuid, transaction: transaction.id }), {
                 onSuccess: () => {
-                    reset();
-                    setSelectedType('');
-                    onClose();
+                    handleClose();
                 },
             });
         } else {
             // Create new transaction
             post(route('transactions.store', account.uuid), {
                 onSuccess: () => {
-                    reset();
-                    setSelectedType('');
-                    onClose();
+                    handleClose();
                 },
             });
         }
@@ -143,9 +153,11 @@ export default function TransactionModal({
     };
 
     const handleClose = () => {
+        // Reset all form state
         reset();
         setSelectedType('');
         setCategorySearch('');
+        // Call parent onClose
         onClose();
     };
 
