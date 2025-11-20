@@ -48,18 +48,10 @@ interface Props extends SharedData {
 
 export default function Show({ account, transactions, incomeCategories, expenseCategories, otherAccounts, transactionTypes }: Props) {
     const [tab, setTab] = useState('balance');
-    const [previousTab, setPreviousTab] = useState<string | null>(null);
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-    useEffect(() => {
-        if (tab === 'balance' && previousTab === 'records') {
-            router.reload({ only: ['account'] });
-        }
-        setPreviousTab(tab);
-    }, [tab]);
 
     const page = usePage<SharedData>();
     const { base_currency } = page.props;

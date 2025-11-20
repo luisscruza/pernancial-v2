@@ -27,7 +27,9 @@ final readonly class CreateTransactionAction
                 return;
             }
 
-            $runningBalance = $account->balance + ($data->type === TransactionType::INCOME || $data->type === TransactionType::ADJUSTMENT_POSITIVE ? $data->amount : -$data->amount);
+            // Calculate optimistic running balance based on current balance
+            $isPositive = $data->type->isPositive();
+            $optimisticRunningBalance = $account->balance + ($isPositive ? $data->amount : -$data->amount);
 
             $transaction = $account->transactions()->create([
                 'type' => $data->type,
@@ -38,8 +40,11 @@ final readonly class CreateTransactionAction
                 'destination_account_id' => $data->destination_account?->id,
                 'conversion_rate' => 1,
                 'converted_amount' => $data->amount,
-                'running_balance' => $runningBalance,
+                'running_balance' => $optimisticRunningBalance,
             ]);
+
+            // Update account balance optimistically
+            $account->update(['balance' => $optimisticRunningBalance]);
 
             if (! $account->currency->is_base) {
                 $this->handleConversion($account, $transaction);
@@ -77,7 +82,8 @@ final readonly class CreateTransactionAction
 
     private function handleOutTransfer(Account $account, CreateTransactionDto $data): Transaction
     {
-        $runningBalance = $account->balance - $data->amount;
+        // Calculate optimistic running balance
+        $optimisticRunningBalance = $account->balance - $data->amount;
 
         $transaction = $account->transactions()->create([
             'type' => TransactionType::TRANSFER_OUT,
@@ -87,8 +93,11 @@ final readonly class CreateTransactionAction
             'category_id' => $data->category?->id,
             'destination_account_id' => $data->destination_account?->id,
             'conversion_rate' => $data->conversion_rate,
-            'running_balance' => $runningBalance,
+            'running_balance' => $optimisticRunningBalance,
         ]);
+
+        // Update account balance optimistically
+        $account->update(['balance' => $optimisticRunningBalance]);
 
         UpdateAccountBalance::dispatch($account, $transaction);
 
@@ -105,7 +114,8 @@ final readonly class CreateTransactionAction
         // Use received_amount if provided, otherwise use the same amount
         $receivedAmount = $data->received_amount ?? $data->amount;
 
-        $runningBalance = $data->destination_account->balance + $receivedAmount;
+        // Calculate optimistic running balance
+        $optimisticRunningBalance = $data->destination_account->balance + $receivedAmount;
 
         $transaction = $data->destination_account->transactions()->create([
             'type' => TransactionType::TRANSFER_IN,
@@ -116,8 +126,11 @@ final readonly class CreateTransactionAction
             'destination_account_id' => null,
             'from_account_id' => $account->id,
             'conversion_rate' => $data->conversion_rate,
-            'running_balance' => $runningBalance,
+            'running_balance' => $optimisticRunningBalance,
         ]);
+
+        // Update account balance optimistically
+        $data->destination_account->update(['balance' => $optimisticRunningBalance]);
 
         UpdateAccountBalance::dispatch($data->destination_account, $transaction);
 

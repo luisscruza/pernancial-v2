@@ -31,16 +31,16 @@ final readonly class DeleteTransactionAction
                     $relatedAccount = $relatedTransaction->account;
                     $relatedTransaction->delete();
 
-                    // Recalculate balances for the related account
-                    UpdateAccountBalance::dispatchSync($relatedAccount, null);
+                    // Recalculate balances for the related account asynchronously
+                    UpdateAccountBalance::dispatch($relatedAccount, null);
                 }
             }
 
             // Delete the main transaction
             $transaction->delete();
 
-            // Recalculate balances for the main account
-            UpdateAccountBalance::dispatchSync($account, null);
+            // Recalculate balances for the main account asynchronously
+            UpdateAccountBalance::dispatch($account, null);
         });
     }
 }

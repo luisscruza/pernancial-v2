@@ -131,6 +131,7 @@ export default function TransactionModal({
             put(route('transactions.update', { account: account.uuid, transaction: transaction.id }), {
                 onSuccess: () => {
                     handleClose();
+                    // Optimistic updates are already applied, no need to reload
                 },
             });
         } else {
@@ -138,6 +139,7 @@ export default function TransactionModal({
             post(route('transactions.store', account.uuid), {
                 onSuccess: () => {
                     handleClose();
+                    // Optimistic updates are already applied, no need to reload
                 },
             });
         }
@@ -168,6 +170,7 @@ export default function TransactionModal({
             router.delete(route('transactions.destroy', [account.uuid, transaction.id]), {
                 onSuccess: () => {
                     handleClose();
+                    // Optimistic updates are already applied, no need to reload
                 },
             });
         }

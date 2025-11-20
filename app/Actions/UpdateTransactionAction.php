@@ -30,8 +30,8 @@ final readonly class UpdateTransactionAction
             // Update regular transaction
             $this->updateTransaction($transaction, $data);
 
-            // Recalculate balances for this account
-            UpdateAccountBalance::dispatchSync($account, $transaction);
+            // Recalculate balances for this account asynchronously
+            UpdateAccountBalance::dispatch($account, $transaction);
         });
     }
 
@@ -43,7 +43,7 @@ final readonly class UpdateTransactionAction
         if (! $relatedTransaction) {
             // If no related transaction, treat as regular transaction
             $this->updateTransaction($transaction, $data);
-            UpdateAccountBalance::dispatchSync($transaction->account, $transaction);
+            UpdateAccountBalance::dispatch($transaction->account, $transaction);
 
             return;
         }
@@ -69,9 +69,9 @@ final readonly class UpdateTransactionAction
             'from_account_id' => $outTransaction->account_id,
         ]);
 
-        // Recalculate balances for both accounts
-        UpdateAccountBalance::dispatchSync($outTransaction->account, $outTransaction);
-        UpdateAccountBalance::dispatchSync($inTransaction->account, $inTransaction);
+        // Recalculate balances for both accounts asynchronously
+        UpdateAccountBalance::dispatch($outTransaction->account, $outTransaction);
+        UpdateAccountBalance::dispatch($inTransaction->account, $inTransaction);
     }
 
     private function updateTransaction(Transaction $transaction, CreateTransactionDto $data): void

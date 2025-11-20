@@ -159,7 +159,7 @@ final class AccountController
             ]);
 
         return Inertia::render('accounts/show', [
-            'account' => AccountResource::make($account),
+            'account' => fn() => AccountResource::make($account->fresh()),
             'transactions' => fn() => Inertia::deepMerge(
                 $account->transactions()
                     ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
