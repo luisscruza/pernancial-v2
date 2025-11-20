@@ -1,6 +1,5 @@
 import * as React from 'react';
 import RCurrencyInput from 'react-currency-input-field';
-import type { CurrencyInputProps as RCurrencyInputProps } from 'react-currency-input-field';
 import { cn } from '@/lib/utils';
 
 interface CurrencyInputProps {
