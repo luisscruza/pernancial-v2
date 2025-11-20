@@ -61,6 +61,7 @@
         "lucide-react": "^0.483.0",
         "motion": "^12.6.3",
         "react": "^19.0.0",
+        "react-currency-input-field": "^4.0.3",
         "react-dom": "^19.0.0",
         "tailwind-merge": "^3.0.2",
         "tailwindcss": "^4.0.15",
