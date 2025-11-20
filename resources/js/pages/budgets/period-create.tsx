@@ -71,7 +71,7 @@ export default function BudgetPeriodCreate({ categories }: Props) {
   }
 
   const addCategory = (categoryId: string) => {
-    if (selectedCategories.has(categoryId)) return
+    if (!categoryId || selectedCategories.has(categoryId)) return
 
     const newSelectedCategories = new Set(selectedCategories)
     newSelectedCategories.add(categoryId)
@@ -272,7 +272,7 @@ export default function BudgetPeriodCreate({ categories }: Props) {
                       )}
                     </div>
                   </div>
-                  <Select onValueChange={addCategory}>
+                  <Select value="" onValueChange={addCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar una categoría para agregar" />
                     </SelectTrigger>

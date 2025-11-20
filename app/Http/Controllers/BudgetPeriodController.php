@@ -8,16 +8,17 @@ use App\Actions\CacheBudgetPeriodSummaryAction;
 use App\Actions\CalculateBudgetSummaryAction;
 use App\Actions\CreateBudgetPeriodAction;
 use App\Dto\BudgetSummaryDto;
+use App\Enums\BudgetType;
 use App\Http\Requests\CreateBudgetPeriodRequest;
+use App\Models\Budget;
 use App\Models\BudgetPeriod;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\User;
-use Illuminate\Container\Attributes\CurrentUser;
 
 final class BudgetPeriodController extends Controller
 {
@@ -125,34 +126,18 @@ final class BudgetPeriodController extends Controller
             'name' => $request->input('name'),
         ]);
 
-        foreach ($request->input('budgets', []) as $budgetData) {
-            if (isset($budgetData['budget_id'])) {
-                $budget = $budgetPeriod->budgets()->find($budgetData['budget_id']);
-                if ($budget) {
-                    $budget->update([
-                        'amount' => $budgetData['amount'],
-                    ]);
-                }
-            } else {
-                $budgetPeriod->budgets()->create([
-                    'user_id' => $user->id,
-                    'category_id' => $budgetData['category_id'],
-                    'amount' => $budgetData['amount'],
-                    'type' => \App\Enums\BudgetType::PERIOD,
-                    'start_date' => $budgetPeriod->start_date,
-                    'end_date' => $budgetPeriod->end_date,
-                    'name' => $user->categories()->find($budgetData['category_id'])->name.' - '.$budgetPeriod->name,
-                ]);
-            }
+        $budgets = $request->input('budgets', []);
+
+        foreach ($budgets as $budget) {
+            Budget::updateOrCreate([
+                'category_id' => $budget['category_id'],
+                'user_id' => $user->id,
+                'budget_period_id' => $budgetPeriod->id,
+                'type' => BudgetType::PERIOD,
+            ], [
+                'amount' => $budget['amount'],
+            ]);
         }
-
-        $updatedBudgetIds = collect($request->input('budgets', []))
-            ->pluck('budget_id')
-            ->filter();
-
-        $budgetPeriod->budgets()
-            ->whereNotIn('id', $updatedBudgetIds)
-            ->delete();
 
         return back()->with([
             'message' => 'Período de presupuesto actualizado exitosamente.',

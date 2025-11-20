@@ -29,19 +29,19 @@ test('user can view budget period duplicate page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->component('budgets/period-duplicate')
                 ->has(
                     'originalPeriod',
-                    fn($page) => $page
+                    fn ($page) => $page
                         ->where('id', $budgetPeriod->id)
                         ->where('name', $budgetPeriod->name)
                         ->etc()
                 )
                 ->has('categories', 1)
                 ->has(
-                    'budgetData.' . $category->id,
-                    fn($page) => $page
+                    'budgetData.'.$category->id,
+                    fn ($page) => $page
                         ->where('amount', '500.00')
                         ->where('category_id', $category->id)
                         ->etc()
@@ -77,20 +77,20 @@ test('budget period duplicate shows all budgets from original period', function 
 
     $response->assertOk()
         ->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->component('budgets/period-duplicate')
                 ->has('originalPeriod')
                 ->has('categories', 2)
                 ->has('budgetData', 2)
                 ->has(
-                    'budgetData.' . $category1->id,
-                    fn($page) => $page
+                    'budgetData.'.$category1->id,
+                    fn ($page) => $page
                         ->where('amount', '300.00')
                         ->where('category_id', $category1->id)
                 )
                 ->has(
-                    'budgetData.' . $category2->id,
-                    fn($page) => $page
+                    'budgetData.'.$category2->id,
+                    fn ($page) => $page
                         ->where('amount', '750.00')
                         ->where('category_id', $category2->id)
                 )
@@ -114,11 +114,11 @@ test('budget period duplicate loads categories ordered by name', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->has('categories', 3)
                 ->has(
                     'categories.0',
-                    fn($page) => $page
+                    fn ($page) => $page
                         ->where('name', 'A Category')
                         ->where('id', $categoryA->id)
                         ->where('emoji', $categoryA->emoji)
@@ -126,7 +126,7 @@ test('budget period duplicate loads categories ordered by name', function () {
                 )
                 ->has(
                     'categories.1',
-                    fn($page) => $page
+                    fn ($page) => $page
                         ->where('name', 'M Category')
                         ->where('id', $categoryM->id)
                         ->where('emoji', $categoryM->emoji)
@@ -134,7 +134,7 @@ test('budget period duplicate loads categories ordered by name', function () {
                 )
                 ->has(
                     'categories.2',
-                    fn($page) => $page
+                    fn ($page) => $page
                         ->where('name', 'Z Category')
                         ->where('id', $categoryZ->id)
                         ->where('emoji', $categoryZ->emoji)
@@ -157,7 +157,7 @@ test('budget period duplicate shows empty budget data when original has no budge
 
     $response->assertOk()
         ->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->component('budgets/period-duplicate')
                 ->has('originalPeriod')
                 ->has('categories', 1)

@@ -20,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Carbon $start_date
  * @property-read Carbon $end_date
  * @property-read bool $is_active
- * @property-read \Carbon\Carbon|null $created_at
- * @property-read \Carbon\Carbon|null $updated_at
+ * @property-read Carbon|null $created_at
+ * @property-read Carbon|null $updated_at
  */
 final class BudgetPeriod extends Model
 {

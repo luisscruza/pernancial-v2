@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\AccountType;
 use App\Traits\BelongsToUser;
 use App\Traits\HasUuidRouting;
+use Carbon\Carbon;
 use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 /**
  * @property-read int $id
@@ -31,8 +31,8 @@ use Carbon\Carbon;
  * @property-read float $balance_in_base
  * @property-read string $accounting_type
  * @property-read bool $is_active
- * @property-read \Carbon\Carbon|null $created_at
- * @property-read \Carbon\Carbon|null $updated_at
+ * @property-read Carbon|null $created_at
+ * @property-read Carbon|null $updated_at
  */
 final class Account extends Model
 {
@@ -82,7 +82,7 @@ final class Account extends Model
     public function balanceInBase(): Attribute
     {
         return Attribute::make(
-            get: fn(): float => (float) ($this->currency?->is_base ? $this->balance : $this->balance * $this->currency?->rateForDate(now()->format('Y-m-d'))),
+            get: fn (): float => (float) ($this->currency?->is_base ? $this->balance : $this->balance * $this->currency?->rateForDate(now()->format('Y-m-d'))),
         );
     }
 
@@ -94,7 +94,7 @@ final class Account extends Model
     public function accountingType(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => $this->type->accountingType(),
+            get: fn (): string => $this->type->accountingType(),
         );
     }
 

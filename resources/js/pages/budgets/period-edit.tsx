@@ -310,27 +310,70 @@ export default function EditBudgetPeriod({ budgetPeriod, categories }: Props) {
           {categoriesWithoutBudgets.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Agregar Más Categorías</CardTitle>
+                <CardTitle>Agregar más categorías</CardTitle>
                 <CardDescription>Selecciona categorías adicionales para presupuestar</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                  {categoriesWithoutBudgets.map((category, index) => (
-                    <motion.button
-                      key={category.id}
-                      type="button"
-                      onClick={() => addBudget(category.id)}
-                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors text-left"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, delay: index * 0.05 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="text-lg">{category.emoji}</span>
-                      <span className="font-medium">{category.name}</span>
-                    </motion.button>
-                  ))}
+                <div className="space-y-6">
+                  {/* Expense Categories */}
+                  {categoriesWithoutBudgets.some(cat => cat.type === 'expense') && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-red-600">📉 Gastos</h3>
+                        <Badge variant="outline" className="border-red-200 text-xs">
+                          {categoriesWithoutBudgets.filter(cat => cat.type === 'expense').length} disponibles
+                        </Badge>
+                      </div>
+                      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                        {categoriesWithoutBudgets.filter(cat => cat.type === 'expense').map((category, index) => (
+                          <motion.button
+                            key={category.id}
+                            type="button"
+                            onClick={() => addBudget(category.id)}
+                            className="flex items-center gap-3 p-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-left"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <span className="text-lg">{category.emoji}</span>
+                            <span className="font-medium">{category.name}</span>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Income Categories */}
+                  {categoriesWithoutBudgets.some(cat => cat.type === 'income') && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-green-600">📈 Ingresos</h3>
+                        <Badge variant="outline" className="border-green-200 text-xs">
+                          {categoriesWithoutBudgets.filter(cat => cat.type === 'income').length} disponibles
+                        </Badge>
+                      </div>
+                      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                        {categoriesWithoutBudgets.filter(cat => cat.type === 'income').map((category, index) => (
+                          <motion.button
+                            key={category.id}
+                            type="button"
+                            onClick={() => addBudget(category.id)}
+                            className="flex items-center gap-3 p-3 border border-green-200 rounded-lg hover:bg-green-50 transition-colors text-left"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <span className="text-lg">{category.emoji}</span>
+                            <span className="font-medium">{category.name}</span>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -353,7 +396,7 @@ export default function EditBudgetPeriod({ budgetPeriod, categories }: Props) {
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Guardar Cambios
+                  Guardar cambios
                 </>
               )}
             </Button>

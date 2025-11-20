@@ -24,7 +24,7 @@ test('user can visit budgets index page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('budgets/index')
                 ->has('budgetPeriods', 1)
                 ->has('currentPeriod')
@@ -41,7 +41,7 @@ test('user can view budget creation page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('budgets/create')
                 ->has('categories', 1)
         );
@@ -97,7 +97,7 @@ test('user can view budget show page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('budgets/show')
                 ->has('budget')
                 ->has('budgetSummary')
@@ -119,7 +119,7 @@ test('user can view budget edit page', function () {
 
     $response->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('budgets/edit')
                 ->has('budget')
                 ->has('categories', 1)

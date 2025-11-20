@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\BudgetPeriodDuplicateController::__invoke
-* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:16
+* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:15
 * @route '/budget-periods/{budgetPeriod}/duplicate'
 */
 const BudgetPeriodDuplicateController = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ BudgetPeriodDuplicateController.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodDuplicateController::__invoke
-* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:16
+* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:15
 * @route '/budget-periods/{budgetPeriod}/duplicate'
 */
 BudgetPeriodDuplicateController.url = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ BudgetPeriodDuplicateController.url = (args: { budgetPeriod: number | { id: numb
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodDuplicateController::__invoke
-* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:16
+* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:15
 * @route '/budget-periods/{budgetPeriod}/duplicate'
 */
 BudgetPeriodDuplicateController.get = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -59,7 +59,7 @@ BudgetPeriodDuplicateController.get = (args: { budgetPeriod: number | { id: numb
 
 /**
 * @see \App\Http\Controllers\BudgetPeriodDuplicateController::__invoke
-* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:16
+* @see app/Http/Controllers/BudgetPeriodDuplicateController.php:15
 * @route '/budget-periods/{budgetPeriod}/duplicate'
 */
 BudgetPeriodDuplicateController.head = (args: { budgetPeriod: number | { id: number } } | [budgetPeriod: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
