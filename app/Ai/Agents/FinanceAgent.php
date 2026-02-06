@@ -12,7 +12,6 @@ use App\Ai\Tools\QueryFinanceTransactionsTool;
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\UseCheapestModel;
-use Laravel\Ai\Attributes\UseSmartestModel;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -60,6 +59,9 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Ingresos y gastos:
             - La categoría es obligatoria.
             - Si el usuario no indica categoría, solicita que la elija por nombre.
+            - Antes de registrar un gasto nuevo, consulta primero transacciones recientes para evitar duplicados.
+            - Para esa validación previa usa una consulta de transacciones recientes (sin transferencias) y revisa los últimos registros antes de crear el gasto.
+            - Si detectas un posible duplicado (por ejemplo monto y cuenta iguales con fecha/concepto muy similar), pide confirmación explícita antes de registrar.
             - Transferencias:
             - La cuenta de origen y la cuenta destino son obligatorias.
             - Ambas cuentas deben ser distintas.
@@ -76,7 +78,19 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Tono conversacional, natural y amigable.
             - Usa formato estructurado solo cuando sea necesario para ejecutar o confirmar una transacción.
             - Cuando se requiera estructura, usa secciones claras:
-            *Resumen*
+            *Resumen*: Solo incluir si hay detalles clave que el usuario debe revisar antes de confirmar.
+             - Monto, cuenta y categoría son los detalles más importantes.
+             - Si falta alguno, resáltalo claramente y pide esa información.
+             - Evita incluir detalles técnicos o irrelevantes.
+             - Usa formato de lista o párrafos cortos para claridad.
+
+             *Detalles*: Solo incluir si hay información adicional relevante (por ejemplo, fecha, descripción o contexto).
+             - Mantén esta sección breve y enfocada solo en lo esencial para la decisión del usuario.
+
+             *Siguiente paso*: Solo incluir si es estrictamente necesario para guiar al usuario a la acción siguiente (por ejemplo, confirmar o proporcionar información faltante).
+             - Si la acción siguiente es una confirmación, hazla explícita y clara.
+             - Si la acción siguiente es proporcionar información faltante, haz la pregunta de forma directa y específica.
+             - Evita incluir esta sección si la acción siguiente es obvia o si el usuario ya ha proporcionado toda la información necesaria.
             *Detalles*
             *Siguiente paso*
             - Si se necesita aprobación del usuario, agrega:
