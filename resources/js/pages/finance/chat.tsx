@@ -104,19 +104,27 @@ function resolveCsrfToken(): string | undefined {
     const token = document.querySelector('meta[name="csrf-token"]');
 
     if (!token) {
-        const cookieToken = document.cookie
-            .split('; ')
-            .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
-            ?.split('=')[1];
-
-        if (!cookieToken) {
-            return undefined;
-        }
-
-        return decodeURIComponent(cookieToken);
+        return undefined;
     }
 
     return token.getAttribute('content') ?? undefined;
+}
+
+function resolveXsrfCookieToken(): string | undefined {
+    if (typeof document === 'undefined') {
+        return undefined;
+    }
+
+    const cookieToken = document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
+    if (!cookieToken) {
+        return undefined;
+    }
+
+    return decodeURIComponent(cookieToken);
 }
 
 function toNumberValue(value: unknown): number {
@@ -585,6 +593,7 @@ export default function FinanceChatPage({ conversations = [], activeConversation
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const nextMessageIdRef = useRef(1);
     const csrfToken = useMemo(() => resolveCsrfToken(), []);
+    const xsrfCookieToken = useMemo(() => resolveXsrfCookieToken(), []);
 
     useEffect(() => {
         setMessages(
@@ -703,6 +712,7 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         csrfToken,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
+            ...(xsrfCookieToken ? { 'X-XSRF-TOKEN': xsrfCookieToken } : {}),
         },
         onResponse: () => {
             streamBufferRef.current = '';
