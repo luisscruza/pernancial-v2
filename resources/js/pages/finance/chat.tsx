@@ -104,7 +104,16 @@ function resolveCsrfToken(): string | undefined {
     const token = document.querySelector('meta[name="csrf-token"]');
 
     if (!token) {
-        return undefined;
+        const cookieToken = document.cookie
+            .split('; ')
+            .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
+            ?.split('=')[1];
+
+        if (!cookieToken) {
+            return undefined;
+        }
+
+        return decodeURIComponent(cookieToken);
     }
 
     return token.getAttribute('content') ?? undefined;
@@ -690,8 +699,11 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         }
     };
 
-    const { send, cancel, isFetching, isStreaming } = useStream<{ message: string; conversation_id?: string }>(streamEndpoint, {
+    const { send, cancel, isFetching, isStreaming } = useStream<{ message: string; conversation_id?: string; _token?: string }>(streamEndpoint, {
         csrfToken,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
         onResponse: () => {
             streamBufferRef.current = '';
             streamEventBufferRef.current = '';
@@ -810,6 +822,7 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         send({
             message,
             ...(selectedConversationId ? { conversation_id: selectedConversationId } : {}),
+            ...(csrfToken ? { _token: csrfToken } : {}),
         });
     };
 
