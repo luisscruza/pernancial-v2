@@ -1,5 +1,6 @@
 import AccountController from './AccountController'
 import TransactionController from './TransactionController'
+import FinanceChatController from './FinanceChatController'
 import CategoryController from './CategoryController'
 import CurrencyController from './CurrencyController'
 import CurrencyRateController from './CurrencyRateController'
@@ -17,6 +18,7 @@ import Auth from './Auth'
 const Controllers = {
     AccountController: Object.assign(AccountController, AccountController),
     TransactionController: Object.assign(TransactionController, TransactionController),
+    FinanceChatController: Object.assign(FinanceChatController, FinanceChatController),
     CategoryController: Object.assign(CategoryController, CategoryController),
     CurrencyController: Object.assign(CurrencyController, CurrencyController),
     CurrencyRateController: Object.assign(CurrencyRateController, CurrencyRateController),

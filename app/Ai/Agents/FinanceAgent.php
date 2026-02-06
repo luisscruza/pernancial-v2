@@ -10,6 +10,7 @@ use App\Ai\Tools\ListFinanceCategoriesTool;
 use App\Ai\Tools\QueryFinanceTransactionsTool;
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -19,6 +20,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[MaxSteps(8)]
+#[UseCheapestModel]
 final class FinanceAgent implements Agent, Conversational, HasTools
 {
     use Promptable;

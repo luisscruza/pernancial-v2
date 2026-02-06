@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
+import { QuickTransactionCommand } from '@/components/quick-transaction-command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -7,12 +8,11 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuT
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
-import { QuickTransactionCommand } from '@/components/quick-transaction-command';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, DollarSign, Folder, LayoutGrid, Menu, Search, } from 'lucide-react';
+import { BookOpen, DollarSign, Folder, LayoutGrid, Menu, MessageCircle, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -37,10 +37,15 @@ const mainNavItems: NavItem[] = [
         href: '/budgets',
         icon: BookOpen,
     },
+    {
+        title: 'Asistente',
+        href: '/finance/chat',
+        icon: MessageCircle,
+    },
 ];
 
 const rightNavItems: NavItem[] = [
- //
+    //
 ];
 
 const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
@@ -138,14 +143,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         <div className="relative flex items-center space-x-1">
                             <Button
                                 variant="ghost"
-                                className="hidden h-9 gap-2 px-3 text-sm text-muted-foreground lg:flex"
+                                className="text-muted-foreground hidden h-9 gap-2 px-3 text-sm lg:flex"
                                 onClick={() => {
                                     // open command palette
                                 }}
                             >
                                 <Search className="h-4 w-4" />
                                 <span>Buscar cuenta...</span>
-                                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                                <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
                                     <span className="text-xs">⌘</span>K
                                 </kbd>
                             </Button>

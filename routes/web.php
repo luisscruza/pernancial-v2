@@ -9,6 +9,7 @@ use App\Http\Controllers\BudgetPeriodDuplicateController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrencyRateController;
+use App\Http\Controllers\FinanceChatController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
@@ -30,6 +31,12 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::post('/accounts/{account}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::put('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
     Route::delete('/accounts/{account}/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+
+    Route::get('/finance/chat', [FinanceChatController::class, 'index'])->name('finance.chat');
+    Route::post('/finance/chat/stream', [FinanceChatController::class, 'stream'])->name('finance.chat.stream');
+    Route::post('/finance/chat/reset', [FinanceChatController::class, 'reset'])->name('finance.chat.reset');
+    Route::patch('/finance/chat/{conversation}', [FinanceChatController::class, 'rename'])->name('finance.chat.rename');
+    Route::delete('/finance/chat/{conversation}', [FinanceChatController::class, 'destroy'])->name('finance.chat.destroy');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
