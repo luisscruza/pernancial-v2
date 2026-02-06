@@ -129,10 +129,9 @@ final readonly class CreateTransactionAction
             'running_balance' => $optimisticRunningBalance,
         ]);
 
-        // Update account balance optimistically
         $data->destination_account->update(['balance' => $optimisticRunningBalance]);
 
-        UpdateAccountBalance::dispatch($data->destination_account, $transaction);
+        UpdateAccountBalance::dispatch($data->destination_account, $transaction)->afterCommit();
 
         return $transaction;
     }

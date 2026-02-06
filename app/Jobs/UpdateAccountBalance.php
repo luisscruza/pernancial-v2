@@ -21,7 +21,7 @@ final class UpdateAccountBalance implements ShouldQueue
         public Account $account,
         public ?Transaction $transaction,
     ) {
-        //
+        $this->afterCommit();
     }
 
     /**
@@ -30,7 +30,7 @@ final class UpdateAccountBalance implements ShouldQueue
     public function handle(): void
     {
         $this->updateBalance();
-        $this->updateRunningBalance();
+        UpdateRunningBalanceJob::dispatch($this->account);
     }
 
     /**
@@ -48,31 +48,5 @@ final class UpdateAccountBalance implements ShouldQueue
         $this->account->update([
             'balance' => $incomes - $expenses + $transfersIn - $transfersOut + $initial + $adjustmentsPositive - $adjustmentsNegative,
         ]);
-    }
-
-    /**
-     * Update the running balance of the transaction if it exists.
-     */
-    private function updateRunningBalance(): void
-    {
-        // Then this will be a queued job to avoid slowing down the main process...
-        $transactions = $this->account->transactions()
-            ->orderBy('transaction_date')
-            ->orderBy('id')
-            ->get();
-
-        $runningBalance = 0;
-
-        foreach ($transactions as $transaction) {
-            $type = $transaction->type; // Instance of TransactionType
-
-            $runningBalance += $type->isPositive()
-                ? $transaction->amount
-                : -$transaction->amount;
-
-            $transaction->update([
-                'running_balance' => $runningBalance,
-            ]);
-        }
     }
 }
