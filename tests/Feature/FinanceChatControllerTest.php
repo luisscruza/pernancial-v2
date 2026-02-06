@@ -122,7 +122,8 @@ test('user can stream finance chat responses for a selected conversation', funct
             'message' => 'Registra un gasto de 12 por cafe en Efectivo.',
             'conversation_id' => $conversationId,
         ])
-        ->assertOk();
+        ->assertOk()
+        ->assertHeader('x-vercel-ai-ui-message-stream', 'v1');
 
     FinanceAgent::assertPrompted(function (AgentPrompt $prompt) use ($conversationId): bool {
         if (! method_exists($prompt->agent, 'currentConversation')) {

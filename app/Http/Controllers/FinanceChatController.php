@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 final class FinanceChatController
 {
@@ -62,7 +63,9 @@ final class FinanceChatController
 
     public function stream(StreamFinanceChatRequest $request, #[CurrentUser] User $user): Responsable
     {
-        set_time_limit(0);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(0);
+        }
 
         /** @var array{message: string, conversation_id?: string|null} $validated */
         $validated = $request->validated();
@@ -87,34 +90,8 @@ final class FinanceChatController
 
         return $agent
             ->stream($validated['message'])
-            ->then(function ($response) use ($user, $validated): void {
-                if (is_string($response->conversationId) && $response->conversationId !== '') {
-                    Cache::forever($this->conversationCacheKey($user), $response->conversationId);
-                }
-
-                $toolResultSummaries = $response->toolResults
-                    ->map(function ($toolResult): array {
-                        $rawResult = is_string($toolResult->result)
-                            ? $toolResult->result
-                            : json_encode($toolResult->result, JSON_UNESCAPED_SLASHES);
-
-                        return [
-                            'name' => $toolResult->name,
-                            'preview' => Str::limit((string) ($rawResult ?? ''), 180),
-                        ];
-                    })
-                    ->all();
-
-                Log::debug('finance-chat stream completed', [
-                    'user_id' => $user->id,
-                    'conversation_id' => $response->conversationId,
-                    'prompt_preview' => Str::limit($validated['message'], 120),
-                    'text_length' => mb_strlen(mb_trim((string) $response->text)),
-                    'tool_calls_count' => $response->toolCalls->count(),
-                    'tool_results_count' => $response->toolResults->count(),
-                    'tool_results' => $toolResultSummaries,
-                ]);
-            });
+            ->usingVercelDataProtocol()
+            ->then(fn ($response) => $this->handleStreamCompleted($response, $user, $validated['message']));
     }
 
     public function reset(#[CurrentUser] User $user): JsonResponse
@@ -329,6 +306,43 @@ final class FinanceChatController
         }
 
         return $result;
+    }
+
+    private function handleStreamCompleted(mixed $response, User $user, string $message): void
+    {
+        try {
+            if (is_string($response->conversationId) && $response->conversationId !== '') {
+                Cache::forever($this->conversationCacheKey($user), $response->conversationId);
+            }
+
+            $toolResultSummaries = $response->toolResults
+                ->map(function ($toolResult): array {
+                    $rawResult = is_string($toolResult->result)
+                        ? $toolResult->result
+                        : json_encode($toolResult->result, JSON_UNESCAPED_SLASHES);
+
+                    return [
+                        'name' => $toolResult->name,
+                        'preview' => Str::limit((string) ($rawResult ?? ''), 180),
+                    ];
+                })
+                ->all();
+
+            Log::debug('finance-chat stream completed', [
+                'user_id' => $user->id,
+                'conversation_id' => $response->conversationId,
+                'prompt_preview' => Str::limit($message, 120),
+                'text_length' => mb_strlen(mb_trim((string) $response->text)),
+                'tool_calls_count' => $response->toolCalls->count(),
+                'tool_results_count' => $response->toolResults->count(),
+                'tool_results' => $toolResultSummaries,
+            ]);
+        } catch (Throwable $exception) {
+            Log::warning('finance-chat stream completion hook failed', [
+                'user_id' => $user->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function resolveConversationId(User $user, ?string $conversationId): ?string
