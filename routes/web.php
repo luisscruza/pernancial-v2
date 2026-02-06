@@ -12,6 +12,7 @@ use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->group(function ()
         return Inertia::render('onboarding/setting-up');
     })->name('onboarding.setting-up');
 });
+
+Route::post('/telegram/webhook', TelegramWebhookController::class)
+    ->name('telegram.webhook');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

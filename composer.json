@@ -12,6 +12,7 @@
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^2.0.19",
         "inertiaui/modal": "^0.19.4",
+        "laravel/ai": "^0.1.2",
         "laravel/framework": "^12.50.0",
         "laravel/mcp": "^0.5.1",
         "laravel/sanctum": "^4.3",

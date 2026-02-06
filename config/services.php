@@ -43,4 +43,11 @@ return [
         'redirect' => env('GOOGLE_REDIRECT'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'owner_email' => env('TELEGRAM_OWNER_EMAIL'),
+        'owner_chat_id' => env('TELEGRAM_OWNER_CHAT_ID'),
+    ],
+
 ];
