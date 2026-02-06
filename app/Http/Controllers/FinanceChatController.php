@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Ai\Agents\FinanceAgent;
+use App\Ai\Tools\GenerateFinanceChartTool;
 use App\Http\Requests\StreamFinanceChatRequest;
 use App\Http\Requests\UpdateFinanceConversationTitleRequest;
 use App\Models\User;
@@ -15,16 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Ai\Contracts\ConversationStore;
-use Laravel\Ai\Messages\Message;
 
 final class FinanceChatController
 {
-    public function __construct(private ConversationStore $conversationStore) {}
-
     public function index(Request $request, #[CurrentUser] User $user): Response
     {
         $conversations = $this->financeConversations($user);
@@ -64,6 +62,8 @@ final class FinanceChatController
 
     public function stream(StreamFinanceChatRequest $request, #[CurrentUser] User $user): Responsable
     {
+        set_time_limit(0);
+
         /** @var array{message: string, conversation_id?: string|null} $validated */
         $validated = $request->validated();
 
@@ -87,10 +87,33 @@ final class FinanceChatController
 
         return $agent
             ->stream($validated['message'])
-            ->then(function ($response) use ($user): void {
+            ->then(function ($response) use ($user, $validated): void {
                 if (is_string($response->conversationId) && $response->conversationId !== '') {
                     Cache::forever($this->conversationCacheKey($user), $response->conversationId);
                 }
+
+                $toolResultSummaries = $response->toolResults
+                    ->map(function ($toolResult): array {
+                        $rawResult = is_string($toolResult->result)
+                            ? $toolResult->result
+                            : json_encode($toolResult->result, JSON_UNESCAPED_SLASHES);
+
+                        return [
+                            'name' => $toolResult->name,
+                            'preview' => Str::limit((string) ($rawResult ?? ''), 180),
+                        ];
+                    })
+                    ->all();
+
+                Log::debug('finance-chat stream completed', [
+                    'user_id' => $user->id,
+                    'conversation_id' => $response->conversationId,
+                    'prompt_preview' => Str::limit($validated['message'], 120),
+                    'text_length' => mb_strlen(mb_trim((string) $response->text)),
+                    'tool_calls_count' => $response->toolCalls->count(),
+                    'tool_results_count' => $response->toolResults->count(),
+                    'tool_results' => $toolResultSummaries,
+                ]);
             });
     }
 
@@ -208,26 +231,104 @@ final class FinanceChatController
             return collect();
         }
 
-        return $this->conversationStore
-            ->getLatestConversationMessages($conversationId, 50)
-            ->map(function (Message $message): ?array {
-                if (! in_array($message->role->value, ['user', 'assistant'], true)) {
+        return DB::table('agent_conversation_messages')
+            ->where('conversation_id', $conversationId)
+            ->where('agent', FinanceAgent::class)
+            ->orderByDesc('id')
+            ->limit(50)
+            ->get()
+            ->reverse()
+            ->values()
+            ->map(function ($message): ?array {
+                if (! in_array($message->role, ['user', 'assistant'], true)) {
                     return null;
                 }
 
-                $content = mb_trim((string) $message->content);
+                $charts = $message->role === 'assistant'
+                    ? $this->extractChartsFromToolResults($message->tool_results ?? null)
+                    : [];
 
-                if ($content === '') {
+                $content = mb_trim((string) ($message->content ?? ''));
+
+                if ($content === '' && $charts === []) {
                     return null;
                 }
 
                 return [
-                    'role' => $message->role->value,
+                    'role' => $message->role,
                     'content' => $content,
+                    'charts' => $charts,
                 ];
             })
             ->filter()
             ->values();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractChartsFromToolResults(mixed $toolResultsRaw): array
+    {
+        if (! is_string($toolResultsRaw) || $toolResultsRaw === '') {
+            return [];
+        }
+
+        $decoded = json_decode($toolResultsRaw, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $charts = [];
+        $expectedToolName = class_basename(GenerateFinanceChartTool::class);
+
+        foreach ($decoded as $toolResult) {
+            if (! is_array($toolResult)) {
+                continue;
+            }
+
+            if (($toolResult['name'] ?? null) !== $expectedToolName) {
+                continue;
+            }
+
+            $payload = $this->decodeChartPayload($toolResult['result'] ?? null);
+
+            if ($payload === null) {
+                continue;
+            }
+
+            $charts[] = $payload;
+        }
+
+        return $charts;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function decodeChartPayload(mixed $result): ?array
+    {
+        if (is_string($result)) {
+            $result = json_decode($result, true);
+        }
+
+        if (! is_array($result)) {
+            return null;
+        }
+
+        if (! isset($result['kind']) || ! in_array($result['kind'], ['bar', 'line', 'stacked_bar'], true)) {
+            return null;
+        }
+
+        if (! isset($result['series']) || ! is_array($result['series'])) {
+            return null;
+        }
+
+        if (! isset($result['points']) || ! is_array($result['points'])) {
+            return null;
+        }
+
+        return $result;
     }
 
     private function resolveConversationId(User $user, ?string $conversationId): ?string

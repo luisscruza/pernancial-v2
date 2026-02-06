@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../
 import chatB2e4da from './chat'
 /**
 * @see \App\Http\Controllers\FinanceChatController::chat
-* @see app/Http/Controllers/FinanceChatController.php:28
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 export const chat = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ chat.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::chat
-* @see app/Http/Controllers/FinanceChatController.php:28
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 chat.url = (options?: RouteQueryOptions) => {
@@ -26,7 +26,7 @@ chat.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::chat
-* @see app/Http/Controllers/FinanceChatController.php:28
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 chat.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -36,7 +36,7 @@ chat.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::chat
-* @see app/Http/Controllers/FinanceChatController.php:28
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 chat.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

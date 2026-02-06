@@ -43,6 +43,74 @@ test('user can view the latest fifty finance chat messages', function () {
             ->where('initialMessages.49.content', 'Mensaje 60'));
 });
 
+test('user can view chart payloads stored in finance chat tool results', function () {
+    $user = createOnboardedUser();
+    $conversationId = (string) Str::uuid7();
+
+    DB::table('agent_conversations')->insert([
+        'id' => $conversationId,
+        'user_id' => $user->id,
+        'title' => 'Graficos',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $chartPayload = [
+        'version' => 1,
+        'kind' => 'bar',
+        'title' => 'Gasto por categoria',
+        'series' => [
+            [
+                'key' => 'amount',
+                'label' => 'Monto',
+                'color' => '#2563eb',
+            ],
+        ],
+        'points' => [
+            [
+                'label' => 'Food',
+                'amount' => 55,
+            ],
+        ],
+    ];
+
+    DB::table('agent_conversation_messages')->insert([
+        'id' => (string) Str::uuid7(),
+        'conversation_id' => $conversationId,
+        'user_id' => $user->id,
+        'agent' => FinanceAgent::class,
+        'role' => 'assistant',
+        'content' => 'Aqui tienes el grafico.',
+        'attachments' => '[]',
+        'tool_calls' => '[]',
+        'tool_results' => json_encode([
+            [
+                'id' => 'tool_1',
+                'name' => 'GenerateFinanceChartTool',
+                'arguments' => [],
+                'result' => json_encode($chartPayload),
+                'result_id' => null,
+            ],
+        ]),
+        'usage' => '[]',
+        'meta' => '[]',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Cache::forever("finance:chat:conversation:{$user->id}", $conversationId);
+
+    $this->actingAs($user)
+        ->get(route('finance.chat'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->component('finance/chat')
+            ->where('activeConversationId', $conversationId)
+            ->where('initialMessages.0.role', 'assistant')
+            ->where('initialMessages.0.charts.0.kind', 'bar')
+            ->where('initialMessages.0.charts.0.points.0.label', 'Food'));
+});
+
 test('user can stream finance chat responses for a selected conversation', function () {
     $user = createOnboardedUser();
     $conversationId = seedFinanceConversation($user, 3);

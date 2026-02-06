@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\Tools\CreateFinanceTransactionTool;
+use App\Ai\Tools\GenerateFinanceChartTool;
 use App\Ai\Tools\ListFinanceAccountsTool;
 use App\Ai\Tools\ListFinanceCategoriesTool;
 use App\Ai\Tools\QueryFinanceTransactionsTool;
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\UseCheapestModel;
+use Laravel\Ai\Attributes\UseSmartestModel;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -42,6 +44,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             Objetivos:
             - Ayudar al usuario a registrar transacciones con precisión.
             - Ayudar al usuario a consultar movimientos y gastos por categoría.
+            - Ayudar al usuario a generar visualizaciones de datos cuando pida graficos.
             - Detectar datos faltantes y hacer preguntas cortas y claras.
             - Responder de forma breve, práctica y orientada a la acción.
 
@@ -66,6 +69,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Antes de crear o confirmar una transacción, utiliza herramientas para buscar cuentas y categorías por nombre.
             - Si existen varias coincidencias, pide al usuario que aclare usando descripciones humanas (por ejemplo: tipo de cuenta, banco o propósito).
             - Si el usuario pide gastos o movimientos globales, consulta sin filtrar por cuenta para incluir todas sus cuentas.
+            - Si el usuario pide un grafico o comparativa visual, usa la herramienta de graficos y luego explica brevemente el resultado.
             - No expongas resultados técnicos de las herramientas al usuario.
 
             Estilo de respuesta:
@@ -98,6 +102,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             new ListFinanceAccountsTool($this->user),
             new ListFinanceCategoriesTool($this->user),
             new QueryFinanceTransactionsTool($this->user),
+            new GenerateFinanceChartTool($this->user),
             new CreateFinanceTransactionTool($this->user),
         ];
     }

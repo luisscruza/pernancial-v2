@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\CreateFinanceTransactionTool;
+use App\Ai\Tools\GenerateFinanceChartTool;
 use App\Ai\Tools\ListFinanceAccountsTool;
 use App\Ai\Tools\QueryFinanceTransactionsTool;
 use App\Enums\CategoryType;
@@ -317,6 +318,134 @@ it('falls back to global category spending when account filter is invalid', func
         ->toContain('total_gastado_base=70.00 USD')
         ->toContain('transacciones=2')
         ->not->toContain('cuenta_filtrada=');
+
+    Carbon::setTestNow();
+});
+
+it('generates spending by category chart payload', function () {
+    Carbon::setTestNow(Carbon::parse('2026-02-20 10:00:00'));
+
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create([
+        'code' => 'USD',
+        'is_base' => true,
+    ]);
+
+    $user->update(['base_currency_id' => $currency->id]);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+    ]);
+
+    $food = Category::factory()->for($user)->create([
+        'name' => 'Food',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $transport = Category::factory()->for($user)->create([
+        'name' => 'Transport',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 70.00,
+        'transaction_date' => '2026-02-11',
+        'description' => 'Restaurant',
+        'category_id' => $food->id,
+        'running_balance' => 930.00,
+        'converted_amount' => 70.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 20.00,
+        'transaction_date' => '2026-02-12',
+        'description' => 'Bus',
+        'category_id' => $transport->id,
+        'running_balance' => 910.00,
+        'converted_amount' => 20.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $output = (string) (new GenerateFinanceChartTool($user))->handle(new Request([
+        'chart_type' => 'spending_by_category',
+        'period' => 'this_month',
+    ]));
+
+    $payload = json_decode($output, true);
+
+    expect($payload)
+        ->toBeArray()
+        ->and($payload['kind'] ?? null)->toBe('bar')
+        ->and($payload['title'] ?? null)->toBe('Gasto por categoria')
+        ->and($payload['series'][0]['key'] ?? null)->toBe('amount')
+        ->and($payload['points'][0]['label'] ?? null)->toBe('Food')
+        ->and($payload['points'][0]['amount'] ?? null)->toBe(70);
+
+    Carbon::setTestNow();
+});
+
+it('generates income vs expense chart payload', function () {
+    Carbon::setTestNow(Carbon::parse('2026-03-20 10:00:00'));
+
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create([
+        'code' => 'USD',
+        'is_base' => true,
+    ]);
+
+    $user->update(['base_currency_id' => $currency->id]);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+    ]);
+
+    $incomeCategory = Category::factory()->for($user)->create([
+        'name' => 'Salary',
+        'type' => CategoryType::INCOME,
+    ]);
+
+    $expenseCategory = Category::factory()->for($user)->create([
+        'name' => 'Food',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::INCOME,
+        'amount' => 1000.00,
+        'transaction_date' => '2026-02-01',
+        'description' => 'Payroll',
+        'category_id' => $incomeCategory->id,
+        'running_balance' => 1000.00,
+        'converted_amount' => 1000.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 300.00,
+        'transaction_date' => '2026-02-15',
+        'description' => 'Groceries',
+        'category_id' => $expenseCategory->id,
+        'running_balance' => 700.00,
+        'converted_amount' => 300.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $output = (string) (new GenerateFinanceChartTool($user))->handle(new Request([
+        'chart_type' => 'income_vs_expense',
+        'period' => 'this_year',
+    ]));
+
+    $payload = json_decode($output, true);
+
+    expect($payload)
+        ->toBeArray()
+        ->and($payload['kind'] ?? null)->toBe('stacked_bar')
+        ->and($payload['series'][0]['key'] ?? null)->toBe('income')
+        ->and($payload['series'][1]['key'] ?? null)->toBe('expense');
 
     Carbon::setTestNow();
 });
