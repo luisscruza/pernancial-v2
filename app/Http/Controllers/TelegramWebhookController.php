@@ -12,27 +12,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Laravel\Ai\Transcription;
+use Throwable;
 
 final class TelegramWebhookController
 {
     public function __invoke(Request $request): JsonResponse
     {
-        \Log::debug('Received Telegram webhook', ['payload' => $request->all()]);
-        
-        
         if (! $this->hasValidWebhookSecret($request)) {
             return response()->json(['ok' => true]);
         }
 
+        /** @var array<string, mixed> $message */
+        $message = (array) data_get($request->all(), 'message', []);
         $chatId = (string) data_get($request->all(), 'message.chat.id', '');
-        $messageText = $this->strip((string) data_get($request->all(), 'message.text', ''));
 
-        if ($chatId === '' || $messageText === '') {
+        if ($chatId === '') {
             return response()->json(['ok' => true]);
         }
 
         if (! $this->isAuthorizedChat($chatId)) {
             $this->sendMessage($chatId, 'Acceso denegado. Este bot esta configurado para un unico chat propietario.');
+
+            return response()->json(['ok' => true]);
+        }
+
+        $messageText = $this->resolveIncomingMessageText($message);
+
+        if ($messageText === '') {
+            if ($this->hasVoiceMessage($message)) {
+                $this->sendMessage($chatId, 'No pude transcribir la nota de voz. Intenta de nuevo o enviame el texto.');
+            }
 
             return response()->json(['ok' => true]);
         }
@@ -174,5 +184,89 @@ final class TelegramWebhookController
     private function stripTelegramMarkdown(string $message): string
     {
         return str_replace(['*', '_', '`'], '', $message);
+    }
+
+    /**
+     * @param  array<string, mixed>  $message
+     */
+    private function resolveIncomingMessageText(array $message): string
+    {
+        $messageText = $this->strip((string) data_get($message, 'text', ''));
+
+        if ($messageText !== '') {
+            return $messageText;
+        }
+
+        $voiceFileId = $this->strip((string) data_get($message, 'voice.file_id', ''));
+
+        if ($voiceFileId === '') {
+            return '';
+        }
+
+        $voiceMimeType = $this->strip((string) data_get($message, 'voice.mime_type', ''));
+
+        return $this->transcribeVoiceFile($voiceFileId, $voiceMimeType !== '' ? $voiceMimeType : null);
+    }
+
+    /**
+     * @param  array<string, mixed>  $message
+     */
+    private function hasVoiceMessage(array $message): bool
+    {
+        return $this->strip((string) data_get($message, 'voice.file_id', '')) !== '';
+    }
+
+    private function transcribeVoiceFile(string $voiceFileId, ?string $mimeType = null): string
+    {
+        $token = $this->strip((string) config('services.telegram.bot_token'));
+
+        if ($token === '') {
+            return '';
+        }
+
+        try {
+            /** @var Response $fileResponse */
+            $fileResponse = Http::asForm()->timeout(15)->post("https://api.telegram.org/bot{$token}/getFile", [
+                'file_id' => $voiceFileId,
+            ]);
+
+            if (! $fileResponse->successful()) {
+                return '';
+            }
+
+            $filePath = $this->strip((string) data_get($fileResponse->json(), 'result.file_path', ''));
+
+            if ($filePath === '') {
+                return '';
+            }
+
+            /** @var Response $audioResponse */
+            $audioResponse = Http::timeout(30)->get("https://api.telegram.org/file/bot{$token}/{$filePath}");
+
+            if (! $audioResponse->successful()) {
+                return '';
+            }
+
+            $temporaryPath = tempnam(sys_get_temp_dir(), 'telegram-voice-');
+
+            if ($temporaryPath === false) {
+                return '';
+            }
+
+            try {
+                $bytesWritten = file_put_contents($temporaryPath, $audioResponse->body());
+
+                if ($bytesWritten === false || $bytesWritten === 0) {
+                    return '';
+                }
+
+                return $this->strip((string) Transcription::fromPath($temporaryPath, $mimeType)->generate());
+            } finally {
+                @unlink($temporaryPath);
+            }
+        } catch (Throwable $e) {
+
+            return '';
+        }
     }
 }

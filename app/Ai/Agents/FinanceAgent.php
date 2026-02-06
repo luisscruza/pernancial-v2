@@ -24,7 +24,8 @@ final class FinanceAgent implements Agent, Conversational, HasTools
     use Promptable;
     use RemembersConversations;
 
-    public function __construct(private User $user) {
+    public function __construct(private User $user)
+    {
         //
     }
 
