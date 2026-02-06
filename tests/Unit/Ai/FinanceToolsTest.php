@@ -68,6 +68,94 @@ it('creates an income transaction through finance transaction tool', function ()
         ->and($createdTransaction?->ai_assisted)->toBeTrue();
 });
 
+it('requires confirmation when detecting a potential duplicate expense', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create(['code' => 'USD']);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+        'balance' => 300.00,
+    ]);
+
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Food',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 12.50,
+        'transaction_date' => '2026-02-06',
+        'description' => 'Cafe de la manana',
+        'category_id' => $category->id,
+        'running_balance' => 287.50,
+        'converted_amount' => 12.50,
+        'conversion_rate' => 1,
+        'ai_assisted' => true,
+    ]);
+
+    $tool = new CreateFinanceTransactionTool($user);
+
+    $output = (string) $tool->handle(new Request([
+        'type' => TransactionType::EXPENSE->value,
+        'amount' => 12.50,
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'transaction_date' => '2026-02-06',
+        'description' => 'Cafe de la manana',
+    ]));
+
+    expect($output)
+        ->toContain('Posible gasto duplicado detectado')
+        ->toContain('confirm_duplicate=true')
+        ->and($account->transactions()->where('type', TransactionType::EXPENSE)->count())->toBe(1);
+});
+
+it('creates expense when duplicate confirmation is explicitly provided', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create(['code' => 'USD']);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+        'balance' => 300.00,
+    ]);
+
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Food',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 12.50,
+        'transaction_date' => '2026-02-06',
+        'description' => 'Cafe de la manana',
+        'category_id' => $category->id,
+        'running_balance' => 287.50,
+        'converted_amount' => 12.50,
+        'conversion_rate' => 1,
+        'ai_assisted' => true,
+    ]);
+
+    $tool = new CreateFinanceTransactionTool($user);
+
+    $output = (string) $tool->handle(new Request([
+        'type' => TransactionType::EXPENSE->value,
+        'amount' => 12.50,
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'transaction_date' => '2026-02-06',
+        'description' => 'Cafe de la manana',
+        'confirm_duplicate' => true,
+    ]));
+
+    $account->refresh();
+
+    expect($output)
+        ->toContain('Transaccion creada: tipo=expense')
+        ->and($account->transactions()->where('type', TransactionType::EXPENSE)->count())->toBe(2);
+});
+
 it('lists recent transactions for a specific account through finance query tool', function () {
     $user = User::factory()->create();
     $currency = Currency::factory()->for($user)->create([

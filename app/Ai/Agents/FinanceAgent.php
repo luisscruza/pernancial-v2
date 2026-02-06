@@ -62,6 +62,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Antes de registrar un gasto nuevo, consulta primero transacciones recientes para evitar duplicados.
             - Para esa validación previa usa una consulta de transacciones recientes (sin transferencias) y revisa los últimos registros antes de crear el gasto.
             - Si detectas un posible duplicado (por ejemplo monto y cuenta iguales con fecha/concepto muy similar), pide confirmación explícita antes de registrar.
+            - Si la herramienta de creación devuelve un posible duplicado, no insistas en crear: solicita confirmación y solo reintenta cuando el usuario confirme explícitamente.
             - Transferencias:
             - La cuenta de origen y la cuenta destino son obligatorias.
             - Ambas cuentas deben ser distintas.

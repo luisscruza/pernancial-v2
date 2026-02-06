@@ -10,6 +10,7 @@ use App\Enums\CategoryType;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -104,6 +105,22 @@ final class CreateFinanceTransactionTool implements Tool
             $description = mb_substr($description, 0, 255);
         }
 
+        $confirmDuplicate = $this->toBool($request['confirm_duplicate'] ?? false);
+
+        if ($transactionType === TransactionType::EXPENSE && ! $confirmDuplicate) {
+            $potentialDuplicate = $this->findPotentialDuplicateExpense(
+                account: $account,
+                amount: $amount,
+                transactionDate: $transactionDate,
+                category: $category,
+                description: $description,
+            );
+
+            if ($potentialDuplicate) {
+                return $this->buildPotentialDuplicateMessage($potentialDuplicate);
+            }
+        }
+
         $dto = new CreateTransactionDto(
             type: $transactionType,
             amount: $amount,
@@ -178,7 +195,115 @@ final class CreateFinanceTransactionTool implements Tool
                 ->description('ID de cuenta destino. Obligatorio para transferencias.'),
             'destination_account_name' => $schema->string()
                 ->description('Nombre exacto de cuenta destino si no se envia destination_account_id.'),
+            'confirm_duplicate' => $schema->boolean()
+                ->description('Define true para crear el gasto aunque se detecte posible duplicado.'),
         ];
+    }
+
+    private function findPotentialDuplicateExpense(
+        Account $account,
+        float $amount,
+        string $transactionDate,
+        ?Category $category,
+        ?string $description,
+    ): ?Transaction {
+        $transactionDateCarbon = CarbonImmutable::createFromFormat('Y-m-d', $transactionDate);
+
+        if (! $transactionDateCarbon) {
+            return null;
+        }
+
+        $candidates = Transaction::query()
+            ->where('account_id', $account->id)
+            ->where('type', TransactionType::EXPENSE)
+            ->where('amount', $amount)
+            ->whereBetween('transaction_date', [
+                $transactionDateCarbon->subDays(2)->format('Y-m-d'),
+                $transactionDateCarbon->addDays(2)->format('Y-m-d'),
+            ])
+            ->when($category !== null, fn ($query) => $query->where('category_id', $category->id))
+            ->with(['account.currency', 'category'])
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        foreach ($candidates as $candidate) {
+            if (! $this->isPotentialDuplicateMatch($candidate, $transactionDate, $description)) {
+                continue;
+            }
+
+            return $candidate;
+        }
+
+        return null;
+    }
+
+    private function isPotentialDuplicateMatch(Transaction $candidate, string $transactionDate, ?string $description): bool
+    {
+        if ($candidate->transaction_date->format('Y-m-d') === $transactionDate) {
+            return true;
+        }
+
+        if ($description === null || $candidate->description === null) {
+            return false;
+        }
+
+        return $this->descriptionsLookSimilar($description, $candidate->description);
+    }
+
+    private function descriptionsLookSimilar(string $descriptionA, string $descriptionB): bool
+    {
+        $normalizedA = $this->normalizeDescription($descriptionA);
+        $normalizedB = $this->normalizeDescription($descriptionB);
+
+        if ($normalizedA === '' || $normalizedB === '') {
+            return false;
+        }
+
+        if ($normalizedA === $normalizedB) {
+            return true;
+        }
+
+        if (str_contains($normalizedA, $normalizedB) || str_contains($normalizedB, $normalizedA)) {
+            return true;
+        }
+
+        similar_text($normalizedA, $normalizedB, $percentage);
+
+        return $percentage >= 80.0;
+    }
+
+    private function normalizeDescription(string $description): string
+    {
+        $withoutSymbols = preg_replace('/[^\pL\pN\s]/u', ' ', $description) ?? $description;
+        $collapsed = preg_replace('/\s+/u', ' ', $withoutSymbols) ?? $withoutSymbols;
+
+        return mb_strtolower($this->strip($collapsed));
+    }
+
+    private function buildPotentialDuplicateMessage(Transaction $transaction): string
+    {
+        $currencyCode = $transaction->account->currency->code ?? 'N/A';
+        $categoryName = $transaction->category?->name ?? 'Sin categoria';
+        $description = $this->toString($transaction->description);
+
+        $message = sprintf(
+            'Posible gasto duplicado detectado: cuenta="%s", monto=%.2f %s, fecha=%s, categoria="%s".',
+            $transaction->account->name,
+            $transaction->amount,
+            $currencyCode,
+            $transaction->transaction_date->format('Y-m-d'),
+            $categoryName,
+        );
+
+        if ($description !== null) {
+            $message .= sprintf(' Descripcion similar: "%s".', mb_substr($description, 0, 120));
+        }
+
+        $message .= ' Confirma con confirm_duplicate=true si deseas registrarlo de todos modos.';
+
+        return $message;
     }
 
     private function resolveAccount(?int $id, ?string $name): ?Account
@@ -272,6 +397,25 @@ final class CreateFinanceTransactionTool implements Tool
         }
 
         return (float) $value;
+    }
+
+    private function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $normalized = mb_strtolower($this->strip($value));
+
+            return in_array($normalized, ['1', 'true', 'yes', 'si', 'sí'], true);
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (float) $value === 1.0;
+        }
+
+        return false;
     }
 
     private function toString(mixed $value): ?string
