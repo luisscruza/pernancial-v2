@@ -10,7 +10,6 @@ use App\Http\Requests\StreamFinanceChatRequest;
 use App\Http\Requests\UpdateFinanceConversationTitleRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -61,7 +60,7 @@ final class FinanceChatController
         ]);
     }
 
-    public function stream(StreamFinanceChatRequest $request, #[CurrentUser] User $user): Responsable
+    public function stream(StreamFinanceChatRequest $request, #[CurrentUser] User $user): JsonResponse
     {
         if (function_exists('set_time_limit')) {
             @set_time_limit(0);
@@ -88,10 +87,55 @@ final class FinanceChatController
             $agent->forUser($user);
         }
 
-        return $agent
-            ->stream($validated['message'])
-            ->usingVercelDataProtocol()
-            ->then(fn ($response) => $this->handleStreamCompleted($response, $user, $validated['message']));
+        try {
+            $response = $agent->prompt($validated['message']);
+
+            if (is_string($response->conversationId) && $response->conversationId !== '') {
+                Cache::forever($this->conversationCacheKey($user), $response->conversationId);
+            }
+
+            $charts = $this->extractChartsFromToolResultCollection($response->toolResults);
+            $chartToolMessages = $this->extractChartToolMessagesFromCollection($response->toolResults);
+            $reply = mb_trim((string) $response);
+
+            if ($reply === '') {
+                if ($chartToolMessages !== []) {
+                    $reply = implode("\n\n", $chartToolMessages);
+                } elseif ($charts !== []) {
+                    $reply = 'Aqui tienes el grafico solicitado.';
+                } else {
+                    $reply = 'No pude generar una respuesta. Intenta de nuevo.';
+                }
+            }
+
+            Log::debug('finance-chat prompt completed', [
+                'user_id' => $user->id,
+                'conversation_id' => $response->conversationId,
+                'prompt_preview' => Str::limit($validated['message'], 120),
+                'text_length' => mb_strlen($reply),
+                'tool_calls_count' => $response->toolCalls->count(),
+                'tool_results_count' => $response->toolResults->count(),
+                'charts_count' => count($charts),
+            ]);
+
+            return response()->json([
+                'ok' => true,
+                'reply' => $reply,
+                'charts' => $charts,
+                'conversation_id' => $response->conversationId,
+            ]);
+        } catch (Throwable $exception) {
+            Log::warning('finance-chat prompt failed', [
+                'user_id' => $user->id,
+                'prompt_preview' => Str::limit($validated['message'], 120),
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'No pude completar la respuesta. Intenta de nuevo.',
+            ], 500);
+        }
     }
 
     public function reset(#[CurrentUser] User $user): JsonResponse
@@ -308,41 +352,64 @@ final class FinanceChatController
         return $result;
     }
 
-    private function handleStreamCompleted(mixed $response, User $user, string $message): void
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractChartsFromToolResultCollection(Collection $toolResults): array
     {
-        try {
-            if (is_string($response->conversationId) && $response->conversationId !== '') {
-                Cache::forever($this->conversationCacheKey($user), $response->conversationId);
+        $charts = [];
+        $expectedToolName = class_basename(GenerateFinanceChartTool::class);
+
+        foreach ($toolResults as $toolResult) {
+            $toolName = is_object($toolResult) ? ($toolResult->name ?? null) : null;
+
+            if ($toolName !== $expectedToolName) {
+                continue;
             }
 
-            $toolResultSummaries = $response->toolResults
-                ->map(function ($toolResult): array {
-                    $rawResult = is_string($toolResult->result)
-                        ? $toolResult->result
-                        : json_encode($toolResult->result, JSON_UNESCAPED_SLASHES);
+            $payload = $this->decodeChartPayload(is_object($toolResult) ? ($toolResult->result ?? null) : null);
 
-                    return [
-                        'name' => $toolResult->name,
-                        'preview' => Str::limit((string) ($rawResult ?? ''), 180),
-                    ];
-                })
-                ->all();
-
-            Log::debug('finance-chat stream completed', [
-                'user_id' => $user->id,
-                'conversation_id' => $response->conversationId,
-                'prompt_preview' => Str::limit($message, 120),
-                'text_length' => mb_strlen(mb_trim((string) $response->text)),
-                'tool_calls_count' => $response->toolCalls->count(),
-                'tool_results_count' => $response->toolResults->count(),
-                'tool_results' => $toolResultSummaries,
-            ]);
-        } catch (Throwable $exception) {
-            Log::warning('finance-chat stream completion hook failed', [
-                'user_id' => $user->id,
-                'error' => $exception->getMessage(),
-            ]);
+            if ($payload !== null) {
+                $charts[] = $payload;
+            }
         }
+
+        return $charts;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function extractChartToolMessagesFromCollection(Collection $toolResults): array
+    {
+        $messages = [];
+        $expectedToolName = class_basename(GenerateFinanceChartTool::class);
+
+        foreach ($toolResults as $toolResult) {
+            $toolName = is_object($toolResult) ? ($toolResult->name ?? null) : null;
+
+            if ($toolName !== $expectedToolName) {
+                continue;
+            }
+
+            $rawResult = is_object($toolResult) ? ($toolResult->result ?? null) : null;
+
+            if (! is_string($rawResult)) {
+                continue;
+            }
+
+            if ($this->decodeChartPayload($rawResult) !== null) {
+                continue;
+            }
+
+            $message = mb_trim($rawResult);
+
+            if ($message !== '') {
+                $messages[] = $message;
+            }
+        }
+
+        return $messages;
     }
 
     private function resolveConversationId(User $user, ?string $conversationId): ?string

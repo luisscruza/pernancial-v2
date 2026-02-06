@@ -111,7 +111,7 @@ test('user can view chart payloads stored in finance chat tool results', functio
             ->where('initialMessages.0.charts.0.points.0.label', 'Food'));
 });
 
-test('user can stream finance chat responses for a selected conversation', function () {
+test('user can receive full finance chat response for a selected conversation', function () {
     $user = createOnboardedUser();
     $conversationId = seedFinanceConversation($user, 3);
 
@@ -123,7 +123,9 @@ test('user can stream finance chat responses for a selected conversation', funct
             'conversation_id' => $conversationId,
         ])
         ->assertOk()
-        ->assertHeader('x-vercel-ai-ui-message-stream', 'v1');
+        ->assertJsonPath('ok', true)
+        ->assertJsonPath('reply', 'Listo. Registre el gasto correctamente.')
+        ->assertJsonPath('charts', []);
 
     FinanceAgent::assertPrompted(function (AgentPrompt $prompt) use ($conversationId): bool {
         if (! method_exists($prompt->agent, 'currentConversation')) {

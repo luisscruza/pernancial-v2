@@ -3,8 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { useStream } from '@laravel/stream-react';
-import { LoaderCircle, Pencil, Plus, SendHorizontal, StopCircle, Trash2 } from 'lucide-react';
+import { LoaderCircle, Pencil, Plus, SendHorizontal, Trash2 } from 'lucide-react';
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 type ChatMessageRole = 'user' | 'assistant';
@@ -70,12 +69,12 @@ interface FinanceChatPageProps {
     initialMessages?: ChatHistoryMessage[];
 }
 
-interface StreamDebugSnapshot {
-    eventCounts: Record<string, number>;
-    toolCalls: string[];
-    chartToolMessages: string[];
-    errors: string[];
-    parseErrors: number;
+interface FinanceChatResponse {
+    ok?: boolean;
+    reply?: string;
+    charts?: unknown;
+    conversation_id?: string | null;
+    message?: string;
 }
 
 const chatPageEndpoint = '/finance/chat';
@@ -84,16 +83,6 @@ const resetEndpoint = '/finance/chat/reset';
 
 function conversationEndpoint(conversationId: string): string {
     return `/finance/chat/${conversationId}`;
-}
-
-function createEmptyStreamDebugSnapshot(): StreamDebugSnapshot {
-    return {
-        eventCounts: {},
-        toolCalls: [],
-        chartToolMessages: [],
-        errors: [],
-        parseErrors: 0,
-    };
 }
 
 function resolveCsrfToken(): string | undefined {
@@ -108,23 +97,6 @@ function resolveCsrfToken(): string | undefined {
     }
 
     return token.getAttribute('content') ?? undefined;
-}
-
-function resolveXsrfCookieToken(): string | undefined {
-    if (typeof document === 'undefined') {
-        return undefined;
-    }
-
-    const cookieToken = document.cookie
-        .split('; ')
-        .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-
-    if (!cookieToken) {
-        return undefined;
-    }
-
-    return decodeURIComponent(cookieToken);
 }
 
 function toNumberValue(value: unknown): number {
@@ -249,28 +221,6 @@ function parseChartPayloads(raw: unknown): ChartPayload[] {
     const chart = normalizeChartPayload(source);
 
     return chart ? [chart] : [];
-}
-
-function chartSignature(chart: ChartPayload): string {
-    return `${chart.kind}:${chart.title}:${chart.series.map((series) => series.key).join('|')}:${chart.points.length}`;
-}
-
-function mergeChartPayloads(currentCharts: ChartPayload[], nextCharts: ChartPayload[]): ChartPayload[] {
-    const signatures = new Set(currentCharts.map((chart) => chartSignature(chart)));
-    const merged = [...currentCharts];
-
-    for (const chart of nextCharts) {
-        const signature = chartSignature(chart);
-
-        if (signatures.has(signature)) {
-            continue;
-        }
-
-        signatures.add(signature);
-        merged.push(chart);
-    }
-
-    return merged;
 }
 
 function LineChartPreview({ chart }: { chart: ChartPayload }) {
@@ -577,23 +527,15 @@ function formatConversationTimestamp(value: string): string {
 export default function FinanceChatPage({ conversations = [], activeConversationId = null, initialMessages = [] }: FinanceChatPageProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [draft, setDraft] = useState('');
-    const [streamingReply, setStreamingReply] = useState('');
-    const [streamingCharts, setStreamingCharts] = useState<ChartPayload[]>([]);
+    const [isSending, setIsSending] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [lastStreamDebug, setLastStreamDebug] = useState<StreamDebugSnapshot | null>(null);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(activeConversationId);
     const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
-    const streamBufferRef = useRef('');
-    const streamEventBufferRef = useRef('');
-    const streamChartBufferRef = useRef<ChartPayload[]>([]);
-    const streamChartToolMessageBufferRef = useRef<string[]>([]);
-    const streamDebugRef = useRef<StreamDebugSnapshot>(createEmptyStreamDebugSnapshot());
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const nextMessageIdRef = useRef(1);
     const csrfToken = useMemo(() => resolveCsrfToken(), []);
-    const xsrfCookieToken = useMemo(() => resolveXsrfCookieToken(), []);
 
     useEffect(() => {
         setMessages(
@@ -624,198 +566,18 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         ]);
     };
 
-    const applyStreamChunk = (chunk: string): void => {
-        streamEventBufferRef.current = `${streamEventBufferRef.current}${chunk}`;
-
-        const events = streamEventBufferRef.current.split('\n\n');
-        streamEventBufferRef.current = events.pop() ?? '';
-
-        for (const eventBlock of events) {
-            const dataPayload = eventBlock
-                .split('\n')
-                .filter((line) => line.startsWith('data:'))
-                .map((line) => line.replace(/^data:\s?/, ''))
-                .join('\n')
-                .trim();
-
-            if (dataPayload === '' || dataPayload === '[DONE]') {
-                continue;
-            }
-
-            try {
-                const event = JSON.parse(dataPayload) as {
-                    type?: string;
-                    delta?: string;
-                    message?: string;
-                    errorText?: string;
-                    tool_name?: string;
-                    arguments?: unknown;
-                    result?: unknown;
-                };
-
-                const eventType = typeof event.type === 'string' && event.type !== '' ? event.type : 'unknown';
-
-                streamDebugRef.current.eventCounts[eventType] = (streamDebugRef.current.eventCounts[eventType] ?? 0) + 1;
-
-                if (event.type === 'text_delta' && typeof event.delta === 'string') {
-                    streamBufferRef.current = `${streamBufferRef.current}${event.delta}`;
-                    setStreamingReply(streamBufferRef.current);
-                }
-
-                if (event.type === 'tool_call' && typeof event.tool_name === 'string') {
-                    streamDebugRef.current.toolCalls = [...streamDebugRef.current.toolCalls, event.tool_name];
-
-                    if (import.meta.env.DEV) {
-                        console.debug('[finance-chat] tool_call', {
-                            tool: event.tool_name,
-                            arguments: event.arguments,
-                        });
-                    }
-                }
-
-                if (event.type === 'tool_result' && event.tool_name === 'GenerateFinanceChartTool') {
-                    const charts = parseChartPayloads(event.result);
-
-                    if (charts.length > 0) {
-                        streamChartBufferRef.current = mergeChartPayloads(streamChartBufferRef.current, charts);
-                        setStreamingCharts(streamChartBufferRef.current);
-                    }
-
-                    if (charts.length === 0 && typeof event.result === 'string' && event.result.trim() !== '') {
-                        streamChartToolMessageBufferRef.current = [...streamChartToolMessageBufferRef.current, event.result.trim()];
-                        streamDebugRef.current.chartToolMessages = [...streamChartToolMessageBufferRef.current];
-                    }
-
-                    if (import.meta.env.DEV) {
-                        console.debug('[finance-chat] chart_tool_result', {
-                            hasCharts: charts.length > 0,
-                            chartsCount: charts.length,
-                            rawResultType: typeof event.result,
-                        });
-                    }
-                }
-
-                if (typeof event.message === 'string' && event.message.trim() !== '') {
-                    streamDebugRef.current.errors = [...streamDebugRef.current.errors, event.message.trim()];
-                }
-
-                if (typeof event.errorText === 'string' && event.errorText.trim() !== '') {
-                    streamDebugRef.current.errors = [...streamDebugRef.current.errors, event.errorText.trim()];
-                }
-            } catch {
-                streamDebugRef.current.parseErrors += 1;
-            }
-        }
-    };
-
-    const { send, cancel, isFetching, isStreaming } = useStream<{ message: string; conversation_id?: string; _token?: string }>(streamEndpoint, {
-        csrfToken,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            ...(xsrfCookieToken ? { 'X-XSRF-TOKEN': xsrfCookieToken } : {}),
-        },
-        onResponse: () => {
-            streamBufferRef.current = '';
-            streamEventBufferRef.current = '';
-            streamChartBufferRef.current = [];
-            streamChartToolMessageBufferRef.current = [];
-            streamDebugRef.current = createEmptyStreamDebugSnapshot();
-            setStreamingReply('');
-            setStreamingCharts([]);
-            setErrorMessage(null);
-            setLastStreamDebug(null);
-        },
-        onData: (chunk) => {
-            applyStreamChunk(chunk);
-        },
-        onFinish: () => {
-            if (streamEventBufferRef.current !== '') {
-                applyStreamChunk('\n\n');
-            }
-
-            const response = streamBufferRef.current.trim();
-            const charts = streamChartBufferRef.current;
-            const chartToolMessages = streamChartToolMessageBufferRef.current;
-            const snapshot = {
-                eventCounts: { ...streamDebugRef.current.eventCounts },
-                toolCalls: [...streamDebugRef.current.toolCalls],
-                chartToolMessages: [...chartToolMessages],
-                errors: [...streamDebugRef.current.errors],
-                parseErrors: streamDebugRef.current.parseErrors,
-            };
-
-            streamBufferRef.current = '';
-            streamEventBufferRef.current = '';
-            streamChartBufferRef.current = [];
-            streamChartToolMessageBufferRef.current = [];
-            streamDebugRef.current = createEmptyStreamDebugSnapshot();
-            setStreamingReply('');
-            setStreamingCharts([]);
-            setLastStreamDebug(snapshot);
-
-            if (import.meta.env.DEV) {
-                console.debug('[finance-chat] stream_finish', snapshot);
-            }
-
-            if (response === '' && charts.length === 0) {
-                if (chartToolMessages.length > 0) {
-                    appendMessage('assistant', chartToolMessages.join('\n\n'));
-
-                    return;
-                }
-
-                const debugHint = snapshot.errors[0] ? ` Debug: ${snapshot.errors[0]}` : '';
-                setErrorMessage(`No pude generar una respuesta. Intenta de nuevo.${debugHint}`);
-
-                return;
-            }
-
-            appendMessage('assistant', response === '' ? 'Aqui tienes el grafico solicitado.' : response, charts);
-
-            router.get(chatPageEndpoint, selectedConversationId ? { conversation: selectedConversationId } : {}, {
-                only: ['conversations', 'activeConversationId'],
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            });
-        },
-        onError: () => {
-            const snapshot = {
-                eventCounts: { ...streamDebugRef.current.eventCounts },
-                toolCalls: [...streamDebugRef.current.toolCalls],
-                chartToolMessages: [...streamChartToolMessageBufferRef.current],
-                errors: [...streamDebugRef.current.errors],
-                parseErrors: streamDebugRef.current.parseErrors,
-            };
-
-            streamBufferRef.current = '';
-            streamEventBufferRef.current = '';
-            streamChartBufferRef.current = [];
-            streamChartToolMessageBufferRef.current = [];
-            streamDebugRef.current = createEmptyStreamDebugSnapshot();
-            setStreamingReply('');
-            setStreamingCharts([]);
-            setLastStreamDebug(snapshot);
-            setErrorMessage('No pude completar la respuesta en streaming. Intenta de nuevo.');
-
-            if (import.meta.env.DEV) {
-                console.debug('[finance-chat] stream_error', snapshot);
-            }
-        },
-    });
-
     useEffect(() => {
         if (!scrollContainerRef.current) {
             return;
         }
 
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }, [messages, streamingReply, streamingCharts, isStreaming]);
+    }, [messages, isSending]);
 
-    const canSend = draft.trim().length > 0 && !isFetching && !isStreaming && !isCreatingConversation;
-    const hasPendingStream = isStreaming || streamingReply !== '' || streamingCharts.length > 0;
+    const canSend = draft.trim().length > 0 && !isSending && !isCreatingConversation;
+    const hasPendingResponse = isSending;
 
-    const submitMessage = (event: FormEvent<HTMLFormElement>): void => {
+    const submitMessage = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
 
         const message = draft.trim();
@@ -827,20 +589,70 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         appendMessage('user', message);
         setDraft('');
         setErrorMessage(null);
-        setLastStreamDebug(null);
 
-        send({
-            message,
-            ...(selectedConversationId ? { conversation_id: selectedConversationId } : {}),
-            ...(csrfToken ? { _token: csrfToken } : {}),
-        });
+        const activeConversationId = selectedConversationId;
+
+        setIsSending(true);
+
+        try {
+            const httpResponse = await fetch(streamEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    message,
+                    ...(activeConversationId ? { conversation_id: activeConversationId } : {}),
+                    ...(csrfToken ? { _token: csrfToken } : {}),
+                }),
+            });
+
+            let payload: FinanceChatResponse = {};
+
+            try {
+                payload = (await httpResponse.json()) as FinanceChatResponse;
+            } catch {
+                payload = {};
+            }
+
+            if (!httpResponse.ok || payload.ok === false) {
+                throw new Error(typeof payload.message === 'string' && payload.message !== '' ? payload.message : 'No pude completar la respuesta.');
+            }
+
+            const charts = parseChartPayloads(payload.charts ?? []);
+            const reply = typeof payload.reply === 'string' ? payload.reply.trim() : '';
+
+            if (reply === '' && charts.length === 0) {
+                throw new Error('No pude generar una respuesta. Intenta de nuevo.');
+            }
+
+            appendMessage('assistant', reply === '' ? 'Aqui tienes el grafico solicitado.' : reply, charts);
+
+            const responseConversationId =
+                typeof payload.conversation_id === 'string' && payload.conversation_id !== '' ? payload.conversation_id : null;
+            const nextConversationId = responseConversationId ?? activeConversationId;
+
+            if (nextConversationId !== null) {
+                setSelectedConversationId(nextConversationId);
+            }
+
+            router.get(chatPageEndpoint, nextConversationId ? { conversation: nextConversationId } : {}, {
+                only: ['conversations', 'activeConversationId'],
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        } catch {
+            setErrorMessage('No pude completar la respuesta. Intenta de nuevo.');
+        } finally {
+            setIsSending(false);
+        }
     };
 
     const openConversation = (conversationId: string): void => {
-        if (isStreaming) {
-            cancel();
-        }
-
         router.get(
             chatPageEndpoint,
             { conversation: conversationId },
@@ -852,10 +664,6 @@ export default function FinanceChatPage({ conversations = [], activeConversation
     };
 
     const startNewConversation = async (): Promise<void> => {
-        if (isStreaming) {
-            cancel();
-        }
-
         setIsCreatingConversation(true);
         setErrorMessage(null);
 
@@ -1072,7 +880,7 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                             ref={scrollContainerRef}
                             className="max-h-[70vh] flex-1 space-y-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4 md:p-6"
                         >
-                            {messages.length === 0 && !hasPendingStream && (
+                            {messages.length === 0 && !hasPendingResponse && (
                                 <div className="border-border/80 bg-muted/20 text-muted-foreground rounded-2xl border border-dashed p-6 text-sm">
                                     Prueba con frases como "Registra un gasto de 15 por cafe en Efectivo" o "Cuanto gaste en comida este mes".
                                 </div>
@@ -1103,25 +911,13 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                                 </div>
                             ))}
 
-                            {hasPendingStream && (
+                            {hasPendingResponse && (
                                 <div className="flex justify-start">
                                     <div className="border-border/70 bg-muted/40 max-w-[95%] rounded-2xl border px-4 py-3 text-sm md:max-w-[80%]">
-                                        {streamingReply !== '' && <p className="whitespace-pre-wrap">{streamingReply}</p>}
-
-                                        {streamingCharts.length > 0 && (
-                                            <div className="mt-3 space-y-3">
-                                                {streamingCharts.map((chart, chartIndex) => (
-                                                    <FinanceChartCard key={`streaming-chart-${chartIndex}`} chart={chart} />
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {streamingReply === '' && streamingCharts.length === 0 && (
-                                            <div className="text-muted-foreground flex items-center gap-2">
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                                Generando respuesta...
-                                            </div>
-                                        )}
+                                        <div className="text-muted-foreground flex items-center gap-2">
+                                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            Generando respuesta...
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1130,33 +926,17 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                         <div className="border-border/70 bg-background/90 border-t p-4 md:p-5">
                             {errorMessage && <p className="text-destructive mb-3 text-sm">{errorMessage}</p>}
 
-                            {errorMessage && lastStreamDebug && (
-                                <details className="mb-3 rounded-lg border p-2 text-xs">
-                                    <summary className="cursor-pointer font-medium">Debug stream</summary>
-                                    <pre className="bg-muted/30 mt-2 max-h-40 overflow-auto rounded p-2 font-mono text-[11px] leading-relaxed">
-                                        {JSON.stringify(lastStreamDebug, null, 2)}
-                                    </pre>
-                                </details>
-                            )}
-
                             <form onSubmit={submitMessage} className="space-y-3">
                                 <Textarea
                                     value={draft}
                                     onChange={(event) => setDraft(event.target.value)}
                                     rows={3}
                                     placeholder=""
-                                    disabled={isFetching || isStreaming || isCreatingConversation}
+                                    disabled={isSending || isCreatingConversation}
                                     maxLength={4000}
                                 />
 
                                 <div className="flex items-center justify-end gap-2">
-                                    {isStreaming && (
-                                        <Button type="button" variant="outline" onClick={cancel}>
-                                            <StopCircle className="h-4 w-4" />
-                                            Detener
-                                        </Button>
-                                    )}
-
                                     <Button type="submit" disabled={!canSend}>
                                         <SendHorizontal className="h-4 w-4" />
                                         Enviar

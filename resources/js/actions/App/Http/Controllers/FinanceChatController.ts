@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\FinanceChatController::index
-* @see app/Http/Controllers/FinanceChatController.php:27
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::index
-* @see app/Http/Controllers/FinanceChatController.php:27
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::index
-* @see app/Http/Controllers/FinanceChatController.php:27
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::index
-* @see app/Http/Controllers/FinanceChatController.php:27
+* @see app/Http/Controllers/FinanceChatController.php:26
 * @route '/finance/chat'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::stream
-* @see app/Http/Controllers/FinanceChatController.php:64
+* @see app/Http/Controllers/FinanceChatController.php:63
 * @route '/finance/chat/stream'
 */
 export const stream = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ stream.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::stream
-* @see app/Http/Controllers/FinanceChatController.php:64
+* @see app/Http/Controllers/FinanceChatController.php:63
 * @route '/finance/chat/stream'
 */
 stream.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ stream.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::stream
-* @see app/Http/Controllers/FinanceChatController.php:64
+* @see app/Http/Controllers/FinanceChatController.php:63
 * @route '/finance/chat/stream'
 */
 stream.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -79,7 +79,7 @@ stream.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::reset
-* @see app/Http/Controllers/FinanceChatController.php:97
+* @see app/Http/Controllers/FinanceChatController.php:141
 * @route '/finance/chat/reset'
 */
 export const reset = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -94,7 +94,7 @@ reset.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::reset
-* @see app/Http/Controllers/FinanceChatController.php:97
+* @see app/Http/Controllers/FinanceChatController.php:141
 * @route '/finance/chat/reset'
 */
 reset.url = (options?: RouteQueryOptions) => {
@@ -103,7 +103,7 @@ reset.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::reset
-* @see app/Http/Controllers/FinanceChatController.php:97
+* @see app/Http/Controllers/FinanceChatController.php:141
 * @route '/finance/chat/reset'
 */
 reset.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -113,7 +113,7 @@ reset.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::rename
-* @see app/Http/Controllers/FinanceChatController.php:104
+* @see app/Http/Controllers/FinanceChatController.php:148
 * @route '/finance/chat/{conversation}'
 */
 export const rename = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -128,7 +128,7 @@ rename.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::rename
-* @see app/Http/Controllers/FinanceChatController.php:104
+* @see app/Http/Controllers/FinanceChatController.php:148
 * @route '/finance/chat/{conversation}'
 */
 rename.url = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -155,7 +155,7 @@ rename.url = (args: { conversation: string | number } | [conversation: string | 
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::rename
-* @see app/Http/Controllers/FinanceChatController.php:104
+* @see app/Http/Controllers/FinanceChatController.php:148
 * @route '/finance/chat/{conversation}'
 */
 rename.patch = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -165,7 +165,7 @@ rename.patch = (args: { conversation: string | number } | [conversation: string 
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::destroy
-* @see app/Http/Controllers/FinanceChatController.php:129
+* @see app/Http/Controllers/FinanceChatController.php:173
 * @route '/finance/chat/{conversation}'
 */
 export const destroy = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -180,7 +180,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::destroy
-* @see app/Http/Controllers/FinanceChatController.php:129
+* @see app/Http/Controllers/FinanceChatController.php:173
 * @route '/finance/chat/{conversation}'
 */
 destroy.url = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -207,7 +207,7 @@ destroy.url = (args: { conversation: string | number } | [conversation: string |
 
 /**
 * @see \App\Http\Controllers\FinanceChatController::destroy
-* @see app/Http/Controllers/FinanceChatController.php:129
+* @see app/Http/Controllers/FinanceChatController.php:173
 * @route '/finance/chat/{conversation}'
 */
 destroy.delete = (args: { conversation: string | number } | [conversation: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
