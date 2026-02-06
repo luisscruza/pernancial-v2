@@ -42,7 +42,6 @@ final readonly class UpdateAccountAction
                 $this->handleBalanceAdjustment($account, $adjustment);
             }
 
-
             return $account->fresh();
         });
     }
@@ -59,7 +58,6 @@ final readonly class UpdateAccountAction
             return;
         }
 
-
         $transactionDto = new CreateTransactionDto(
             type: $difference < 0 ? TransactionType::ADJUSTMENT_NEGATIVE : TransactionType::ADJUSTMENT_POSITIVE,
             amount: abs($difference),
@@ -70,7 +68,6 @@ final readonly class UpdateAccountAction
             conversion_rate: 1,
             received_amount: null,
         );
-
 
         $this->createTransactionAction->handle($account, $transactionDto);
     }

@@ -51,7 +51,7 @@ final class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'currency' => $user->currency,
-                    'accounts' => $user->accounts()->active()->get()->map(fn($account): array => [
+                    'accounts' => $user->accounts()->active()->get()->map(fn ($account): array => [
                         'id' => $account->id,
                         'uuid' => $account->uuid,
                         'name' => $account->name,
@@ -60,15 +60,15 @@ final class HandleInertiaRequests extends Middleware
                     ])->values(),
                 ] : null,
             ],
-            'ziggy' => fn(): array => [
+            'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'base_currency' => $user ? $user->currencies()->where('is_base', true)->first() : null,
             'flash' => [
-                'success' => fn(): ?string => $request->session()->get('success'),
-                'error' => fn(): ?string => $request->session()->get('error'),
-                'message' => fn(): ?string => $request->session()->get('message'),
+                'success' => fn (): ?string => $request->session()->get('success'),
+                'error' => fn (): ?string => $request->session()->get('error'),
+                'message' => fn (): ?string => $request->session()->get('message'),
             ],
         ];
     }

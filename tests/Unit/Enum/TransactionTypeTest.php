@@ -8,7 +8,7 @@ use App\Enums\TransactionType;
 
 test('cases', function () {
     expect(TransactionType::cases())->toBeArray()
-        ->and(TransactionType::cases())->toHaveCount(6)
+        ->and(TransactionType::cases())->toHaveCount(8)
         ->and(TransactionType::cases())->toBe([
             TransactionType::INCOME,
             TransactionType::EXPENSE,
@@ -16,6 +16,8 @@ test('cases', function () {
             TransactionType::INITIAL,
             TransactionType::TRANSFER_IN,
             TransactionType::TRANSFER_OUT,
+            TransactionType::ADJUSTMENT_NEGATIVE,
+            TransactionType::ADJUSTMENT_POSITIVE,
         ]);
 });
 

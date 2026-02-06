@@ -42,13 +42,14 @@ test('user can visit account page', function () {
                         ->whereNotNull('uuid')
                         ->whereNotNull('balance_in_base')
                         ->where('name', $account->name)
-                        ->where('type', $account->type->label())
+                        ->where('type', $account->type)
                         ->where('accounting_type', $account->accounting_type)
                         ->where('emoji', $account->emoji)
                         ->where('color', $account->color)
                         ->where('balance', $account->balance)
                         ->where('currency', CurrencyResource::make($account->currency)->resolve())
                         ->where('description', $account->description)
+                        ->etc()
                 )
                 ->has(
                     'transactions',

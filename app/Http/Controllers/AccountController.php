@@ -44,13 +44,13 @@ final class AccountController
      */
     public function create(#[CurrentUser] User $user): Response
     {
-        $currencies = $user->currencies()->get()->map(fn(Currency $currency): array => [
+        $currencies = $user->currencies()->get()->map(fn (Currency $currency): array => [
             'id' => $currency->id,
             'name' => $currency->name,
             'symbol' => $currency->symbol,
         ]);
 
-        $accountTypes = collect(AccountType::cases())->map(fn(AccountType $type): array => [
+        $accountTypes = collect(AccountType::cases())->map(fn (AccountType $type): array => [
             'value' => $type->value,
             'label' => $type->label(),
             'emoji' => $type->emoji(),
@@ -80,7 +80,7 @@ final class AccountController
      */
     public function edit(Account $account): Response
     {
-        $accountTypes = collect(AccountType::cases())->map(fn(AccountType $type): array => [
+        $accountTypes = collect(AccountType::cases())->map(fn (AccountType $type): array => [
             'value' => $type->value,
             'label' => $type->label(),
             'emoji' => $type->emoji(),
@@ -118,7 +118,7 @@ final class AccountController
         $incomeCategories = $user->categories()
             ->where('type', CategoryType::INCOME)
             ->get()
-            ->map(fn(Category $category): array => [
+            ->map(fn (Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'emoji' => $category->emoji,
@@ -128,7 +128,7 @@ final class AccountController
         $expenseCategories = $user->categories()
             ->where('type', CategoryType::EXPENSE)
             ->get()
-            ->map(fn(Category $category): array => [
+            ->map(fn (Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'emoji' => $category->emoji,
@@ -139,7 +139,7 @@ final class AccountController
             ->where('id', '!=', $account->id)
             ->with('currency')
             ->get()
-            ->map(fn(Account $acc): array => [
+            ->map(fn (Account $acc): array => [
                 'id' => $acc->id,
                 'uuid' => $acc->uuid,
                 'name' => $acc->name,
@@ -152,19 +152,19 @@ final class AccountController
             ]);
 
         $transactionTypes = collect(TransactionType::cases())
-            ->filter(fn(TransactionType $type): bool => $type->isCreatable())
-            ->map(fn(TransactionType $type): array => [
+            ->filter(fn (TransactionType $type): bool => $type->isCreatable())
+            ->map(fn (TransactionType $type): array => [
                 'value' => $type->value,
                 'label' => $type->label(),
             ]);
 
         return Inertia::render('accounts/show', [
-            'account' => fn() => AccountResource::make($account->fresh()),
-            'transactions' => fn() => Inertia::deepMerge(
+            'account' => fn () => AccountResource::make($account->fresh()),
+            'transactions' => fn () => Inertia::deepMerge(
                 $account->transactions()
                     ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
-                    ->when($dateFrom, fn($query) => $query->whereDate('transaction_date', '>=', $dateFrom))
-                    ->when($dateTo, fn($query) => $query->whereDate('transaction_date', '<=', $dateTo))
+                    ->when($dateFrom, fn ($query) => $query->whereDate('transaction_date', '>=', $dateFrom))
+                    ->when($dateTo, fn ($query) => $query->whereDate('transaction_date', '<=', $dateTo))
                     ->orderBy('transaction_date', 'desc')
                     ->orderBy('created_at', 'desc')
                     ->paginate($per_page, page: $page)
