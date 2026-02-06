@@ -22,6 +22,7 @@ final class CreateTransactionDto
         public ?Category $category,
         public ?float $conversion_rate,
         public ?float $received_amount = null,
+        public bool $ai_assisted = false,
     ) {
         //
     }

@@ -20,7 +20,7 @@ final class ListFinanceAccountsTool implements Tool
      */
     public function description(): Stringable|string
     {
-        return 'List the user accounts with IDs, balances, and currency codes.';
+        return 'Lista las cuentas del usuario con IDs, saldos y codigos de moneda.';
     }
 
     /**
@@ -38,14 +38,14 @@ final class ListFinanceAccountsTool implements Tool
             ->get();
 
         if ($accounts->isEmpty()) {
-            return 'No accounts found for this user.';
+            return 'No se encontraron cuentas para este usuario.';
         }
 
-        $lines = ['Accounts:'];
+        $lines = ['Cuentas:'];
 
         foreach ($accounts as $account) {
             $currencyCode = $account->currency->code ?? 'N/A';
-            $status = $account->is_active ? 'active' : 'inactive';
+            $status = $account->is_active ? 'activa' : 'inactiva';
 
             $lines[] = sprintf(
                 '- id=%d, name="%s", type=%s, balance=%.2f %s, status=%s',
@@ -68,7 +68,7 @@ final class ListFinanceAccountsTool implements Tool
     {
         return [
             'include_inactive' => $schema->boolean()
-                ->description('Set true to include inactive accounts.'),
+                ->description('Define true para incluir cuentas inactivas.'),
         ];
     }
 }

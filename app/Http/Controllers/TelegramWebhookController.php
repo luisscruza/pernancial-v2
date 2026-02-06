@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Ai\Agents\FinanceAgent;
 use App\Models\User;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +17,9 @@ final class TelegramWebhookController
 {
     public function __invoke(Request $request): JsonResponse
     {
+        \Log::debug('Received Telegram webhook', ['payload' => $request->all()]);
+        
+        
         if (! $this->hasValidWebhookSecret($request)) {
             return response()->json(['ok' => true]);
         }
@@ -28,7 +32,7 @@ final class TelegramWebhookController
         }
 
         if (! $this->isAuthorizedChat($chatId)) {
-            $this->sendMessage($chatId, 'Access denied. This bot is configured for a single owner chat.');
+            $this->sendMessage($chatId, 'Acceso denegado. Este bot esta configurado para un unico chat propietario.');
 
             return response()->json(['ok' => true]);
         }
@@ -41,7 +45,7 @@ final class TelegramWebhookController
 
         if (Str::startsWith($messageText, '/reset')) {
             Cache::forget($this->conversationCacheKey($chatId));
-            $this->sendMessage($chatId, 'Conversation context reset. Start a new finance request anytime.');
+            $this->sendMessage($chatId, 'Contexto de conversacion reiniciado. Puedes empezar una nueva solicitud financiera cuando quieras.');
 
             return response()->json(['ok' => true]);
         }
@@ -49,7 +53,7 @@ final class TelegramWebhookController
         $owner = $this->ownerUser();
 
         if (! $owner) {
-            $this->sendMessage($chatId, 'Bot owner is not configured. Set TELEGRAM_OWNER_EMAIL first.');
+            $this->sendMessage($chatId, 'El propietario del bot no esta configurado. Define primero TELEGRAM_OWNER_EMAIL.');
 
             return response()->json(['ok' => true]);
         }
@@ -73,7 +77,7 @@ final class TelegramWebhookController
         $reply = $this->strip((string) $response);
 
         if ($reply === '') {
-            $reply = 'I could not generate a response. Please try again.';
+            $reply = 'No pude generar una respuesta. Intentalo de nuevo.';
         }
 
         $this->sendMessage($chatId, $reply);
@@ -120,9 +124,24 @@ final class TelegramWebhookController
             return;
         }
 
+        $formattedMessage = Str::limit($message, 4000);
+
+        /** @var Response $response */
+        $response = Http::asForm()->timeout(15)->post("https://api.telegram.org/bot{$token}/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => $formattedMessage,
+            'parse_mode' => 'Markdown',
+            'disable_web_page_preview' => true,
+        ]);
+
+        if ($response->successful()) {
+            return;
+        }
+
         Http::asForm()->timeout(15)->post("https://api.telegram.org/bot{$token}/sendMessage", [
             'chat_id' => $chatId,
-            'text' => Str::limit($message, 4000),
+            'text' => $this->stripTelegramMarkdown($formattedMessage),
+            'disable_web_page_preview' => true,
         ]);
     }
 
@@ -134,21 +153,26 @@ final class TelegramWebhookController
     private function helpMessage(): string
     {
         return implode("\n", [
-            'Hi. I can help you manage your finance records.',
+            'Hola. Puedo ayudarte a gestionar tus finanzas.',
             '',
-            'Examples:',
-            '- "Register expense 12.50 for coffee in account Cash category Food today"',
-            '- "Add income 1200 salary to account Bank on 2026-02-01"',
-            '- "Transfer 200 from account Cash to account Savings"',
+            'Ejemplos:',
+            '- "Registra un gasto de 12.50 por cafe en la cuenta Efectivo categoria Comida hoy"',
+            '- "Agrega un ingreso de 1200 de salario a la cuenta Banco el 2026-02-01"',
+            '- "Transfiere 200 desde la cuenta Efectivo a la cuenta Ahorros"',
             '',
-            'Commands:',
-            '- /help: show this message',
-            '- /reset: clear conversation context',
+            'Comandos:',
+            '- /help: muestra este mensaje',
+            '- /reset: limpia el contexto de la conversacion',
         ]);
     }
 
     private function strip(string $value): string
     {
         return preg_replace('/^\s+|\s+$/u', '', $value) ?? $value;
+    }
+
+    private function stripTelegramMarkdown(string $message): string
+    {
+        return str_replace(['*', '_', '`'], '', $message);
     }
 }

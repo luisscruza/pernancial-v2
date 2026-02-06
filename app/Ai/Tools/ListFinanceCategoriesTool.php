@@ -18,7 +18,7 @@ final class ListFinanceCategoriesTool implements Tool
 
     public function description(): Stringable|string
     {
-        return 'List transaction categories for the user, filtered by type when needed.';
+        return 'Lista categorias de transaccion del usuario, con filtro por tipo cuando sea necesario.';
     }
 
     public function handle(Request $request): Stringable|string
@@ -26,7 +26,7 @@ final class ListFinanceCategoriesTool implements Tool
         $type = mb_strtolower($this->strip((string) ($request['type'] ?? '')));
 
         if ($type !== '' && ! in_array($type, [CategoryType::INCOME->value, CategoryType::EXPENSE->value], true)) {
-            return 'Invalid type. Use "income" or "expense".';
+            return 'Tipo invalido. Usa "income" o "expense".';
         }
 
         $categories = Category::query()
@@ -38,13 +38,13 @@ final class ListFinanceCategoriesTool implements Tool
 
         if ($categories->isEmpty()) {
             if ($type === '') {
-                return 'No categories found for this user.';
+                return 'No se encontraron categorias para este usuario.';
             }
 
-            return sprintf('No %s categories found for this user.', $type);
+            return sprintf('No se encontraron categorias de tipo %s para este usuario.', $type);
         }
 
-        $lines = ['Categories:'];
+        $lines = ['Categorias:'];
 
         foreach ($categories as $category) {
             $lines[] = sprintf(
@@ -62,7 +62,7 @@ final class ListFinanceCategoriesTool implements Tool
     {
         return [
             'type' => $schema->string()
-                ->description('Optional category type filter: income or expense.')
+                ->description('Filtro opcional de tipo de categoria: income o expense.')
                 ->enum([CategoryType::INCOME->value, CategoryType::EXPENSE->value]),
         ];
     }

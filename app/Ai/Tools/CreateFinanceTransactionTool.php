@@ -24,7 +24,7 @@ final class CreateFinanceTransactionTool implements Tool
 
     public function description(): Stringable|string
     {
-        return 'Create an income, expense, or transfer transaction for the user.';
+        return 'Crea una transaccion de ingreso, gasto o transferencia para el usuario.';
     }
 
     public function handle(Request $request): Stringable|string
@@ -32,19 +32,19 @@ final class CreateFinanceTransactionTool implements Tool
         $transactionType = TransactionType::tryFrom((string) ($request['type'] ?? ''));
 
         if (! $transactionType || ! $transactionType->isCreatable()) {
-            return 'Invalid transaction type. Use income, expense, or transfer.';
+            return 'Tipo de transaccion invalido. Usa income, expense o transfer.';
         }
 
         $amount = $this->toFloat($request['amount'] ?? null);
 
         if ($amount === null || $amount <= 0) {
-            return 'Amount must be a number greater than zero.';
+            return 'El monto debe ser un numero mayor que cero.';
         }
 
         $transactionDate = $this->resolveDate($request['transaction_date'] ?? null);
 
         if ($transactionDate === null) {
-            return 'transaction_date must use YYYY-MM-DD format.';
+            return 'transaction_date debe usar el formato YYYY-MM-DD.';
         }
 
         $account = $this->resolveAccount(
@@ -53,7 +53,7 @@ final class CreateFinanceTransactionTool implements Tool
         );
 
         if (! $account) {
-            return 'Unable to resolve source account. Provide account_id or account_name from the accounts tool.';
+            return 'No se pudo resolver la cuenta origen. Proporciona account_id o account_name desde la herramienta de cuentas.';
         }
 
         $expectedCategoryType = $transactionType === TransactionType::INCOME
@@ -69,12 +69,12 @@ final class CreateFinanceTransactionTool implements Tool
             );
 
             if (! $category) {
-                return 'Unable to resolve category. Provide category_id or category_name from the categories tool.';
+                return 'No se pudo resolver la categoria. Proporciona category_id o category_name desde la herramienta de categorias.';
             }
 
             if ($category->type !== $expectedCategoryType) {
                 return sprintf(
-                    'Category type mismatch. %s transactions require a %s category.',
+                    'La categoria no coincide. Las transacciones %s requieren una categoria %s.',
                     $transactionType->value,
                     $expectedCategoryType->value,
                 );
@@ -90,11 +90,11 @@ final class CreateFinanceTransactionTool implements Tool
             );
 
             if (! $destinationAccount) {
-                return 'Unable to resolve destination account. Provide destination_account_id or destination_account_name.';
+                return 'No se pudo resolver la cuenta destino. Proporciona destination_account_id o destination_account_name.';
             }
 
             if ($destinationAccount->is($account)) {
-                return 'Source and destination accounts must be different.';
+                return 'La cuenta origen y destino deben ser diferentes.';
             }
         }
 
@@ -113,18 +113,19 @@ final class CreateFinanceTransactionTool implements Tool
             category: $category,
             conversion_rate: 1.0,
             received_amount: null,
+            ai_assisted: true,
         );
 
         try {
             app(CreateTransactionAction::class)->handle($account, $dto);
         } catch (Throwable $exception) {
-            return sprintf('Failed to create transaction: %s', $exception->getMessage());
+            return sprintf('No se pudo crear la transaccion: %s', $exception->getMessage());
         }
 
         $account->refresh()->loadMissing('currency');
 
         $message = sprintf(
-            'Transaction created: type=%s amount=%.2f account="%s" date=%s. New balance=%.2f %s.',
+            'Transaccion creada: tipo=%s monto=%.2f cuenta="%s" fecha=%s. Nuevo saldo=%.2f %s.',
             $transactionType->value,
             $amount,
             $account->name,
@@ -137,7 +138,7 @@ final class CreateFinanceTransactionTool implements Tool
             $destinationAccount->refresh()->loadMissing('currency');
 
             $message .= sprintf(
-                ' Destination "%s" balance=%.2f %s.',
+                ' Destino "%s" saldo=%.2f %s.',
                 $destinationAccount->name,
                 $destinationAccount->balance,
                 $destinationAccount->currency->code,
@@ -151,7 +152,7 @@ final class CreateFinanceTransactionTool implements Tool
     {
         return [
             'type' => $schema->string()
-                ->description('Transaction type.')
+                ->description('Tipo de transaccion.')
                 ->enum([
                     TransactionType::INCOME->value,
                     TransactionType::EXPENSE->value,
@@ -159,24 +160,24 @@ final class CreateFinanceTransactionTool implements Tool
                 ])
                 ->required(),
             'amount' => $schema->number()
-                ->description('Transaction amount greater than zero.')
+                ->description('Monto de la transaccion mayor que cero.')
                 ->required(),
             'transaction_date' => $schema->string()
-                ->description('Optional date in YYYY-MM-DD format. Defaults to today if omitted.'),
+                ->description('Fecha opcional en formato YYYY-MM-DD. Si se omite, usa la fecha de hoy.'),
             'description' => $schema->string()
-                ->description('Optional human-readable transaction description.'),
+                ->description('Descripcion opcional legible de la transaccion.'),
             'account_id' => $schema->integer()
-                ->description('Source account ID.'),
+                ->description('ID de la cuenta origen.'),
             'account_name' => $schema->string()
-                ->description('Source account exact name if account_id is not provided.'),
+                ->description('Nombre exacto de la cuenta origen si no se envia account_id.'),
             'category_id' => $schema->integer()
-                ->description('Category ID. Required for income and expense.'),
+                ->description('ID de categoria. Obligatorio para income y expense.'),
             'category_name' => $schema->string()
-                ->description('Category exact name. Required for income and expense when category_id is missing.'),
+                ->description('Nombre exacto de categoria. Obligatorio para income y expense cuando falta category_id.'),
             'destination_account_id' => $schema->integer()
-                ->description('Destination account ID. Required for transfers.'),
+                ->description('ID de cuenta destino. Obligatorio para transferencias.'),
             'destination_account_name' => $schema->string()
-                ->description('Destination account exact name if destination_account_id is not provided.'),
+                ->description('Nombre exacto de cuenta destino si no se envia destination_account_id.'),
         ];
     }
 

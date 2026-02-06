@@ -1,16 +1,16 @@
-import AppLayout from '@/layouts/app-layout';
-import { PaginatedProps, SharedData } from '@/types';
-import { Category, Transaction } from '@/types';
-import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, Pencil, X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { Category, PaginatedProps, SharedData, Transaction } from '@/types';
 import { formatCurrency } from '@/utils/currency';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { ChevronLeft, Pencil, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Props extends SharedData {
     category: Category;
@@ -22,12 +22,8 @@ interface Props extends SharedData {
     };
 }
 
-export default function CategoryShow({
-    category,
-    transactions,
-    filters,
-}: Props) {
-      const { auth } = usePage<SharedData>().props
+export default function CategoryShow({ category, transactions, filters }: Props) {
+    const { auth } = usePage<SharedData>().props;
 
     const [tab, setTab] = useState('overview');
     const [selectedAccountId, setSelectedAccountId] = useState<string>(filters?.account_id || 'all');
@@ -44,20 +40,22 @@ export default function CategoryShow({
         transfer_out: 'text-red-500',
     };
 
-    const filteredTransactions = selectedAccountId === 'all' 
-        ? transactions.data 
-        : transactions.data.filter(t => t.account.id.toString() === selectedAccountId);
+    const filteredTransactions =
+        selectedAccountId === 'all' ? transactions.data : transactions.data.filter((t) => t.account.id.toString() === selectedAccountId);
 
-    const filteredGroupedTransactions = filteredTransactions.reduce((groups, transaction) => {
-        const date = new Date(transaction.transaction_date);
-        const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
-        
-        if (!groups[monthKey]) {
-            groups[monthKey] = [];
-        }
-        groups[monthKey].push(transaction);
-        return groups;
-    }, {} as Record<string, Transaction[]>);
+    const filteredGroupedTransactions = filteredTransactions.reduce(
+        (groups, transaction) => {
+            const date = new Date(transaction.transaction_date);
+            const monthKey = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+
+            if (!groups[monthKey]) {
+                groups[monthKey] = [];
+            }
+            groups[monthKey].push(transaction);
+            return groups;
+        },
+        {} as Record<string, Transaction[]>,
+    );
 
     const handleAccountChange = (value: string) => {
         setSelectedAccountId(value);
@@ -72,7 +70,7 @@ export default function CategoryShow({
                 only: ['transactions', 'filters'],
                 preserveState: true,
                 preserveScroll: false,
-            }
+            },
         );
     };
 
@@ -88,7 +86,7 @@ export default function CategoryShow({
                 only: ['transactions', 'filters'],
                 preserveState: true,
                 preserveScroll: false,
-            }
+            },
         );
     };
 
@@ -103,7 +101,7 @@ export default function CategoryShow({
                 only: ['transactions', 'filters'],
                 preserveState: true,
                 preserveScroll: false,
-            }
+            },
         );
     };
 
@@ -124,7 +122,7 @@ export default function CategoryShow({
         <AppLayout title={category.name}>
             <Head title={category.name} />
 
-            <div className="mx-auto w-full max-w-4xl p-4 space-y-6">
+            <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
                 <motion.div
                     className="flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}
@@ -148,31 +146,22 @@ export default function CategoryShow({
                     </div>
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
                     <Card>
                         <CardHeader className="flex-row items-start justify-between space-y-0">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                                <div className="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-lg">
                                     <span className="text-2xl">{category.emoji}</span>
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-semibold">{category.name}</h2>
-                                    <p className="text-muted-foreground capitalize">
-                                        {category.type === 'expense' ? 'Gasto' : 'Ingreso'}
-                                    </p>
+                                    <p className="text-muted-foreground capitalize">{category.type === 'expense' ? 'Gasto' : 'Ingreso'}</p>
                                 </div>
                             </div>
-                             <div className="flex items-center gap-4">
-                                
+                            <div className="flex items-center gap-4">
                                 <div>
                                     <h2 className="text-xl font-semibold">Total</h2>
-                                    <p className="text-muted-foreground capitalize">
-                                        {formatCurrency(totalTransactions,  auth.user.currency)}
-                                    </p>
+                                    <p className="text-muted-foreground capitalize">{formatCurrency(totalTransactions, auth.user.currency)}</p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -183,20 +172,18 @@ export default function CategoryShow({
                                     <TabsTrigger value="overview">Resumen</TabsTrigger>
                                     <TabsTrigger value="transactions">Transacciones</TabsTrigger>
                                 </TabsList>
-                                
+
                                 <TabsContent value="overview" className="space-y-4">
                                     <div className="mt-6">
                                         <div className="space-y-4">
                                             <div className="rounded-lg border p-4">
-                                                <p className="text-sm text-muted-foreground">Total de transacciones</p>
-                                                <p className="text-2xl font-semibold">
-                                                    {transactions.total}
-                                                </p>
+                                                <p className="text-muted-foreground text-sm">Total de transacciones</p>
+                                                <p className="text-2xl font-semibold">{transactions.total}</p>
                                             </div>
-                                            
+
                                             {transactions.data.length > 0 && (
                                                 <div className="rounded-lg border p-4">
-                                                    <p className="text-sm text-muted-foreground">Última transacción</p>
+                                                    <p className="text-muted-foreground text-sm">Última transacción</p>
                                                     <p className="text-lg font-medium">
                                                         {new Date(transactions.data[0].transaction_date).toLocaleDateString()}
                                                     </p>
@@ -205,7 +192,7 @@ export default function CategoryShow({
                                         </div>
                                     </div>
                                 </TabsContent>
-                                
+
                                 <TabsContent value="transactions">
                                     <div className="mb-4 flex flex-wrap gap-2">
                                         <Input
@@ -243,7 +230,7 @@ export default function CategoryShow({
                                         </Button>
                                         {(dateFrom || dateTo || selectedAccountId !== 'all') && (
                                             <Button onClick={handleClearFilters} variant="outline" size="sm">
-                                                <X className="h-4 w-4 mr-1" />
+                                                <X className="mr-1 h-4 w-4" />
                                                 Limpiar
                                             </Button>
                                         )}
@@ -256,23 +243,21 @@ export default function CategoryShow({
                                             animate={{ opacity: 1 }}
                                             transition={{ duration: 0.3 }}
                                         >
-                                            <div className="text-4xl mb-4">💸</div>
-                                            <h3 className="text-lg font-medium mb-2">Sin transacciones</h3>
-                                            <p className="text-sm text-gray-500">
-                                                No hay transacciones para esta categoría aún.
-                                            </p>
+                                            <div className="mb-4 text-4xl">💸</div>
+                                            <h3 className="mb-2 text-lg font-medium">Sin transacciones</h3>
+                                            <p className="text-sm text-gray-500">No hay transacciones para esta categoría aún.</p>
                                         </motion.div>
                                     ) : (
                                         <>
                                             {Object.entries(filteredGroupedTransactions).map(([month, monthTransactions], monthIndex) => (
                                                 <div key={month} className="space-y-2">
                                                     <motion.div
-                                                        className="sticky top-0 bg-background pt-4 pb-2"
+                                                        className="bg-background sticky top-0 pt-4 pb-2"
                                                         initial={{ opacity: 0, x: -20 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ duration: 0.3, delay: monthIndex * 0.05 }}
                                                     >
-                                                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                                        <h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
                                                             {month}
                                                         </h3>
                                                     </motion.div>
@@ -284,23 +269,27 @@ export default function CategoryShow({
                                                             className="flex items-center justify-between border-b py-4 last:border-0"
                                                             initial={{ opacity: 0, y: 20 }}
                                                             animate={{ opacity: 1, y: 0 }}
-                                                            transition={{ duration: 0.3, delay: (monthIndex * 0.05) + (index * 0.02) }}
+                                                            transition={{ duration: 0.3, delay: monthIndex * 0.05 + index * 0.02 }}
                                                         >
                                                             <div className="flex items-center gap-4">
-                                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                                                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
                                                                     <span className="text-lg">{transaction.account.emoji}</span>
                                                                 </div>
                                                                 <div>
                                                                     <h3 className="font-medium">{transaction.account.name}</h3>
-                                                                    
+
                                                                     {transaction.description && (
-                                                                        <p className="text-sm text-muted-foreground">
-                                                                            {transaction.description}
-                                                                        </p>
+                                                                        <p className="text-muted-foreground text-sm">{transaction.description}</p>
+                                                                    )}
+
+                                                                    {transaction.ai_assisted && (
+                                                                        <Badge variant="secondary" className="mt-1">
+                                                                            Asistida por IA
+                                                                        </Badge>
                                                                     )}
 
                                                                     {transaction.type.startsWith('transfer') && (
-                                                                        <p className="text-sm text-muted-foreground">
+                                                                        <p className="text-muted-foreground text-sm">
                                                                             <span className="font-medium">Transferencia </span>
                                                                             {transaction.type === 'transfer_in'
                                                                                 ? `Desde: ${transaction.from_account?.name} (${transaction.from_account?.currency.symbol})`
@@ -308,7 +297,7 @@ export default function CategoryShow({
                                                                         </p>
                                                                     )}
 
-                                                                    <p className="text-sm text-muted-foreground">
+                                                                    <p className="text-muted-foreground text-sm">
                                                                         {new Date(transaction.transaction_date).toLocaleDateString()}
                                                                     </p>
                                                                 </div>
@@ -338,9 +327,7 @@ export default function CategoryShow({
                                             )}
 
                                             {hasReachedEnd && (
-                                                <p className="text-center text-sm text-muted-foreground pt-4">
-                                                    No hay más registros que mostrar.
-                                                </p>
+                                                <p className="text-muted-foreground pt-4 text-center text-sm">No hay más registros que mostrar.</p>
                                             )}
                                         </>
                                     )}

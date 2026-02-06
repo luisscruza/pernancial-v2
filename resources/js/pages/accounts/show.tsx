@@ -1,4 +1,5 @@
 import TransactionModal from '@/components/transaction-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -255,6 +256,12 @@ export default function Show({ account, transactions, incomeCategories, expenseC
 
                                                                     {transaction.description && (
                                                                         <p className="text-muted-foreground text-sm">{transaction.description}</p>
+                                                                    )}
+
+                                                                    {transaction.ai_assisted && (
+                                                                        <Badge variant="secondary" className="mt-1">
+                                                                            Asistida por IA
+                                                                        </Badge>
                                                                     )}
 
                                                                     {transaction.type.startsWith('transfer') && (

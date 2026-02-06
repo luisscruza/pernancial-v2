@@ -26,6 +26,7 @@ test('to array', function () {
         'updated_at',
         'deleted_at',
         'related_transaction_id',
+        'ai_assisted',
     ]);
 });
 

@@ -9,6 +9,7 @@ import BudgetController from './BudgetController'
 import OnboardingController from './OnboardingController'
 import OnboardingCategoryController from './OnboardingCategoryController'
 import OnboardingAccountController from './OnboardingAccountController'
+import TelegramWebhookController from './TelegramWebhookController'
 import Settings from './Settings'
 import GoogleOAuthController from './GoogleOAuthController'
 import Auth from './Auth'
@@ -25,6 +26,7 @@ const Controllers = {
     OnboardingController: Object.assign(OnboardingController, OnboardingController),
     OnboardingCategoryController: Object.assign(OnboardingCategoryController, OnboardingCategoryController),
     OnboardingAccountController: Object.assign(OnboardingAccountController, OnboardingAccountController),
+    TelegramWebhookController: Object.assign(TelegramWebhookController, TelegramWebhookController),
     Settings: Object.assign(Settings, Settings),
     GoogleOAuthController: Object.assign(GoogleOAuthController, GoogleOAuthController),
     Auth: Object.assign(Auth, Auth),

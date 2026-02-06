@@ -40,6 +40,7 @@ test('user can create an income transaction', function () {
         'amount' => 500.00,
         'description' => 'Salary payment',
         'category_id' => $incomeCategory->id,
+        'ai_assisted' => false,
     ]);
 });
 

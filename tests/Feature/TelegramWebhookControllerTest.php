@@ -15,7 +15,7 @@ it('prompts the finance agent and replies in the owner chat', function () {
     $owner = User::factory()->create(['email' => 'owner@example.com']);
     config()->set('services.telegram.owner_email', $owner->email);
 
-    FinanceAgent::fake(['Expense registered successfully.']);
+    FinanceAgent::fake(['Gasto registrado correctamente.']);
 
     Http::fake([
         'https://api.telegram.org/*' => Http::response(['ok' => true], 200),
@@ -39,7 +39,7 @@ it('prompts the finance agent and replies in the owner chat', function () {
     Http::assertSent(function ($request): bool {
         return $request->url() === 'https://api.telegram.org/bottest-bot-token/sendMessage'
             && (string) $request['chat_id'] === '12345'
-            && str_contains((string) $request['text'], 'Expense registered successfully.');
+            && str_contains((string) $request['text'], 'Gasto registrado correctamente.');
     });
 });
 
@@ -74,7 +74,7 @@ it('rejects non owner chats', function () {
 
     Http::assertSent(function ($request): bool {
         return (string) $request['chat_id'] === '99999'
-            && str_contains((string) $request['text'], 'Access denied');
+            && str_contains((string) $request['text'], 'Acceso denegado');
     });
 });
 

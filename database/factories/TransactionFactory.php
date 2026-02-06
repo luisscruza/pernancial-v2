@@ -32,6 +32,7 @@ final class TransactionFactory extends Factory
             'description' => $this->faker->sentence(),
             'account_id' => Account::factory(),
             'running_balance' => $amount, // This will be recalculated when transactions are created
+            'ai_assisted' => false,
         ];
 
         // Add type-specific data

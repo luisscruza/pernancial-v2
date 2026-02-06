@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $conversion_rate
  * @property float|null $converted_amount
  * @property float|null $running_balance
+ * @property bool $ai_assisted
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -94,6 +95,7 @@ final class Transaction extends Model
             'conversion_rate' => 'float',
             'converted_amount' => 'float',
             'running_balance' => 'float',
+            'ai_assisted' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',

@@ -41,6 +41,7 @@ final readonly class CreateTransactionAction
                 'conversion_rate' => 1,
                 'converted_amount' => $data->amount,
                 'running_balance' => $optimisticRunningBalance,
+                'ai_assisted' => $data->ai_assisted,
             ]);
 
             // Update account balance optimistically
@@ -94,6 +95,7 @@ final readonly class CreateTransactionAction
             'destination_account_id' => $data->destination_account?->id,
             'conversion_rate' => $data->conversion_rate,
             'running_balance' => $optimisticRunningBalance,
+            'ai_assisted' => $data->ai_assisted,
         ]);
 
         // Update account balance optimistically
@@ -127,6 +129,7 @@ final readonly class CreateTransactionAction
             'from_account_id' => $account->id,
             'conversion_rate' => $data->conversion_rate,
             'running_balance' => $optimisticRunningBalance,
+            'ai_assisted' => $data->ai_assisted,
         ]);
 
         $data->destination_account->update(['balance' => $optimisticRunningBalance]);
