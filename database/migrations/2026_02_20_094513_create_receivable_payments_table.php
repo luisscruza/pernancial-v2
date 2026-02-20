@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('receivable_payments', function (Blueprint $table): void {
             $table->id();
-            $table->foreignIdFor(Receivable::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Receivable::class);
             $table->foreignIdFor(Account::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Transaction::class)->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 15, 4);
