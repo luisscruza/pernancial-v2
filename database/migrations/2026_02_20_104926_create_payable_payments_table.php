@@ -22,7 +22,7 @@ return new class extends Migration
 
         Schema::create('payable_payments', function (Blueprint $table): void {
             $table->id();
-            $table->foreignIdFor(Payable::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Payable::class);
             $table->foreignIdFor(Account::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Transaction::class)->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 15, 4);
