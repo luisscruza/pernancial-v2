@@ -3,7 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { LoaderCircle, Pencil, Plus, SendHorizontal, Trash2 } from 'lucide-react';
+import { LoaderCircle, Paperclip, Pencil, Plus, SendHorizontal, Trash2, X } from 'lucide-react';
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 type ChatMessageRole = 'user' | 'assistant';
@@ -532,8 +532,10 @@ export default function FinanceChatPage({ conversations = [], activeConversation
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(activeConversationId);
     const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+    const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const nextMessageIdRef = useRef(1);
     const csrfToken = useMemo(() => resolveCsrfToken(), []);
 
@@ -574,7 +576,7 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }, [messages, isSending]);
 
-    const canSend = draft.trim().length > 0 && !isSending && !isCreatingConversation;
+    const canSend = (draft.trim().length > 0 || attachmentFile !== null) && !isSending && !isCreatingConversation;
     const hasPendingResponse = isSending;
 
     const submitMessage = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -582,11 +584,14 @@ export default function FinanceChatPage({ conversations = [], activeConversation
 
         const message = draft.trim();
 
-        if (message === '') {
+        if (message === '' && attachmentFile === null) {
             return;
         }
 
-        appendMessage('user', message);
+        const userPreviewMessage =
+            message !== '' ? message : `Adjunte ${attachmentFile?.type === 'application/pdf' ? 'un PDF' : 'una imagen'} para importar movimientos.`;
+
+        appendMessage('user', userPreviewMessage);
         setDraft('');
         setErrorMessage(null);
 
@@ -595,19 +600,29 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         setIsSending(true);
 
         try {
+            const formData = new FormData();
+            formData.append('message', message);
+
+            if (activeConversationId) {
+                formData.append('conversation_id', activeConversationId);
+            }
+
+            if (csrfToken) {
+                formData.append('_token', csrfToken);
+            }
+
+            if (attachmentFile !== null) {
+                formData.append('statement_file', attachmentFile);
+            }
+
             const httpResponse = await fetch(streamEndpoint, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                     ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({
-                    message,
-                    ...(activeConversationId ? { conversation_id: activeConversationId } : {}),
-                    ...(csrfToken ? { _token: csrfToken } : {}),
-                }),
+                body: formData,
             });
 
             let payload: FinanceChatResponse = {};
@@ -630,6 +645,11 @@ export default function FinanceChatPage({ conversations = [], activeConversation
             }
 
             appendMessage('assistant', reply === '' ? 'Aqui tienes el grafico solicitado.' : reply, charts);
+            setAttachmentFile(null);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
 
             const responseConversationId =
                 typeof payload.conversation_id === 'string' && payload.conversation_id !== '' ? payload.conversation_id : null;
@@ -645,8 +665,12 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                 preserveScroll: true,
                 replace: true,
             });
-        } catch {
-            setErrorMessage('No pude completar la respuesta. Intenta de nuevo.');
+        } catch (error) {
+            if (error instanceof Error && error.message.trim() !== '') {
+                setErrorMessage(error.message);
+            } else {
+                setErrorMessage('No pude completar la respuesta. Intenta de nuevo.');
+            }
         } finally {
             setIsSending(false);
         }
@@ -931,10 +955,56 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                                     value={draft}
                                     onChange={(event) => setDraft(event.target.value)}
                                     rows={3}
-                                    placeholder=""
+                                    placeholder="Escribe tu mensaje o adjunta un PDF/foto para importar movimientos."
                                     disabled={isSending || isCreatingConversation}
                                     maxLength={4000}
                                 />
+
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="application/pdf,image/jpeg,image/png,image/webp"
+                                        onChange={(event) => {
+                                            const selectedFile = event.target.files?.[0] ?? null;
+                                            setAttachmentFile(selectedFile);
+                                        }}
+                                        disabled={isSending || isCreatingConversation}
+                                        className="hidden"
+                                    />
+
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isSending || isCreatingConversation}
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <Paperclip className="h-4 w-4" />
+                                            Adjuntar PDF o foto
+                                        </Button>
+
+                                        {attachmentFile && (
+                                            <div className="text-muted-foreground border-border/70 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+                                                <span className="max-w-56 truncate">{attachmentFile.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setAttachmentFile(null);
+
+                                                        if (fileInputRef.current) {
+                                                            fileInputRef.current.value = '';
+                                                        }
+                                                    }}
+                                                    className="text-muted-foreground hover:text-foreground"
+                                                >
+                                                    <X className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div className="flex items-center justify-end gap-2">
                                     <Button type="submit" disabled={!canSend}>

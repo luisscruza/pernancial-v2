@@ -24,8 +24,15 @@ final class StreamFinanceChatRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'message' => ['required', 'string', 'max:4000'],
+            'message' => ['nullable', 'string', 'max:4000', 'required_without:statement_file'],
             'conversation_id' => ['nullable', 'string', 'size:36'],
+            'statement_file' => [
+                'nullable',
+                'file',
+                'mimetypes:application/pdf,image/jpeg,image/png,image/webp',
+                'max:20480',
+                'required_without:message',
+            ],
         ];
     }
 
@@ -38,19 +45,25 @@ final class StreamFinanceChatRequest extends FormRequest
     {
         return [
             'message.required' => 'El mensaje es obligatorio.',
+            'message.required_without' => 'Escribe un mensaje o adjunta un archivo.',
             'message.string' => 'El mensaje debe ser texto.',
             'message.max' => 'El mensaje no puede tener mas de 4000 caracteres.',
             'conversation_id.string' => 'La conversacion no es valida.',
             'conversation_id.size' => 'La conversacion no es valida.',
+            'statement_file.required_without' => 'Adjunta un archivo o escribe un mensaje.',
+            'statement_file.file' => 'El archivo adjunto no es valido.',
+            'statement_file.mimetypes' => 'Solo se aceptan PDF, JPG, PNG o WEBP.',
+            'statement_file.max' => 'El archivo no puede pesar mas de 20 MB.',
         ];
     }
 
     protected function prepareForValidation(): void
     {
         $conversationId = mb_trim((string) $this->input('conversation_id', ''));
+        $message = mb_trim((string) $this->input('message', ''));
 
         $this->merge([
-            'message' => mb_trim((string) $this->input('message', '')),
+            'message' => $message !== '' ? $message : null,
             'conversation_id' => $conversationId !== '' ? $conversationId : null,
         ]);
     }

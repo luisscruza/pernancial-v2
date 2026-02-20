@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\Tools\CreateFinanceTransactionTool;
 use App\Ai\Tools\GenerateFinanceChartTool;
+use App\Ai\Tools\ImportFinanceStatementTool;
 use App\Ai\Tools\ListFinanceAccountsTool;
 use App\Ai\Tools\ListFinanceCategoriesTool;
 use App\Ai\Tools\QueryFinanceTransactionsTool;
@@ -19,7 +20,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[MaxSteps(8)]
+#[MaxSteps(12)]
 final class FinanceAgent implements Agent, Conversational, HasTools
 {
     use Promptable;
@@ -42,6 +43,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Ayudar al usuario a registrar transacciones con precisión.
             - Ayudar al usuario a consultar movimientos y gastos por categoría.
             - Ayudar al usuario a generar visualizaciones de datos cuando pida graficos.
+            - Ayudar al usuario a importar estados de cuenta en PDF o imagen para organizar y registrar movimientos.
             - Detectar datos faltantes y hacer preguntas cortas y claras.
             - Responder de forma breve, práctica y orientada a la acción.
 
@@ -66,11 +68,20 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Ambas cuentas deben ser distintas.
             - Nunca pidas ni confirmes cuentas usando identificadores técnicos.
 
+            Reglas para importación de estado de cuenta (PDF o foto):
+            - Si el usuario adjunta un archivo, primero extrae los movimientos y luego usa la herramienta de importación con mode=preview.
+            - En preview debes mostrar cuántos son nuevos, cuántos parecen duplicados y qué datos faltan antes de crear.
+            - Solo usa mode=commit cuando el usuario confirme explícitamente.
+            - Para detectar duplicados considera monto, descripción y fecha cercana; no dependas únicamente de fecha exacta.
+            - Si el usuario pide agrupar compras de supermercado, usa group_strategy=supermarket_monthly o group_strategy=manual_keys según corresponda.
+            - Si el usuario pide consolidar varios cargos en uno solo, usa group_key y group_description para agruparlos.
+
             Uso de herramientas:
             - Antes de crear o confirmar una transacción, utiliza herramientas para buscar cuentas y categorías por nombre.
             - Si existen varias coincidencias, pide al usuario que aclare usando descripciones humanas (por ejemplo: tipo de cuenta, banco o propósito).
             - Si el usuario pide gastos o movimientos globales, consulta sin filtrar por cuenta para incluir todas sus cuentas.
             - Si el usuario pide un grafico o comparativa visual, usa la herramienta de graficos y luego explica brevemente el resultado.
+            - Si importas movimientos desde archivo, usa la herramienta de importación para registrar en lote y devolver un resumen claro.
             - No expongas resultados técnicos de las herramientas al usuario.
 
             Estilo de respuesta:
@@ -104,6 +115,11 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             PROMPT;
     }
 
+    public function timeout(): int
+    {
+        return (int) config('ai.agent_timeouts.finance_chat', 45);
+    }
+
     /**
      * Get the tools available to the agent.
      *
@@ -117,6 +133,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             new QueryFinanceTransactionsTool($this->user),
             new GenerateFinanceChartTool($this->user),
             new CreateFinanceTransactionTool($this->user),
+            new ImportFinanceStatementTool($this->user),
         ];
     }
 }

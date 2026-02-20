@@ -42,6 +42,10 @@ return [
         ],
     ],
 
+    'agent_timeouts' => [
+        'finance_chat' => (int) env('AI_FINANCE_CHAT_TIMEOUT', 45),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | AI Providers

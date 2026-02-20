@@ -6,6 +6,7 @@ use App\Ai\Agents\FinanceAgent;
 use App\Models\Account;
 use App\Models\Currency;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -132,7 +133,8 @@ test('user can receive full finance chat response for a selected conversation', 
             return false;
         }
 
-        return $prompt->agent->currentConversation() === $conversationId;
+        return $prompt->agent->currentConversation() === $conversationId
+            && $prompt->timeout === (int) config('ai.agent_timeouts.finance_chat', 45);
     });
 
     expect(Cache::get("finance:chat:conversation:{$user->id}"))->toBe($conversationId);
@@ -147,6 +149,25 @@ test('finance chat stream validates the message', function () {
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['message']);
+});
+
+test('finance chat stream accepts statement file without message', function () {
+    $user = createOnboardedUser();
+
+    FinanceAgent::fake(['Analice el estado de cuenta y detecte duplicados.']);
+
+    $this->actingAs($user)
+        ->post(route('finance.chat.stream'), [
+            'statement_file' => UploadedFile::fake()->create('estado.pdf', 256, 'application/pdf'),
+        ])
+        ->assertOk()
+        ->assertJsonPath('ok', true)
+        ->assertJsonPath('reply', 'Analice el estado de cuenta y detecte duplicados.');
+
+    FinanceAgent::assertPrompted(function (AgentPrompt $prompt): bool {
+        return $prompt->contains('Analiza el archivo adjunto')
+            && $prompt->attachments->count() === 1;
+    });
 });
 
 test('user can reset the finance chat conversation', function () {

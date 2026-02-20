@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Tools\CreateFinanceTransactionTool;
 use App\Ai\Tools\GenerateFinanceChartTool;
+use App\Ai\Tools\ImportFinanceStatementTool;
 use App\Ai\Tools\ListFinanceAccountsTool;
 use App\Ai\Tools\QueryFinanceTransactionsTool;
 use App\Enums\CategoryType;
@@ -154,6 +155,159 @@ it('creates expense when duplicate confirmation is explicitly provided', functio
     expect($output)
         ->toContain('Transaccion creada: tipo=expense')
         ->and($account->transactions()->where('type', TransactionType::EXPENSE)->count())->toBe(2);
+});
+
+it('detects likely duplicate statement entries even when the date is not exact', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create(['code' => 'USD']);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+        'balance' => 300.00,
+    ]);
+
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Supermercado',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 45.00,
+        'transaction_date' => '2026-02-01',
+        'description' => 'Chedraui Centro',
+        'category_id' => $category->id,
+        'running_balance' => 255.00,
+        'converted_amount' => 45.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $tool = new ImportFinanceStatementTool($user);
+
+    $output = (string) $tool->handle(new Request([
+        'mode' => 'preview',
+        'account_id' => $account->id,
+        'default_expense_category_id' => $category->id,
+        'entries' => [
+            [
+                'type' => 'expense',
+                'amount' => 45.00,
+                'transaction_date' => '2026-02-04',
+                'description' => 'Compra Chedraui centro',
+            ],
+        ],
+    ]));
+
+    expect($output)
+        ->toContain('posibles_duplicados=1')
+        ->toContain('posible duplicado');
+});
+
+it('imports only non-duplicate statement entries in commit mode', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create(['code' => 'USD']);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+        'balance' => 500.00,
+    ]);
+
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Supermercado',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $account->transactions()->create([
+        'type' => TransactionType::EXPENSE,
+        'amount' => 45.00,
+        'transaction_date' => '2026-02-01',
+        'description' => 'Chedraui Centro',
+        'category_id' => $category->id,
+        'running_balance' => 455.00,
+        'converted_amount' => 45.00,
+        'conversion_rate' => 1,
+    ]);
+
+    $tool = new ImportFinanceStatementTool($user);
+
+    $output = (string) $tool->handle(new Request([
+        'mode' => 'commit',
+        'account_id' => $account->id,
+        'default_expense_category_id' => $category->id,
+        'entries' => [
+            [
+                'type' => 'expense',
+                'amount' => 45.00,
+                'transaction_date' => '2026-02-03',
+                'description' => 'Compra Chedraui centro',
+            ],
+            [
+                'type' => 'expense',
+                'amount' => 60.00,
+                'transaction_date' => '2026-02-06',
+                'description' => 'Supermercado semanal',
+            ],
+        ],
+    ]));
+
+    expect($output)
+        ->toContain('creados=1')
+        ->toContain('duplicados_omitidos=1')
+        ->and($account->transactions()->where('type', TransactionType::EXPENSE)->count())->toBe(2);
+});
+
+it('supports grouping statement entries with manual keys', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create(['code' => 'USD']);
+
+    $account = Account::factory()->for($user)->for($currency)->create([
+        'name' => 'Main Account',
+        'balance' => 300.00,
+    ]);
+
+    $category = Category::factory()->for($user)->create([
+        'name' => 'Supermercado',
+        'type' => CategoryType::EXPENSE,
+    ]);
+
+    $tool = new ImportFinanceStatementTool($user);
+
+    $output = (string) $tool->handle(new Request([
+        'mode' => 'commit',
+        'group_strategy' => 'manual_keys',
+        'account_id' => $account->id,
+        'default_expense_category_id' => $category->id,
+        'entries' => [
+            [
+                'type' => 'expense',
+                'amount' => 12.50,
+                'transaction_date' => '2026-01-10',
+                'description' => 'Supermercado A',
+                'group_key' => 'super-enero',
+                'group_description' => 'Supermercados enero',
+            ],
+            [
+                'type' => 'expense',
+                'amount' => 22.10,
+                'transaction_date' => '2026-01-15',
+                'description' => 'Supermercado B',
+                'group_key' => 'super-enero',
+                'group_description' => 'Supermercados enero',
+            ],
+        ],
+    ]));
+
+    $createdExpense = $account->transactions()
+        ->where('type', TransactionType::EXPENSE)
+        ->latest('id')
+        ->first();
+
+    expect($output)
+        ->toContain('creados=1')
+        ->toContain('agrupado=2')
+        ->and($account->transactions()->where('type', TransactionType::EXPENSE)->count())->toBe(1)
+        ->and($createdExpense?->amount)->toBe(34.60)
+        ->and($createdExpense?->description)->toContain('Supermercados enero');
 });
 
 it('lists recent transactions for a specific account through finance query tool', function () {

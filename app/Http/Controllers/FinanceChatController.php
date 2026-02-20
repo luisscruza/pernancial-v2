@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +67,24 @@ final class FinanceChatController
             @set_time_limit(0);
         }
 
-        /** @var array{message: string, conversation_id?: string|null} $validated */
+        /** @var array{message?: string|null, conversation_id?: string|null} $validated */
         $validated = $request->validated();
+
+        $statementFile = $request->file('statement_file');
+        $attachment = $statementFile instanceof UploadedFile ? [$statementFile] : [];
+
+        $prompt = mb_trim((string) ($validated['message'] ?? ''));
+
+        if ($prompt === '' && $attachment !== []) {
+            $prompt = 'Analiza el archivo adjunto, detecta movimientos, marca posibles duplicados y sugiere importacion en modo preview.';
+        }
+
+        if ($prompt === '') {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Escribe un mensaje o adjunta un archivo.',
+            ], 422);
+        }
 
         $agent = new FinanceAgent($user);
         $conversationId = $this->resolveConversationId($user, $validated['conversation_id'] ?? null);
@@ -88,19 +105,23 @@ final class FinanceChatController
         }
 
         try {
-            $response = $agent->prompt($validated['message']);
+            $response = $agent->prompt(
+                $prompt,
+                attachments: $attachment,
+                timeout: (int) config('ai.agent_timeouts.finance_chat', 45),
+            );
 
             if (is_string($response->conversationId) && $response->conversationId !== '') {
                 Cache::forever($this->conversationCacheKey($user), $response->conversationId);
             }
 
             $charts = $this->extractChartsFromToolResultCollection($response->toolResults);
-            $chartToolMessages = $this->extractChartToolMessagesFromCollection($response->toolResults);
+            $toolMessages = $this->extractToolMessagesFromCollection($response->toolResults);
             $reply = mb_trim((string) $response);
 
             if ($reply === '') {
-                if ($chartToolMessages !== []) {
-                    $reply = implode("\n\n", $chartToolMessages);
+                if ($toolMessages !== []) {
+                    $reply = implode("\n\n", $toolMessages);
                 } elseif ($charts !== []) {
                     $reply = 'Aqui tienes el grafico solicitado.';
                 } else {
@@ -111,11 +132,12 @@ final class FinanceChatController
             Log::debug('finance-chat prompt completed', [
                 'user_id' => $user->id,
                 'conversation_id' => $response->conversationId,
-                'prompt_preview' => Str::limit($validated['message'], 120),
+                'prompt_preview' => Str::limit($prompt, 120),
                 'text_length' => mb_strlen($reply),
                 'tool_calls_count' => $response->toolCalls->count(),
                 'tool_results_count' => $response->toolResults->count(),
                 'charts_count' => count($charts),
+                'has_attachment' => $attachment !== [],
             ]);
 
             return response()->json([
@@ -125,16 +147,22 @@ final class FinanceChatController
                 'conversation_id' => $response->conversationId,
             ]);
         } catch (Throwable $exception) {
+            $isTimeout = $this->isTimeoutException($exception);
+
             Log::warning('finance-chat prompt failed', [
                 'user_id' => $user->id,
-                'prompt_preview' => Str::limit($validated['message'], 120),
+                'prompt_preview' => Str::limit($prompt, 120),
                 'error' => $exception->getMessage(),
+                'is_timeout' => $isTimeout,
+                'has_attachment' => $attachment !== [],
             ]);
 
             return response()->json([
                 'ok' => false,
-                'message' => 'No pude completar la respuesta. Intenta de nuevo.',
-            ], 500);
+                'message' => $isTimeout
+                    ? 'La respuesta tardó demasiado. Intenta con una petición más corta o vuelve a intentarlo.'
+                    : 'No pude completar la respuesta. Intenta de nuevo.',
+            ], $isTimeout ? 504 : 500);
         }
     }
 
@@ -380,7 +408,7 @@ final class FinanceChatController
     /**
      * @return array<int, string>
      */
-    private function extractChartToolMessagesFromCollection(Collection $toolResults): array
+    private function extractToolMessagesFromCollection(Collection $toolResults): array
     {
         $messages = [];
         $expectedToolName = class_basename(GenerateFinanceChartTool::class);
@@ -388,17 +416,13 @@ final class FinanceChatController
         foreach ($toolResults as $toolResult) {
             $toolName = is_object($toolResult) ? ($toolResult->name ?? null) : null;
 
-            if ($toolName !== $expectedToolName) {
-                continue;
-            }
-
             $rawResult = is_object($toolResult) ? ($toolResult->result ?? null) : null;
 
             if (! is_string($rawResult)) {
                 continue;
             }
 
-            if ($this->decodeChartPayload($rawResult) !== null) {
+            if ($toolName === $expectedToolName && $this->decodeChartPayload($rawResult) !== null) {
                 continue;
             }
 
@@ -410,6 +434,28 @@ final class FinanceChatController
         }
 
         return $messages;
+    }
+
+    private function isTimeoutException(Throwable $exception): bool
+    {
+        $timeoutClasses = [
+            \Illuminate\Http\Client\ConnectionException::class,
+        ];
+
+        foreach ($timeoutClasses as $timeoutClass) {
+            if ($exception instanceof $timeoutClass) {
+                return true;
+            }
+        }
+
+        $message = Str::lower($exception->getMessage());
+
+        return Str::contains($message, [
+            'timeout',
+            'timed out',
+            'curl error 28',
+            'operation timed out',
+        ]);
     }
 
     private function resolveConversationId(User $user, ?string $conversationId): ?string
