@@ -39,6 +39,12 @@ final class AccountController
             ->where('accounting_type', 'normal')
             ->sum('balance_in_base');
 
+        $creditCardDebt = $accounts
+            ->where('type', AccountType::CREDIT_CARD)
+            ->sum('balance_in_base');
+
+        $creditCardDebt = abs($creditCardDebt) * -1;
+
         $receivables = $user->receivables()->with('currency')->get();
         $payables = $user->payables()->with('currency')->get();
 
@@ -65,8 +71,8 @@ final class AccountController
         $cuentasPorPagar = $cuentasPorPagar * -1;
         $cuentasPorPagarTotal = $cuentasPorPagarTotal * -1;
 
-        $totalGeneral = $balanceEnCuenta + $cuentasPorCobrar + $cuentasPorPagar;
-        $totalGeneralSinFiltro = $balanceEnCuenta + $cuentasPorCobrarTotal + $cuentasPorPagarTotal;
+        $totalGeneral = $balanceEnCuenta + $cuentasPorCobrar + $cuentasPorPagar + $creditCardDebt;
+        $totalGeneralSinFiltro = $balanceEnCuenta + $cuentasPorCobrarTotal + $cuentasPorPagarTotal + $creditCardDebt;
 
         return Inertia::render('accounts/index', [
             'accounts' => AccountResource::collection($accounts),
@@ -76,6 +82,7 @@ final class AccountController
                 'cuentasPorPagarTotal' => $cuentasPorPagarTotal,
                 'cuentasPorCobrarTotal' => $cuentasPorCobrarTotal,
                 'balanceEnCuenta' => $balanceEnCuenta,
+                'creditCardDebt' => $creditCardDebt,
                 'totalGeneral' => $totalGeneral,
                 'totalGeneralSinFiltro' => $totalGeneralSinFiltro,
             ],

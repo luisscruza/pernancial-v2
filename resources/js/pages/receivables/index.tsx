@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { Account, Category, PaginatedProps, Receivable, SharedData } from '@/types';
+import { Account, Category, Contact, PaginatedProps, Receivable, SharedData } from '@/types';
 import { formatCurrency } from '@/utils/currency';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PlusIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -21,16 +21,24 @@ export default function ReceivablesIndex({
     receivables,
     accounts,
     categories,
+    contacts,
+    filters,
 }: {
     receivables: PaginatedProps<Receivable>;
     accounts: Account[];
     categories: Category[];
+    contacts: Contact[];
+    filters: {
+        contact_id?: number | null;
+        status?: string | null;
+    };
 }) {
     const { auth } = usePage<SharedData>().props;
     const [activeReceivable, setActiveReceivable] = useState<Receivable | null>(null);
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [accountSearch, setAccountSearch] = useState('');
     const [categorySearch, setCategorySearch] = useState('');
+    const [contactSearch, setContactSearch] = useState('');
     const { data, errors, post, processing, reset, setData } = useForm({
         account_id: '',
         amount: '',
@@ -87,6 +95,36 @@ export default function ReceivablesIndex({
         });
     }, [categories, categorySearch]);
 
+    const filteredContacts = useMemo(() => {
+        const query = contactSearch.trim().toLowerCase();
+
+        if (!query) {
+            return contacts;
+        }
+
+        return contacts.filter((contact) => contact.name.toLowerCase().includes(query));
+    }, [contacts, contactSearch]);
+
+    const groupedReceivables = useMemo(() => {
+        const groups = new Map<string, Receivable[]>();
+
+        receivables.data.forEach((receivable) => {
+            const key = receivable.due_date;
+            const group = groups.get(key);
+
+            if (group) {
+                group.push(receivable);
+            } else {
+                groups.set(key, [receivable]);
+            }
+        });
+
+        return Array.from(groups.entries());
+    }, [receivables.data]);
+
+    const selectedContact = filters.contact_id ? filters.contact_id.toString() : 'all';
+    const selectedStatus = filters.status ?? 'unpaid';
+
     const handleOpenPayment = (receivable: Receivable) => {
         setActiveReceivable(receivable);
         setIsPaymentOpen(true);
@@ -114,6 +152,38 @@ export default function ReceivablesIndex({
         });
     };
 
+    const handleContactFilterChange = (value: string) => {
+        const contactId = value === 'all' ? null : Number(value);
+
+        router.get(
+            route('receivables.index'),
+            {
+                contact_id: contactId ?? undefined,
+                status: selectedStatus,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handleStatusFilterChange = (value: string) => {
+        router.get(
+            route('receivables.index'),
+            {
+                contact_id: selectedContact === 'all' ? undefined : Number(selectedContact),
+                status: value,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    const formatDueDate = (value: string) => new Date(value).toLocaleDateString();
+
     return (
         <AppLayout title="Cuentas por cobrar">
             <Head title="Cuentas por cobrar" />
@@ -131,55 +201,118 @@ export default function ReceivablesIndex({
                     </Button>
                 </motion.div>
 
+                <motion.div
+                    className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,_320px)_minmax(0,_220px)_1fr]"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    <div className="space-y-2">
+                        <Label>Filtrar por contacto</Label>
+                        <Select
+                            value={selectedContact}
+                            onValueChange={(value) => {
+                                setContactSearch('');
+                                handleContactFilterChange(value);
+                            }}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Todos los contactos" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <div className="sticky top-0 z-10 bg-white px-2 pb-2">
+                                    <Input
+                                        type="text"
+                                        placeholder="Buscar contacto..."
+                                        value={contactSearch}
+                                        onChange={(e) => setContactSearch(e.target.value)}
+                                        className="h-8"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+                                <SelectItem value="all">Todos los contactos</SelectItem>
+                                {filteredContacts.length > 0 ? (
+                                    filteredContacts.map((contact) => (
+                                        <SelectItem key={contact.id} value={contact.id.toString()}>
+                                            {contact.name}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <div className="text-muted-foreground px-2 py-6 text-center text-sm">No se encontraron contactos</div>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Estado</Label>
+                        <Select value={selectedStatus} onValueChange={handleStatusFilterChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="unpaid">No pagados / Parcial</SelectItem>
+                                <SelectItem value="paid">Pagados</SelectItem>
+                                <SelectItem value="all">Todos</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </motion.div>
+
                 <motion.div layout className="space-y-3">
                     <AnimatePresence mode="popLayout">
-                        {receivables.data.map((receivable) => {
-                            const remaining = Math.max(0, receivable.amount_total - receivable.amount_paid);
-                            return (
-                                <motion.div
-                                    layout
-                                    key={receivable.id}
-                                    className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                >
-                                    <div className="flex flex-wrap items-start justify-between gap-3">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="text-base font-semibold text-gray-900">{receivable.contact?.name}</h3>
-                                                <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyles[receivable.status]}`}>
-                                                    {receivable.status === 'open'
-                                                        ? 'Pendiente'
-                                                        : receivable.status === 'partial'
-                                                          ? 'Parcial'
-                                                          : 'Pagada'}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500">Vence: {new Date(receivable.due_date).toLocaleDateString()}</p>
-                                            {receivable.description && <p className="text-sm text-gray-500">{receivable.description}</p>}
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm text-gray-500">Total</p>
-                                            <p className="text-lg font-semibold">
-                                                {formatCurrency(receivable.amount_total, receivable.currency ?? auth.user.currency)}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                                Pendiente: {formatCurrency(remaining, receivable.currency ?? auth.user.currency)}
-                                            </p>
-                                        </div>
-                                    </div>
+                        {groupedReceivables.map(([dueDate, items]) => (
+                            <motion.div layout key={dueDate} className="space-y-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
+                                    <p className="text-xs font-semibold tracking-wide text-gray-600 uppercase">Vence: {formatDueDate(dueDate)}</p>
+                                </div>
 
-                                    <div className="mt-4 flex flex-wrap items-center gap-2">
-                                        <Button size="sm" variant="outline" onClick={() => handleOpenPayment(receivable)}>
-                                            Registrar cobro
-                                        </Button>
-                                        <Button size="sm" variant="ghost" asChild>
-                                            <Link href={route('receivables.show', receivable.id)}>Ver detalle</Link>
-                                        </Button>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
+                                <div className="space-y-3">
+                                    {items.map((receivable) => {
+                                        const remaining = Math.max(0, receivable.amount_total - receivable.amount_paid);
+                                        return (
+                                            <div key={receivable.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <h3 className="text-base font-semibold text-gray-900">{receivable.contact?.name}</h3>
+                                                            <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyles[receivable.status]}`}>
+                                                                {receivable.status === 'open'
+                                                                    ? 'Pendiente'
+                                                                    : receivable.status === 'partial'
+                                                                      ? 'Parcial'
+                                                                      : 'Pagada'}
+                                                            </span>
+                                                        </div>
+                                                        {receivable.description && <p className="text-sm text-gray-500">{receivable.description}</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm text-gray-500">Total</p>
+                                                        <p className="text-lg font-semibold">
+                                                            {formatCurrency(receivable.amount_total, receivable.currency ?? auth.user.currency)}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            Pendiente: {formatCurrency(remaining, receivable.currency ?? auth.user.currency)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 flex flex-wrap items-center gap-2">
+                                                    {remaining > 0 && (
+                                                        <Button size="sm" variant="outline" onClick={() => handleOpenPayment(receivable)}>
+                                                            Registrar cobro
+                                                        </Button>
+                                                    )}
+                                                    <Button size="sm" variant="ghost" asChild>
+                                                        <Link href={route('receivables.show', receivable.id)}>Ver detalle</Link>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </motion.div>
+                        ))}
                     </AnimatePresence>
                 </motion.div>
 

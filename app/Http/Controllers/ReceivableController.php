@@ -25,12 +25,20 @@ final class ReceivableController
     /**
      * Display a listing of receivables.
      */
-    public function index(#[CurrentUser] User $user): Response
+    public function index(Request $request, #[CurrentUser] User $user): Response
     {
+        $contactId = $request->integer('contact_id');
+        $status = $request->string('status')->toString();
+        $statusFilter = $status !== '' ? $status : 'unpaid';
+
         $receivables = $user->receivables()
             ->with(['contact', 'currency'])
+            ->when($contactId, fn ($query) => $query->where('contact_id', $contactId))
+            ->when($statusFilter === 'paid', fn ($query) => $query->where('status', 'paid'))
+            ->when($statusFilter === 'unpaid', fn ($query) => $query->whereIn('status', ['open', 'partial']))
             ->orderBy('due_date', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         $accounts = $user->accounts()
             ->with('currency')
@@ -46,10 +54,19 @@ final class ReceivableController
                 'emoji' => $category->emoji,
             ]);
 
+        $contacts = $user->contacts()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('receivables/index', [
             'receivables' => $receivables,
             'accounts' => $accounts,
             'categories' => $categories,
+            'contacts' => $contacts,
+            'filters' => [
+                'contact_id' => $contactId ?: null,
+                'status' => $statusFilter,
+            ],
         ]);
     }
 

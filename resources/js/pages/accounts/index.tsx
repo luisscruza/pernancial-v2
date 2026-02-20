@@ -20,6 +20,7 @@ export default function AccountPage({
         cuentasPorPagarTotal: number;
         cuentasPorCobrarTotal: number;
         balanceEnCuenta: number;
+        creditCardDebt: number;
         totalGeneral: number;
         totalGeneralSinFiltro: number;
     };
@@ -111,6 +112,14 @@ export default function AccountPage({
                         </p>
                         <p className="mt-1 text-xs text-gray-400">
                             General: {formatCurrency(accountingStats.cuentasPorPagarTotal, page.props.auth.user.currency)}
+                        </p>
+                    </div>
+
+                    {/* Tarjetas de credito */}
+                    <div className="rounded-xl border border-gray-50 bg-white p-4">
+                        <p className="mb-1 text-xs text-gray-500">Tarjetas de credito</p>
+                        <p className="text-lg font-semibold text-red-600">
+                            {formatCurrency(accountingStats.creditCardDebt, page.props.auth.user.currency)}
                         </p>
                     </div>
 
