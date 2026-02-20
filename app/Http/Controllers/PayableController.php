@@ -43,44 +43,53 @@ final class PayableController
             ->paginate(20)
             ->withQueryString();
 
-        $summaryBase = $user->payables()
-            ->when($contactId, fn ($query) => $query->where('contact_id', $contactId));
-
-        $pendingQuery = (clone $summaryBase)->whereIn('status', ['open', 'partial']);
-        $paidQuery = (clone $summaryBase)->where('status', 'paid');
-
-        $pendingAmount = (float) (clone $pendingQuery)
-            ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
-            ->value('total');
-
-        $paidAmount = (float) (clone $paidQuery)
-            ->selectRaw('COALESCE(SUM(amount_total), 0) as total')
-            ->value('total');
-
-        $overdueQuery = (clone $pendingQuery)->whereDate('due_date', '<', $today);
-        $dueTodayQuery = (clone $pendingQuery)->whereDate('due_date', $today);
-        $dueSoonQuery = (clone $pendingQuery)
-            ->whereDate('due_date', '>', $today)
-            ->whereDate('due_date', '<=', $soonDate);
+        $summaryItems = $user->payables()
+            ->with('currency')
+            ->when($contactId, fn ($query) => $query->where('contact_id', $contactId))
+            ->get();
 
         $summary = [
-            'pending_count' => (clone $pendingQuery)->count(),
-            'pending_amount' => $pendingAmount,
-            'overdue_count' => (clone $overdueQuery)->count(),
-            'overdue_amount' => (float) (clone $overdueQuery)
-                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
-                ->value('total'),
-            'due_today_count' => (clone $dueTodayQuery)->count(),
-            'due_today_amount' => (float) (clone $dueTodayQuery)
-                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
-                ->value('total'),
-            'due_soon_count' => (clone $dueSoonQuery)->count(),
-            'due_soon_amount' => (float) (clone $dueSoonQuery)
-                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
-                ->value('total'),
-            'paid_count' => (clone $paidQuery)->count(),
-            'paid_amount' => $paidAmount,
+            'pending_count' => 0,
+            'pending_amount' => 0.0,
+            'overdue_count' => 0,
+            'overdue_amount' => 0.0,
+            'due_today_count' => 0,
+            'due_today_amount' => 0.0,
+            'due_soon_count' => 0,
+            'due_soon_amount' => 0.0,
+            'paid_count' => 0,
+            'paid_amount' => 0.0,
         ];
+
+        foreach ($summaryItems as $payable) {
+            $rate = $payable->currency?->is_base ? 1.0 : (float) $payable->currency?->currentRate();
+            $rate = $rate ?: 1.0;
+            $pending = (float) $payable->amount_total - (float) $payable->amount_paid;
+            $pendingBase = $pending * $rate;
+            $totalBase = (float) $payable->amount_total * $rate;
+            $dueDate = Carbon::parse($payable->due_date);
+
+            if (in_array($payable->status, ['open', 'partial'], true)) {
+                $summary['pending_count'] += 1;
+                $summary['pending_amount'] += $pendingBase;
+
+                if ($dueDate->lt($today)) {
+                    $summary['overdue_count'] += 1;
+                    $summary['overdue_amount'] += $pendingBase;
+                } elseif ($dueDate->isSameDay($today)) {
+                    $summary['due_today_count'] += 1;
+                    $summary['due_today_amount'] += $pendingBase;
+                } elseif ($dueDate->gt($today) && $dueDate->lte($soonDate)) {
+                    $summary['due_soon_count'] += 1;
+                    $summary['due_soon_amount'] += $pendingBase;
+                }
+            }
+
+            if ($payable->status === 'paid') {
+                $summary['paid_count'] += 1;
+                $summary['paid_amount'] += $totalBase;
+            }
+        }
 
         $accounts = $user->accounts()
             ->with('currency')

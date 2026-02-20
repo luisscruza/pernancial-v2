@@ -44,10 +44,16 @@ it('shows the payables index page', function () {
     $contact = Contact::factory()->for($user)->create();
 
     Account::factory()->for($user)->for($currency)->create();
-    Payable::factory()->for($user)->for($contact)->for($currency)->create();
+    Payable::factory()->for($user)->for($contact)->for($currency)->create([
+        'amount_total' => 100,
+        'amount_paid' => 20,
+        'due_date' => now()->addDays(3)->toDateString(),
+    ]);
     Payable::factory()->for($user)->for($contact)->for($currency)->create([
         'status' => 'paid',
+        'amount_total' => 200,
         'amount_paid' => 200,
+        'due_date' => now()->subDays(2)->toDateString(),
     ]);
 
     actingAs($user);
@@ -59,6 +65,13 @@ it('shows the payables index page', function () {
                 ->component('payables/index')
                 ->has('payables.data', 1)
                 ->has('accounts', 1)
+                ->where('summary.pending_count', 1)
+                ->where('summary.pending_amount', 80)
+                ->where('summary.paid_count', 1)
+                ->where('summary.paid_amount', 200)
+                ->where('summary.overdue_count', 0)
+                ->where('summary.due_today_count', 0)
+                ->where('summary.due_soon_count', 1)
                 ->where('filters.status', 'unpaid')
         );
 });
@@ -71,10 +84,16 @@ it('filters payables by contact', function () {
     $contactB = Contact::factory()->for($user)->create();
 
     Account::factory()->for($user)->for($currency)->create();
-    Payable::factory()->for($user)->for($contactA)->for($currency)->create();
+    Payable::factory()->for($user)->for($contactA)->for($currency)->create([
+        'amount_total' => 120,
+        'amount_paid' => 20,
+        'due_date' => now()->addDays(1)->toDateString(),
+    ]);
     Payable::factory()->for($user)->for($contactA)->for($currency)->create([
         'status' => 'paid',
+        'amount_total' => 300,
         'amount_paid' => 300,
+        'due_date' => now()->subDays(1)->toDateString(),
     ]);
     Payable::factory()->for($user)->for($contactB)->for($currency)->create();
 
@@ -87,6 +106,8 @@ it('filters payables by contact', function () {
                 ->component('payables/index')
                 ->has('payables.data', 1)
                 ->has('contacts', 2)
+                ->where('summary.pending_count', 1)
+                ->where('summary.paid_count', 1)
                 ->where('filters.contact_id', $contactA->id)
                 ->where('filters.status', 'unpaid')
         );

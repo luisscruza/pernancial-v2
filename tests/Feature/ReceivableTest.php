@@ -19,10 +19,16 @@ it('shows the receivables index page', function () {
     $contact = Contact::factory()->for($user)->create();
 
     Account::factory()->for($user)->for($currency)->create();
-    Receivable::factory()->for($user)->for($contact)->for($currency)->create();
+    Receivable::factory()->for($user)->for($contact)->for($currency)->create([
+        'amount_total' => 140,
+        'amount_paid' => 40,
+        'due_date' => now()->addDays(2)->toDateString(),
+    ]);
     Receivable::factory()->for($user)->for($contact)->for($currency)->create([
         'status' => 'paid',
+        'amount_total' => 200,
         'amount_paid' => 200,
+        'due_date' => now()->subDays(3)->toDateString(),
     ]);
 
     actingAs($user);
@@ -34,6 +40,13 @@ it('shows the receivables index page', function () {
                 ->component('receivables/index')
                 ->has('receivables.data', 1)
                 ->has('accounts', 1)
+                ->where('summary.pending_count', 1)
+                ->where('summary.pending_amount', 100)
+                ->where('summary.paid_count', 1)
+                ->where('summary.paid_amount', 200)
+                ->where('summary.overdue_count', 0)
+                ->where('summary.due_today_count', 0)
+                ->where('summary.due_soon_count', 1)
                 ->where('filters.status', 'unpaid')
         );
 });
@@ -46,10 +59,16 @@ it('filters receivables by contact', function () {
     $contactB = Contact::factory()->for($user)->create();
 
     Account::factory()->for($user)->for($currency)->create();
-    Receivable::factory()->for($user)->for($contactA)->for($currency)->create();
+    Receivable::factory()->for($user)->for($contactA)->for($currency)->create([
+        'amount_total' => 160,
+        'amount_paid' => 60,
+        'due_date' => now()->addDays(1)->toDateString(),
+    ]);
     Receivable::factory()->for($user)->for($contactA)->for($currency)->create([
         'status' => 'paid',
+        'amount_total' => 300,
         'amount_paid' => 300,
+        'due_date' => now()->subDays(1)->toDateString(),
     ]);
     Receivable::factory()->for($user)->for($contactB)->for($currency)->create();
 
@@ -62,6 +81,8 @@ it('filters receivables by contact', function () {
                 ->component('receivables/index')
                 ->has('receivables.data', 1)
                 ->has('contacts', 2)
+                ->where('summary.pending_count', 1)
+                ->where('summary.paid_count', 1)
                 ->where('filters.contact_id', $contactA->id)
                 ->where('filters.status', 'unpaid')
         );
