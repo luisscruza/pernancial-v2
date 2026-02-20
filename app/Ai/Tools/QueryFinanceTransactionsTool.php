@@ -89,7 +89,7 @@ final class QueryFinanceTransactionsTool implements Tool
 
         $transactions = Transaction::query()
             ->whereHas('account', fn ($query) => $query->where('user_id', $this->user->id))
-            ->with(['category', 'account.currency', 'destinationAccount', 'fromAccount'])
+            ->with(['category', 'splits.category', 'account.currency', 'destinationAccount', 'fromAccount'])
             ->when($account !== null, fn ($query) => $query->where('account_id', $account->id))
             ->when(! $includeTransfers, function ($query): void {
                 $query->whereNotIn('type', [
@@ -152,6 +152,14 @@ final class QueryFinanceTransactionsTool implements Tool
 
             if ($transaction->category) {
                 $line .= sprintf(', categoria="%s"', $transaction->category->name);
+            }
+
+            if ($transaction->splits->isNotEmpty()) {
+                $splitDetails = $transaction->splits
+                    ->map(fn ($split) => sprintf('%s=%.2f', $split->category?->name ?? 'Sin categoria', $split->amount))
+                    ->implode(', ');
+
+                $line .= sprintf(', dividido="%s"', $splitDetails);
             }
 
             if ($transactionType === TransactionType::TRANSFER_OUT->value && $transaction->destinationAccount) {
@@ -220,10 +228,13 @@ final class QueryFinanceTransactionsTool implements Tool
 
         $transactions = Transaction::query()
             ->where('type', TransactionType::EXPENSE)
-            ->where('category_id', $category->id)
             ->whereBetween('transaction_date', [$dateFrom, $dateTo])
             ->whereHas('account', fn ($query) => $query->where('user_id', $this->user->id))
-            ->with(['account.currency'])
+            ->where(function ($query) use ($category): void {
+                $query->where('category_id', $category->id)
+                    ->orWhereHas('splits', fn ($splitQuery) => $splitQuery->where('category_id', $category->id));
+            })
+            ->with(['account.currency', 'splits'])
             ->when($account !== null, fn ($query) => $query->where('account_id', $account->id))
             ->orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -258,14 +269,25 @@ final class QueryFinanceTransactionsTool implements Tool
             return implode("\n", $lines);
         }
 
-        $totalBase = $transactions->sum(fn (Transaction $transaction): float => $this->toBaseAmount($transaction));
+        $totalBase = 0.0;
+        $currencyTotals = [];
+        $transactionCount = 0;
+
+        foreach ($transactions as $transaction) {
+            $amount = $this->resolveCategoryAmount($transaction, $category->id);
+
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $currencyCode = $transaction->account->currency->code ?? 'N/A';
+            $currencyTotals[$currencyCode] = ($currencyTotals[$currencyCode] ?? 0.0) + $amount;
+            $totalBase += $this->toBaseAmountFor($transaction, $amount);
+            $transactionCount++;
+        }
         $baseCurrencyCode = $this->user->currency?->code ?? 'N/A';
 
-        $currencyBreakdown = $transactions
-            ->groupBy(fn (Transaction $transaction): string => $transaction->account->currency->code ?? 'N/A')
-            ->map(function ($group): float {
-                return (float) $group->sum('amount');
-            })
+        $currencyBreakdown = collect($currencyTotals)
             ->sortKeys()
             ->map(fn (float $amount, string $currencyCode): string => sprintf('%.2f %s', $amount, $currencyCode))
             ->implode(', ');
@@ -274,7 +296,7 @@ final class QueryFinanceTransactionsTool implements Tool
             sprintf('Resumen de gasto en la categoria "%s" (id=%d):', $category->name, $category->id),
             sprintf('- periodo=%s, fecha_desde=%s, fecha_hasta=%s', $period['label'], $dateFrom, $dateTo),
             sprintf('- total_gastado_base=%.2f %s', $totalBase, $baseCurrencyCode),
-            sprintf('- transacciones=%d', $transactions->count()),
+            sprintf('- transacciones=%d', $transactionCount),
             sprintf('- desglose_moneda_original=%s', $currencyBreakdown),
         ];
 
@@ -377,17 +399,30 @@ final class QueryFinanceTransactionsTool implements Tool
         return $parsed;
     }
 
-    private function toBaseAmount(Transaction $transaction): float
+    private function resolveCategoryAmount(Transaction $transaction, int $categoryId): float
     {
-        if ($transaction->converted_amount !== null) {
-            return (float) $transaction->converted_amount;
+        if ($transaction->splits->isNotEmpty()) {
+            $split = $transaction->splits->firstWhere('category_id', $categoryId);
+
+            return $split?->amount ?? 0.0;
         }
 
+        return (int) $transaction->category_id === $categoryId ? (float) $transaction->amount : 0.0;
+    }
+
+    private function toBaseAmountFor(Transaction $transaction, float $amount): float
+    {
         if ($transaction->conversion_rate !== null && $transaction->conversion_rate > 0) {
-            return (float) $transaction->amount * (float) $transaction->conversion_rate;
+            return $amount * (float) $transaction->conversion_rate;
         }
 
-        return (float) $transaction->amount;
+        if ($transaction->converted_amount !== null && $transaction->amount > 0) {
+            $factor = (float) $transaction->converted_amount / (float) $transaction->amount;
+
+            return $amount * $factor;
+        }
+
+        return $amount;
     }
 
     private function resolveAccount(?int $id, ?string $name): ?Account

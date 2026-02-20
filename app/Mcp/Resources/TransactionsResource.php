@@ -54,7 +54,7 @@ final class TransactionsResource extends Resource
             $transactions = Transaction::whereHas('account', function (Builder $query) use ($user): void {
                 $query->where('user_id', $user->id);
             })
-                ->with(['account.currency', 'category', 'destinationAccount.currency'])
+                ->with(['account.currency', 'category', 'splits.category', 'destinationAccount.currency'])
                 ->orderBy('transaction_date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->limit(50) // Limit to last 50 transactions
@@ -75,6 +75,7 @@ final class TransactionsResource extends Resource
                             ],
                         ],
                         'category' => null,
+                        'splits' => [],
                         'destination_account' => null,
                         'running_balance' => $transaction->running_balance,
                         'created_at' => $transaction->created_at?->toISOString(),
@@ -97,6 +98,20 @@ final class TransactionsResource extends Resource
                                 'symbol' => $transaction->destinationAccount->currency->symbol,
                             ],
                         ];
+                    }
+
+                    if ($transaction->splits->isNotEmpty()) {
+                        $data['splits'] = $transaction->splits->map(function ($split): array {
+                            return [
+                                'id' => $split->id,
+                                'amount' => $split->amount,
+                                'category' => $split->category ? [
+                                    'id' => $split->category->id,
+                                    'name' => $split->category->name,
+                                    'type' => $split->category->type,
+                                ] : null,
+                            ];
+                        })->values()->all();
                     }
 
                     return $data;

@@ -61,9 +61,37 @@ final class CreateFinanceTransactionTool implements Tool
             ? CategoryType::INCOME
             : CategoryType::EXPENSE;
 
+        $rawSplits = $request['splits'] ?? null;
+        $hasSplits = is_array($rawSplits) && count($rawSplits) > 0;
+        $splits = [];
+
+        if ($transactionType === TransactionType::TRANSFER) {
+            if ($hasSplits) {
+                return 'Las transferencias no permiten dividir el monto en categorias.';
+            }
+
+            if ($this->toInt($request['category_id'] ?? null) !== null || $this->toString($request['category_name'] ?? null) !== null) {
+                return 'Las transferencias no requieren categoria.';
+            }
+        }
+
+        if ($hasSplits) {
+            if ($this->toInt($request['category_id'] ?? null) !== null || $this->toString($request['category_name'] ?? null) !== null) {
+                return 'No puedes enviar categoria principal cuando ya hay divisiones.';
+            }
+
+            $resolved = $this->resolveSplits($rawSplits, $expectedCategoryType, $amount);
+
+            if (isset($resolved['error'])) {
+                return (string) $resolved['error'];
+            }
+
+            $splits = $resolved['splits'];
+        }
+
         $category = null;
 
-        if ($transactionType !== TransactionType::TRANSFER) {
+        if ($transactionType !== TransactionType::TRANSFER && ! $hasSplits) {
             $category = $this->resolveCategory(
                 id: $this->toInt($request['category_id'] ?? null),
                 name: $this->toString($request['category_name'] ?? null),
@@ -112,7 +140,7 @@ final class CreateFinanceTransactionTool implements Tool
                 account: $account,
                 amount: $amount,
                 transactionDate: $transactionDate,
-                category: $category,
+                category: $hasSplits ? null : $category,
                 description: $description,
             );
 
@@ -131,6 +159,7 @@ final class CreateFinanceTransactionTool implements Tool
             conversion_rate: 1.0,
             received_amount: null,
             ai_assisted: true,
+            splits: $splits,
         );
 
         try {
@@ -197,7 +226,75 @@ final class CreateFinanceTransactionTool implements Tool
                 ->description('Nombre exacto de cuenta destino si no se envia destination_account_id.'),
             'confirm_duplicate' => $schema->boolean()
                 ->description('Define true para crear el gasto aunque se detecte posible duplicado.'),
+            'splits' => $schema->array()
+                ->description('Lista de divisiones por categoria. Solo para income o expense.')
+                ->items($schema->object([
+                    'category_id' => $schema->integer()
+                        ->description('ID de categoria para la division.'),
+                    'category_name' => $schema->string()
+                        ->description('Nombre de categoria para la division si falta category_id.'),
+                    'amount' => $schema->number()
+                        ->description('Monto asignado a esta categoria.')
+                        ->required(),
+                ])),
         ];
+    }
+
+    /**
+     * @param  array<int, mixed>  $rawSplits
+     * @return array{splits: array<int, array{category_id: int, amount: float}>}|array{error: string}
+     */
+    private function resolveSplits(array $rawSplits, CategoryType $expectedCategoryType, float $amount): array
+    {
+        if ($rawSplits === []) {
+            return ['error' => 'Agrega al menos una division.'];
+        }
+
+        $splits = [];
+        $categoryIds = [];
+        $total = 0.0;
+
+        foreach ($rawSplits as $index => $rawSplit) {
+            if (! is_array($rawSplit)) {
+                return ['error' => sprintf('La division %d no es valida.', $index + 1)];
+            }
+
+            $splitAmount = $this->toFloat($rawSplit['amount'] ?? null);
+
+            if ($splitAmount === null || $splitAmount <= 0) {
+                return ['error' => sprintf('El monto de la division %d debe ser mayor que cero.', $index + 1)];
+            }
+
+            $category = $this->resolveCategory(
+                id: $this->toInt($rawSplit['category_id'] ?? null),
+                name: $this->toString($rawSplit['category_name'] ?? null),
+            );
+
+            if (! $category) {
+                return ['error' => sprintf('No se pudo resolver la categoria en la division %d.', $index + 1)];
+            }
+
+            if ($category->type !== $expectedCategoryType) {
+                return ['error' => 'Todas las divisiones deben usar categorias del mismo tipo.'];
+            }
+
+            if (in_array($category->id, $categoryIds, true)) {
+                return ['error' => 'No puedes repetir categorias en las divisiones.'];
+            }
+
+            $categoryIds[] = $category->id;
+            $splits[] = [
+                'category_id' => $category->id,
+                'amount' => $splitAmount,
+            ];
+            $total += $splitAmount;
+        }
+
+        if (abs($total - $amount) > 0.01) {
+            return ['error' => 'La suma de las divisiones debe ser igual al monto total.'];
+        }
+
+        return ['splits' => $splits];
     }
 
     private function findPotentialDuplicateExpense(

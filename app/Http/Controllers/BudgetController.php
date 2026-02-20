@@ -71,9 +71,12 @@ final class BudgetController extends Controller
             ->pluck('id');
 
         $transactions = Transaction::query()
-            ->with(['account.currency', 'category'])
+            ->with(['account.currency', 'category', 'splits.category'])
             ->whereIn('account_id', $accountIds)
-            ->where('category_id', $budget->category_id)
+            ->where(function ($query) use ($budget): void {
+                $query->where('category_id', $budget->category_id)
+                    ->orWhereHas('splits', fn ($splitQuery) => $splitQuery->where('category_id', $budget->category_id));
+            })
             ->whereBetween('transaction_date', [$budget->budgetPeriod->start_date, $budget->budgetPeriod->end_date])
             ->orderByDesc('transaction_date')
             ->get();

@@ -116,4 +116,34 @@ final class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Budget::class);
     }
+
+    /**
+     * Get the contacts for the user.
+     *
+     * @return HasMany<Contact, $this>
+     */
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    /**
+     * Get the receivable series for the user.
+     *
+     * @return HasMany<ReceivableSeries, $this>
+     */
+    public function receivableSeries(): HasMany
+    {
+        return $this->hasMany(ReceivableSeries::class);
+    }
+
+    /**
+     * Get the receivables for the user.
+     *
+     * @return HasMany<Receivable, $this>
+     */
+    public function receivables(): HasMany
+    {
+        return $this->hasMany(Receivable::class);
+    }
 }

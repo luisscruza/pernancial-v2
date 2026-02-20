@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\BudgetController::edit
-* @see app/Http/Controllers/BudgetController.php:88
+* @see app/Http/Controllers/BudgetController.php:91
 * @route '/budgets/{budget}/edit'
 */
 export const edit = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetController::edit
-* @see app/Http/Controllers/BudgetController.php:88
+* @see app/Http/Controllers/BudgetController.php:91
 * @route '/budgets/{budget}/edit'
 */
 edit.url = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ edit.url = (args: { budget: number | { id: number } } | [budget: number | { id: 
 
 /**
 * @see \App\Http\Controllers\BudgetController::edit
-* @see app/Http/Controllers/BudgetController.php:88
+* @see app/Http/Controllers/BudgetController.php:91
 * @route '/budgets/{budget}/edit'
 */
 edit.get = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ edit.get = (args: { budget: number | { id: number } } | [budget: number | { id: 
 
 /**
 * @see \App\Http\Controllers\BudgetController::edit
-* @see app/Http/Controllers/BudgetController.php:88
+* @see app/Http/Controllers/BudgetController.php:91
 * @route '/budgets/{budget}/edit'
 */
 edit.head = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -259,7 +259,7 @@ show.head = (args: { budget: number | { id: number } } | [budget: number | { id:
 
 /**
 * @see \App\Http\Controllers\BudgetController::update
-* @see app/Http/Controllers/BudgetController.php:102
+* @see app/Http/Controllers/BudgetController.php:105
 * @route '/budgets/{budget}'
 */
 export const update = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -274,7 +274,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetController::update
-* @see app/Http/Controllers/BudgetController.php:102
+* @see app/Http/Controllers/BudgetController.php:105
 * @route '/budgets/{budget}'
 */
 update.url = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ update.url = (args: { budget: number | { id: number } } | [budget: number | { id
 
 /**
 * @see \App\Http\Controllers\BudgetController::update
-* @see app/Http/Controllers/BudgetController.php:102
+* @see app/Http/Controllers/BudgetController.php:105
 * @route '/budgets/{budget}'
 */
 update.put = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -317,7 +317,7 @@ update.put = (args: { budget: number | { id: number } } | [budget: number | { id
 
 /**
 * @see \App\Http\Controllers\BudgetController::destroy
-* @see app/Http/Controllers/BudgetController.php:129
+* @see app/Http/Controllers/BudgetController.php:132
 * @route '/budgets/{budget}'
 */
 export const destroy = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -332,7 +332,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\BudgetController::destroy
-* @see app/Http/Controllers/BudgetController.php:129
+* @see app/Http/Controllers/BudgetController.php:132
 * @route '/budgets/{budget}'
 */
 destroy.url = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -365,7 +365,7 @@ destroy.url = (args: { budget: number | { id: number } } | [budget: number | { i
 
 /**
 * @see \App\Http\Controllers\BudgetController::destroy
-* @see app/Http/Controllers/BudgetController.php:129
+* @see app/Http/Controllers/BudgetController.php:132
 * @route '/budgets/{budget}'
 */
 destroy.delete = (args: { budget: number | { id: number } } | [budget: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({

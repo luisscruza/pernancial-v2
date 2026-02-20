@@ -6,6 +6,7 @@ namespace App\Mcp\Tools;
 
 use App\Actions\CreateTransactionAction;
 use App\Dto\CreateTransactionDto;
+use App\Enums\CategoryType;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Category;
@@ -42,6 +43,9 @@ final class CreateTransactionTool extends Tool
             'description' => 'nullable|string|max:255',
             'category_id' => 'nullable|integer|exists:categories,id',
             'destination_account_id' => 'nullable|integer|exists:accounts,id',
+            'splits' => 'nullable|array|min:1',
+            'splits.*.category_id' => 'required|integer|exists:categories,id|distinct:strict',
+            'splits.*.amount' => 'required|numeric|min:0.01',
         ], [
             'type.required' => 'Transaction type is required. Use "income", "expense", or "transfer".',
             'type.in' => 'Transaction type must be one of: income, expense, transfer.',
@@ -54,6 +58,14 @@ final class CreateTransactionTool extends Tool
             'account_id.exists' => 'The specified account does not exist.',
             'category_id.exists' => 'The specified category does not exist.',
             'destination_account_id.exists' => 'The specified destination account does not exist.',
+            'splits.array' => 'Splits must be a valid list.',
+            'splits.min' => 'Provide at least one split.',
+            'splits.*.category_id.required' => 'Each split must include a category.',
+            'splits.*.category_id.exists' => 'One of the split categories does not exist.',
+            'splits.*.category_id.distinct' => 'Split categories must be unique.',
+            'splits.*.amount.required' => 'Each split must include an amount.',
+            'splits.*.amount.numeric' => 'Split amount must be a number.',
+            'splits.*.amount.min' => 'Split amount must be greater than 0.',
         ]);
 
         $user = User::where('email', 'cruzmediaorg@gmail.com')->first();
@@ -69,9 +81,16 @@ final class CreateTransactionTool extends Tool
 
         $transactionType = TransactionType::from($validated['type']);
 
+        $splits = $validated['splits'] ?? [];
+        $hasSplits = is_array($splits) && $splits !== [];
+
         // For transfers, validate destination account
         $destinationAccount = null;
         if ($transactionType === TransactionType::TRANSFER) {
+            if ($hasSplits) {
+                return Response::error('Split categories are not allowed for transfer transactions.');
+            }
+
             if (! isset($validated['destination_account_id'])) {
                 return Response::error('Destination account is required for transfer transactions.');
             }
@@ -89,13 +108,20 @@ final class CreateTransactionTool extends Tool
             }
         }
 
-        // Verify category (required for income/expense, optional for transfer)
-
-        if ($transactionType !== TransactionType::TRANSFER && ! isset($validated['category_id'])) {
+        // Verify category (required for income/expense unless splits provided)
+        if ($transactionType !== TransactionType::TRANSFER && ! $hasSplits && ! isset($validated['category_id'])) {
             return Response::error('Category is required for income and expense transactions.');
         }
 
+        if ($transactionType !== TransactionType::TRANSFER && $hasSplits && isset($validated['category_id'])) {
+            return Response::error('Primary category cannot be used when splits are provided.');
+        }
+
         $category = null;
+        $expectedCategoryType = $transactionType === TransactionType::INCOME
+            ? CategoryType::INCOME
+            : CategoryType::EXPENSE;
+
         if (isset($validated['category_id'])) {
             $category = Category::where('id', $validated['category_id'])
                 ->where('user_id', $user->id)
@@ -103,6 +129,41 @@ final class CreateTransactionTool extends Tool
 
             if (! $category) {
                 return Response::error('Category not found or you do not have permission to access it.');
+            }
+
+            if ($category->type !== $expectedCategoryType) {
+                return Response::error('Category type does not match the transaction type.');
+            }
+        }
+
+        $splitPayload = [];
+
+        if ($hasSplits) {
+            $sum = 0.0;
+
+            foreach ($splits as $split) {
+                $splitCategory = Category::where('id', $split['category_id'])
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                if (! $splitCategory) {
+                    return Response::error('Split category not found or you do not have permission to access it.');
+                }
+
+                if ($splitCategory->type !== $expectedCategoryType) {
+                    return Response::error('Split category type does not match the transaction type.');
+                }
+
+                $splitPayload[] = [
+                    'category_id' => $splitCategory->id,
+                    'amount' => (float) $split['amount'],
+                ];
+
+                $sum += (float) $split['amount'];
+            }
+
+            if (abs($sum - (float) $validated['amount']) > 0.01) {
+                return Response::error('Split amounts must add up to the total amount.');
             }
         }
 
@@ -115,6 +176,7 @@ final class CreateTransactionTool extends Tool
                 destination_account: $destinationAccount,
                 category: $category,
                 conversion_rate: 1.0, // Default to 1.0 for now
+                splits: $splitPayload,
             );
 
             $createTransactionAction->handle($account, $dto);
@@ -133,6 +195,19 @@ final class CreateTransactionTool extends Tool
 
             if ($category) {
                 $message .= " in category '{$category->name}'";
+            }
+
+            if ($splitPayload !== []) {
+                $splitSummary = collect($splitPayload)
+                    ->map(function (array $split): string {
+                        $splitCategory = Category::find($split['category_id']);
+                        $name = $splitCategory?->name ?? 'Category';
+
+                        return sprintf('%s: %.2f', $name, $split['amount']);
+                    })
+                    ->implode(', ');
+
+                $message .= " split as {$splitSummary}";
             }
 
             $message .= " on {$validated['transaction_date']}.";
@@ -175,6 +250,16 @@ final class CreateTransactionTool extends Tool
                 ->description('The ID of the category associated with the transaction'),
             'destination_account_id' => $schema->string()
                 ->description('The ID of the destination account (required for transfers)'),
+            'splits' => $schema->array()
+                ->description('Split allocations for income/expense transactions.')
+                ->items($schema->object([
+                    'category_id' => $schema->integer()
+                        ->description('The ID of the split category')
+                        ->required(),
+                    'amount' => $schema->number()
+                        ->description('The split amount')
+                        ->required(),
+                ])),
         ];
     }
 }

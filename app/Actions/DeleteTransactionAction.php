@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
+use App\Models\ReceivablePayment;
 use App\Models\Transaction;
 
 final readonly class DeleteTransactionAction
@@ -18,6 +19,26 @@ final readonly class DeleteTransactionAction
         $transaction->getConnection()->transaction(function () use ($transaction): void {
 
             $account = $transaction->account;
+
+            $receivablePayment = ReceivablePayment::query()
+                ->where('transaction_id', $transaction->id)
+                ->with('receivable')
+                ->first();
+
+            if ($receivablePayment && $receivablePayment->receivable) {
+                $receivable = $receivablePayment->receivable;
+                $nextPaid = max(0, $receivable->amount_paid - $receivablePayment->amount);
+                $status = $nextPaid <= 0
+                    ? 'open'
+                    : ($nextPaid >= $receivable->amount_total ? 'paid' : 'partial');
+
+                $receivable->update([
+                    'amount_paid' => $nextPaid,
+                    'status' => $status,
+                ]);
+
+                $receivablePayment->delete();
+            }
 
             // Check if this is a transfer transaction with a related transaction
             if (

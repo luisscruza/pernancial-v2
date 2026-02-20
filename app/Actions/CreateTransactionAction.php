@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Dto\CreateReceivableDto;
+use App\Dto\CreateReceivablePaymentDto;
 use App\Dto\CreateTransactionDto;
 use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
 use App\Models\Account;
+use App\Models\Contact;
 use App\Models\Transaction;
 use InvalidArgumentException;
 
 final readonly class CreateTransactionAction
 {
+    public function __construct(
+        private CreateReceivableAction $createReceivableAction,
+        private CreateReceivablePaymentAction $createReceivablePaymentAction,
+    ) {}
+
     /**
      * Create a new transaction for the given account.
      */
@@ -26,6 +34,12 @@ final readonly class CreateTransactionAction
                 return;
             }
 
+            if ($data->is_shared) {
+                $this->handleSharedExpense($account, $data);
+
+                return;
+            }
+
             // Calculate optimistic running balance based on current balance
             $isPositive = $data->type->isPositive();
             $optimisticRunningBalance = $account->balance + ($isPositive ? $data->amount : -$data->amount);
@@ -35,6 +49,7 @@ final readonly class CreateTransactionAction
             $transaction = $account->transactions()->create([
                 'type' => $data->type,
                 'amount' => $data->amount,
+                'personal_amount' => $data->personal_amount,
                 'transaction_date' => $data->transaction_date,
                 'description' => $data->description,
                 'category_id' => $hasSplits ? null : $data->category?->id,
@@ -58,6 +73,67 @@ final readonly class CreateTransactionAction
 
             UpdateAccountBalance::dispatch($account, $transaction);
         });
+    }
+
+    private function handleSharedExpense(Account $account, CreateTransactionDto $data): void
+    {
+        $personalAmount = $data->personal_amount ?? $data->amount;
+        $optimisticRunningBalance = $account->balance - $data->amount;
+
+        $transaction = $account->transactions()->create([
+            'type' => $data->type,
+            'amount' => $data->amount,
+            'personal_amount' => $personalAmount,
+            'transaction_date' => $data->transaction_date,
+            'description' => $data->description,
+            'category_id' => $data->category?->id,
+            'conversion_rate' => 1,
+            'converted_amount' => $data->amount,
+            'running_balance' => $optimisticRunningBalance,
+            'ai_assisted' => $data->ai_assisted,
+        ]);
+
+        $account->update(['balance' => $optimisticRunningBalance]);
+
+        if (! $account->currency->is_base) {
+            $this->handleConversion($account, $transaction);
+        }
+
+        foreach ($data->shared_receivables as $sharedReceivable) {
+            $contact = Contact::find($sharedReceivable['contact_id']);
+
+            if (! $contact) {
+                continue;
+            }
+
+            $receivable = $this->createReceivableAction->handle($account->user, new CreateReceivableDto(
+                contact: $contact,
+                currency: $account->currency,
+                amount_total: (float) $sharedReceivable['amount'],
+                due_date: $data->transaction_date,
+                description: $data->description ?: 'Gasto compartido',
+                origin_transaction: $transaction,
+            ));
+
+            if (! array_key_exists('paid_account_id', $sharedReceivable) || $sharedReceivable['paid_account_id'] === null) {
+                continue;
+            }
+
+            $paidAccount = Account::find((int) $sharedReceivable['paid_account_id']);
+
+            if (! $paidAccount) {
+                continue;
+            }
+
+            $this->createReceivablePaymentAction->handle($receivable, new CreateReceivablePaymentDto(
+                account: $paidAccount,
+                amount: (float) $sharedReceivable['amount'],
+                paid_at: $data->transaction_date,
+                note: 'Pago recibido al registrar gasto compartido',
+            ));
+        }
+
+        UpdateAccountBalance::dispatch($account, $transaction);
     }
 
     /**

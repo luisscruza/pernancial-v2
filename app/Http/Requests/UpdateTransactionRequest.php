@@ -9,6 +9,7 @@ use App\Enums\CategoryType;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Transaction;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -33,6 +34,7 @@ final class UpdateTransactionRequest extends FormRequest
         return [
             'type' => ['required', 'string', Rule::enum(TransactionType::class)],
             'amount' => ['required', 'numeric', 'not_in:0'],
+            'personal_amount' => ['nullable', 'numeric', 'not_in:0'],
             'received_amount' => ['nullable', 'numeric', 'not_in:0'],
             'description' => ['nullable', 'string', 'max:255'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
@@ -41,6 +43,11 @@ final class UpdateTransactionRequest extends FormRequest
             'splits' => ['nullable', 'array', 'min:1'],
             'splits.*.category_id' => ['required', 'integer', 'exists:categories,id', 'distinct:strict'],
             'splits.*.amount' => ['required', 'numeric', 'not_in:0'],
+            'is_shared' => ['nullable', 'boolean'],
+            'shared_receivables' => ['nullable', 'array', 'min:1'],
+            'shared_receivables.*.contact_id' => ['required', 'integer', 'exists:contacts,id', 'distinct:strict'],
+            'shared_receivables.*.amount' => ['required', 'numeric', 'not_in:0'],
+            'shared_receivables.*.paid_account_id' => ['nullable', 'integer', 'exists:accounts,id'],
         ];
     }
 
@@ -57,6 +64,8 @@ final class UpdateTransactionRequest extends FormRequest
             'amount.required' => 'El monto es obligatorio.',
             'amount.numeric' => 'El monto debe ser un número.',
             'amount.not_in' => 'El monto no puede ser cero.',
+            'personal_amount.numeric' => 'El monto personal debe ser un número.',
+            'personal_amount.not_in' => 'El monto personal no puede ser cero.',
             'description.max' => 'La descripción no puede tener más de 255 caracteres.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
             'destination_account_id.exists' => 'La cuenta de destino seleccionada no existe.',
@@ -70,6 +79,15 @@ final class UpdateTransactionRequest extends FormRequest
             'splits.*.amount.required' => 'El monto de la división es obligatorio.',
             'splits.*.amount.numeric' => 'El monto de la división debe ser un número.',
             'splits.*.amount.not_in' => 'El monto de la división no puede ser cero.',
+            'shared_receivables.array' => 'Las cuentas por cobrar deben ser una lista válida.',
+            'shared_receivables.min' => 'Agrega al menos una persona en la división.',
+            'shared_receivables.*.contact_id.required' => 'Selecciona la persona que debe el monto.',
+            'shared_receivables.*.contact_id.exists' => 'La persona seleccionada no existe.',
+            'shared_receivables.*.contact_id.distinct' => 'No puedes repetir personas en la división.',
+            'shared_receivables.*.amount.required' => 'El monto de la persona es obligatorio.',
+            'shared_receivables.*.amount.numeric' => 'El monto de la persona debe ser un número.',
+            'shared_receivables.*.amount.not_in' => 'El monto de la persona no puede ser cero.',
+            'shared_receivables.*.paid_account_id.exists' => 'La cuenta de pago seleccionada no existe.',
         ];
     }
 
@@ -90,6 +108,48 @@ final class UpdateTransactionRequest extends FormRequest
 
                 $splits = $this->input('splits', []);
                 $hasSplits = is_array($splits) && count($splits) > 0;
+                $isShared = $this->boolean('is_shared');
+                $sharedReceivables = $this->input('shared_receivables', []);
+                $hasSharedReceivables = is_array($sharedReceivables) && count($sharedReceivables) > 0;
+                $transaction = $this->route('transaction');
+
+                if ($isShared && $type !== TransactionType::EXPENSE) {
+                    $validator->errors()->add('is_shared', 'Solo puedes compartir gastos, no ingresos o transferencias.');
+
+                    return;
+                }
+
+                if ($isShared && $hasSplits) {
+                    $validator->errors()->add('splits', 'No puedes combinar divisiones por categoría con gastos compartidos.');
+
+                    return;
+                }
+
+                if ($isShared && ! $hasSharedReceivables) {
+                    $validator->errors()->add('shared_receivables', 'Agrega al menos una persona para repartir el gasto.');
+                }
+
+                if ($isShared && ! $this->filled('category_id')) {
+                    $validator->errors()->add('category_id', 'Selecciona una categoría para el gasto compartido.');
+                }
+
+                if ($isShared && ! $this->filled('personal_amount')) {
+                    $validator->errors()->add('personal_amount', 'Indica tu parte del gasto.');
+                }
+
+                if ($transaction instanceof Transaction) {
+                    if (! $isShared && $transaction->personal_amount !== null) {
+                        $validator->errors()->add('is_shared', 'No puedes quitar la división compartida de este gasto.');
+
+                        return;
+                    }
+
+                    if ($isShared && $transaction->receivables()->whereHas('payments')->exists()) {
+                        $validator->errors()->add('shared_receivables', 'No puedes editar este gasto porque ya tiene cobros registrados.');
+
+                        return;
+                    }
+                }
 
                 if ($type === TransactionType::TRANSFER && $hasSplits) {
                     $validator->errors()->add('splits', 'Las transferencias no pueden dividirse en categorías.');
@@ -105,7 +165,23 @@ final class UpdateTransactionRequest extends FormRequest
                     $validator->errors()->add('category_id', 'No puedes usar categoría principal cuando hay divisiones.');
                 }
 
-                if (! $hasSplits) {
+                if (! $hasSplits && ! $isShared) {
+                    return;
+                }
+
+                if ($isShared) {
+                    $amount = (float) $this->input('amount');
+                    $personalAmount = (float) $this->input('personal_amount');
+                    $sharedSum = 0.0;
+
+                    foreach ($sharedReceivables as $sharedReceivable) {
+                        $sharedSum += (float) ($sharedReceivable['amount'] ?? 0);
+                    }
+
+                    if (abs(($personalAmount + $sharedSum) - $amount) > 0.01) {
+                        $validator->errors()->add('shared_receivables', 'La suma de tu parte y las personas debe ser igual al monto total.');
+                    }
+
                     return;
                 }
 
@@ -162,6 +238,7 @@ final class UpdateTransactionRequest extends FormRequest
         return new CreateTransactionDto(
             type: TransactionType::from($this->input('type')),
             amount: (float) $this->input('amount'),
+            personal_amount: $this->filled('personal_amount') ? (float) $this->input('personal_amount') : null,
             transaction_date: $this->input('transaction_date'),
             description: $this->input('description'),
             destination_account: Account::find($this->input('destination_account_id')),
@@ -169,6 +246,8 @@ final class UpdateTransactionRequest extends FormRequest
             conversion_rate: null,
             received_amount: $this->input('received_amount') ? (float) $this->input('received_amount') : null,
             splits: $this->normalizeSplits(),
+            is_shared: $this->boolean('is_shared'),
+            shared_receivables: $this->normalizeSharedReceivables(),
         );
     }
 
@@ -197,6 +276,40 @@ final class UpdateTransactionRequest extends FormRequest
             $normalized[] = [
                 'category_id' => (int) $split['category_id'],
                 'amount' => (float) $split['amount'],
+            ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @return array<int, array{contact_id: int, amount: float, paid_account_id?: int|null}>
+     */
+    private function normalizeSharedReceivables(): array
+    {
+        $sharedReceivables = $this->input('shared_receivables', []);
+
+        if (! is_array($sharedReceivables)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($sharedReceivables as $sharedReceivable) {
+            if (! is_array($sharedReceivable)) {
+                continue;
+            }
+
+            if (! array_key_exists('contact_id', $sharedReceivable) || ! array_key_exists('amount', $sharedReceivable)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'contact_id' => (int) $sharedReceivable['contact_id'],
+                'amount' => (float) $sharedReceivable['amount'],
+                'paid_account_id' => array_key_exists('paid_account_id', $sharedReceivable)
+                    ? ($sharedReceivable['paid_account_id'] !== null ? (int) $sharedReceivable['paid_account_id'] : null)
+                    : null,
             ];
         }
 

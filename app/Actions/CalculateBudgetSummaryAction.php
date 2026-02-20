@@ -38,7 +38,10 @@ final class CalculateBudgetSummaryAction
             ->get();
 
         // Sum up the spending (convert to user's base currency if needed)
-        $totalSpent = $directTransactions->sum(fn (Transaction $transaction): float => $this->convertTransactionAmountToBase($transaction, $transaction->amount));
+        $totalSpent = $directTransactions->sum(fn (Transaction $transaction): float => $this->convertTransactionAmountToBase(
+            $transaction,
+            $transaction->personal_amount ?? $transaction->amount,
+        ));
         $totalSpent += $splitTransactions->sum(fn (TransactionSplit $split): float => $this->convertSplitToBaseCurrency($split));
 
         $transactionCount = $directTransactions->count() + $splitTransactions->count();

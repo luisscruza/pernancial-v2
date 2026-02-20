@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $id
  * @property TransactionType $type
  * @property float $amount
+ * @property float|null $personal_amount
  * @property CarbonImmutable $transaction_date
  * @property string|null $description
  * @property int $account_id
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $deleted_at
  * @property int|null $related_transaction_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, TransactionSplit> $splits
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Receivable> $receivables
  */
 final class Transaction extends Model
 {
@@ -88,6 +90,14 @@ final class Transaction extends Model
     }
 
     /**
+     * @return HasMany<Receivable, $this>
+     */
+    public function receivables(): HasMany
+    {
+        return $this->hasMany(Receivable::class, 'origin_transaction_id');
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -96,6 +106,7 @@ final class Transaction extends Model
             'id' => 'integer',
             'type' => TransactionType::class,
             'amount' => 'float',
+            'personal_amount' => 'float',
             'transaction_date' => 'date',
             'description' => 'string',
             'account_id' => 'integer',

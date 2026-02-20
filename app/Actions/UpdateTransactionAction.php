@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Dto\CreateReceivableDto;
+use App\Dto\CreateReceivablePaymentDto;
 use App\Dto\CreateTransactionDto;
 use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
+use App\Models\Account;
+use App\Models\Contact;
 use App\Models\Transaction;
+use InvalidArgumentException;
 
 final readonly class UpdateTransactionAction
 {
+    public function __construct(
+        private CreateReceivableAction $createReceivableAction,
+        private CreateReceivablePaymentAction $createReceivablePaymentAction,
+    ) {}
+
     /**
      * Update an existing transaction.
      */
@@ -22,6 +32,14 @@ final readonly class UpdateTransactionAction
             // Check if this is a transfer transaction
             if ($transaction->type === TransactionType::TRANSFER_OUT || $transaction->type === TransactionType::TRANSFER_IN) {
                 $this->handleTransferUpdate($transaction, $data);
+
+                return;
+            }
+
+            if ($data->is_shared) {
+                $this->updateSharedTransaction($transaction, $data);
+
+                UpdateAccountBalance::dispatch($account, $transaction);
 
                 return;
             }
@@ -82,6 +100,7 @@ final readonly class UpdateTransactionAction
         $transaction->update([
             'type' => $data->type,
             'amount' => $data->amount,
+            'personal_amount' => $data->personal_amount,
             'transaction_date' => $data->transaction_date,
             'description' => $data->description,
             'category_id' => $hasSplits ? null : $data->category?->id,
@@ -104,6 +123,77 @@ final readonly class UpdateTransactionAction
                 'converted_amount' => $data->amount,
             ]);
         }
+    }
+
+    private function updateSharedTransaction(Transaction $transaction, CreateTransactionDto $data): void
+    {
+        $account = $transaction->account;
+        $personalAmount = $data->personal_amount ?? $data->amount;
+
+        if ($data->type !== TransactionType::EXPENSE) {
+            throw new InvalidArgumentException('Shared transactions must be expenses.');
+        }
+
+        $transaction->update([
+            'type' => $data->type,
+            'amount' => $data->amount,
+            'personal_amount' => $personalAmount,
+            'transaction_date' => $data->transaction_date,
+            'description' => $data->description,
+            'category_id' => $data->category?->id,
+            'destination_account_id' => null,
+        ]);
+
+        $transaction->receivables()->delete();
+
+        foreach ($data->shared_receivables as $sharedReceivable) {
+            $contact = Contact::find($sharedReceivable['contact_id']);
+
+            if (! $contact) {
+                continue;
+            }
+
+            $receivable = $this->createReceivableAction->handle($account->user, new CreateReceivableDto(
+                contact: $contact,
+                currency: $account->currency,
+                amount_total: (float) $sharedReceivable['amount'],
+                due_date: $data->transaction_date,
+                description: $data->description ?: 'Gasto compartido',
+                origin_transaction: $transaction,
+            ));
+
+            if (! array_key_exists('paid_account_id', $sharedReceivable) || $sharedReceivable['paid_account_id'] === null) {
+                continue;
+            }
+
+            $paidAccount = Account::find((int) $sharedReceivable['paid_account_id']);
+
+            if (! $paidAccount) {
+                continue;
+            }
+
+            $this->createReceivablePaymentAction->handle($receivable, new CreateReceivablePaymentDto(
+                account: $paidAccount,
+                amount: (float) $sharedReceivable['amount'],
+                paid_at: $data->transaction_date,
+                note: 'Pago recibido al registrar gasto compartido',
+            ));
+        }
+
+        if (! $account->currency->is_base) {
+            $rate = $account->currency->rateForDate($transaction->transaction_date->toDateString());
+            $transaction->update([
+                'conversion_rate' => $rate,
+                'converted_amount' => $transaction->amount * $rate,
+            ]);
+
+            return;
+        }
+
+        $transaction->update([
+            'conversion_rate' => 1,
+            'converted_amount' => $transaction->amount,
+        ]);
     }
 
     /**

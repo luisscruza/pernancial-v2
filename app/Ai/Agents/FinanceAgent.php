@@ -59,6 +59,7 @@ final class FinanceAgent implements Agent, Conversational, HasTools
             - Ingresos y gastos:
             - La categoría es obligatoria.
             - Si el usuario no indica categoría, solicita que la elija por nombre.
+            - Si el usuario quiere dividir el monto en varias categorías, usa divisiones por categoría y evita una categoría principal.
             - Antes de registrar un gasto nuevo, consulta primero transacciones recientes para evitar duplicados.
             - Para esa validación previa usa una consulta de transacciones recientes (sin transferencias) y revisa los últimos registros antes de crear el gasto.
             - Si detectas un posible duplicado (por ejemplo monto y cuenta iguales con fecha/concepto muy similar), pide confirmación explícita antes de registrar.
