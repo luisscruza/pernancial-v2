@@ -17,8 +17,11 @@ export default function AccountPage({
     accountingStats: {
         cuentasPorPagar: number;
         cuentasPorCobrar: number;
+        cuentasPorPagarTotal: number;
+        cuentasPorCobrarTotal: number;
         balanceEnCuenta: number;
         totalGeneral: number;
+        totalGeneralSinFiltro: number;
     };
 }) {
     const page = usePage<SharedData>();
@@ -91,17 +94,23 @@ export default function AccountPage({
 
                     {/* Cuentas por cobrar */}
                     <div className="rounded-xl border border-gray-50 bg-white p-4">
-                        <p className="mb-1 text-xs text-gray-500">Cuentas por cobrar</p>
+                        <p className="mb-1 text-xs text-gray-500">Cuentas por cobrar (mes actual)</p>
                         <p className="text-lg font-semibold text-green-600">
                             {formatCurrency(accountingStats.cuentasPorCobrar, page.props.auth.user.currency)}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400">
+                            General: {formatCurrency(accountingStats.cuentasPorCobrarTotal, page.props.auth.user.currency)}
                         </p>
                     </div>
 
                     {/* Cuentas por pagar */}
                     <div className="rounded-xl border border-gray-50 bg-white p-4">
-                        <p className="mb-1 text-xs text-gray-500">Cuentas por pagar</p>
+                        <p className="mb-1 text-xs text-gray-500">Cuentas por pagar (mes actual)</p>
                         <p className="text-lg font-semibold text-red-600">
                             {formatCurrency(accountingStats.cuentasPorPagar, page.props.auth.user.currency)}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400">
+                            General: {formatCurrency(accountingStats.cuentasPorPagarTotal, page.props.auth.user.currency)}
                         </p>
                     </div>
 
@@ -110,6 +119,9 @@ export default function AccountPage({
                         <p className="mb-1 text-xs text-gray-500">Total general</p>
                         <p className="text-lg font-semibold text-gray-900">
                             {formatCurrency(accountingStats.totalGeneral, page.props.auth.user.currency)}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400">
+                            General sin filtro: {formatCurrency(accountingStats.totalGeneralSinFiltro, page.props.auth.user.currency)}
                         </p>
                     </div>
                 </motion.div>

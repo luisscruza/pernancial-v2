@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:30
+* @see app/Http/Controllers/AccountController.php:31
 * @route '/'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:30
+* @see app/Http/Controllers/AccountController.php:31
 * @route '/'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:30
+* @see app/Http/Controllers/AccountController.php:31
 * @route '/'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::index
-* @see app/Http/Controllers/AccountController.php:30
+* @see app/Http/Controllers/AccountController.php:31
 * @route '/'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::create
-* @see app/Http/Controllers/AccountController.php:75
+* @see app/Http/Controllers/AccountController.php:88
 * @route '/accounts/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::create
-* @see app/Http/Controllers/AccountController.php:75
+* @see app/Http/Controllers/AccountController.php:88
 * @route '/accounts/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AccountController::create
-* @see app/Http/Controllers/AccountController.php:75
+* @see app/Http/Controllers/AccountController.php:88
 * @route '/accounts/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::create
-* @see app/Http/Controllers/AccountController.php:75
+* @see app/Http/Controllers/AccountController.php:88
 * @route '/accounts/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -89,7 +89,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::store
-* @see app/Http/Controllers/AccountController.php:99
+* @see app/Http/Controllers/AccountController.php:112
 * @route '/accounts'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -104,7 +104,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::store
-* @see app/Http/Controllers/AccountController.php:99
+* @see app/Http/Controllers/AccountController.php:112
 * @route '/accounts'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -113,7 +113,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AccountController::store
-* @see app/Http/Controllers/AccountController.php:99
+* @see app/Http/Controllers/AccountController.php:112
 * @route '/accounts'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:141
+* @see app/Http/Controllers/AccountController.php:154
 * @route '/accounts/{account}'
 */
 export const show = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:141
+* @see app/Http/Controllers/AccountController.php:154
 * @route '/accounts/{account}'
 */
 show.url = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ show.url = (args: { account: string | { uuid: string } } | [account: string | { 
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:141
+* @see app/Http/Controllers/AccountController.php:154
 * @route '/accounts/{account}'
 */
 show.get = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.get = (args: { account: string | { uuid: string } } | [account: string | { 
 
 /**
 * @see \App\Http\Controllers\AccountController::show
-* @see app/Http/Controllers/AccountController.php:141
+* @see app/Http/Controllers/AccountController.php:154
 * @route '/accounts/{account}'
 */
 show.head = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -191,7 +191,7 @@ show.head = (args: { account: string | { uuid: string } } | [account: string | {
 
 /**
 * @see \App\Http\Controllers\AccountController::edit
-* @see app/Http/Controllers/AccountController.php:111
+* @see app/Http/Controllers/AccountController.php:124
 * @route '/accounts/{account}/edit'
 */
 export const edit = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -206,7 +206,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::edit
-* @see app/Http/Controllers/AccountController.php:111
+* @see app/Http/Controllers/AccountController.php:124
 * @route '/accounts/{account}/edit'
 */
 edit.url = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -239,7 +239,7 @@ edit.url = (args: { account: string | { uuid: string } } | [account: string | { 
 
 /**
 * @see \App\Http\Controllers\AccountController::edit
-* @see app/Http/Controllers/AccountController.php:111
+* @see app/Http/Controllers/AccountController.php:124
 * @route '/accounts/{account}/edit'
 */
 edit.get = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -249,7 +249,7 @@ edit.get = (args: { account: string | { uuid: string } } | [account: string | { 
 
 /**
 * @see \App\Http\Controllers\AccountController::edit
-* @see app/Http/Controllers/AccountController.php:111
+* @see app/Http/Controllers/AccountController.php:124
 * @route '/accounts/{account}/edit'
 */
 edit.head = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -259,7 +259,7 @@ edit.head = (args: { account: string | { uuid: string } } | [account: string | {
 
 /**
 * @see \App\Http\Controllers\AccountController::update
-* @see app/Http/Controllers/AccountController.php:129
+* @see app/Http/Controllers/AccountController.php:142
 * @route '/accounts/{account}'
 */
 export const update = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -274,7 +274,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\AccountController::update
-* @see app/Http/Controllers/AccountController.php:129
+* @see app/Http/Controllers/AccountController.php:142
 * @route '/accounts/{account}'
 */
 update.url = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ update.url = (args: { account: string | { uuid: string } } | [account: string | 
 
 /**
 * @see \App\Http\Controllers\AccountController::update
-* @see app/Http/Controllers/AccountController.php:129
+* @see app/Http/Controllers/AccountController.php:142
 * @route '/accounts/{account}'
 */
 update.put = (args: { account: string | { uuid: string } } | [account: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({

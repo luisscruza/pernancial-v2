@@ -16,6 +16,7 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,30 +42,42 @@ final class AccountController
         $receivables = $user->receivables()->with('currency')->get();
         $payables = $user->payables()->with('currency')->get();
 
-        $cuentasPorCobrar = $receivables->sum(function ($receivable): float {
-            $rate = $receivable->currency?->is_base ? 1.0 : (float) $receivable->currency?->currentRate();
-            $pending = (float) $receivable->amount_total - (float) $receivable->amount_paid;
+        $limitDate = Carbon::now()->addMonth()->endOfDay();
+
+        $sumPending = static function ($item): float {
+            $rate = $item->currency?->is_base ? 1.0 : (float) $item->currency?->currentRate();
+            $pending = (float) $item->amount_total - (float) $item->amount_paid;
 
             return $pending * ($rate ?: 1.0);
-        });
+        };
 
-        $cuentasPorPagar = $payables->sum(function ($payable): float {
-            $rate = $payable->currency?->is_base ? 1.0 : (float) $payable->currency?->currentRate();
-            $pending = (float) $payable->amount_total - (float) $payable->amount_paid;
+        $cuentasPorCobrar = $receivables
+            ->filter(fn ($receivable): bool => $receivable->due_date?->lte($limitDate))
+            ->sum($sumPending);
 
-            return $pending * ($rate ?: 1.0);
-        });
+        $cuentasPorPagar = $payables
+            ->filter(fn ($payable): bool => $payable->due_date?->lte($limitDate))
+            ->sum($sumPending);
+
+        $cuentasPorCobrarTotal = $receivables->sum($sumPending);
+        $cuentasPorPagarTotal = $payables->sum($sumPending);
 
         $cuentasPorPagar = $cuentasPorPagar * -1;
+        $cuentasPorPagarTotal = $cuentasPorPagarTotal * -1;
+
         $totalGeneral = $balanceEnCuenta + $cuentasPorCobrar + $cuentasPorPagar;
+        $totalGeneralSinFiltro = $balanceEnCuenta + $cuentasPorCobrarTotal + $cuentasPorPagarTotal;
 
         return Inertia::render('accounts/index', [
             'accounts' => AccountResource::collection($accounts),
             'accountingStats' => [
                 'cuentasPorPagar' => $cuentasPorPagar,
                 'cuentasPorCobrar' => $cuentasPorCobrar,
+                'cuentasPorPagarTotal' => $cuentasPorPagarTotal,
+                'cuentasPorCobrarTotal' => $cuentasPorCobrarTotal,
                 'balanceEnCuenta' => $balanceEnCuenta,
                 'totalGeneral' => $totalGeneral,
+                'totalGeneralSinFiltro' => $totalGeneralSinFiltro,
             ],
         ]);
     }
