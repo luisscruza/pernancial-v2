@@ -316,6 +316,7 @@ it('throws exception when destination_account is null', function () {
     $dto = new CreateTransactionDto(
         type: TransactionType::TRANSFER,
         amount: 100.00,
+        personal_amount: null,
         transaction_date: '2025-10-10',
         description: 'Invalid transfer test',
         destination_account: null,

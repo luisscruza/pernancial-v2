@@ -27,6 +27,7 @@ test('to array', function () {
         'deleted_at',
         'related_transaction_id',
         'ai_assisted',
+        'personal_amount',
     ]);
 });
 

@@ -9,7 +9,7 @@ use App\Models\ReceivableSeries;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-final class GenerateReceivableOccurrences extends Command
+final class GenerateReceivableOccurrencesCommand extends Command
 {
     /**
      * The name and signature of the console command.

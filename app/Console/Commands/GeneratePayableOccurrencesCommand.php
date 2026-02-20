@@ -9,7 +9,7 @@ use App\Models\PayableSeries;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-final class GeneratePayableOccurrences extends Command
+final class GeneratePayableOccurrencesCommand extends Command
 {
     /**
      * The name and signature of the console command.

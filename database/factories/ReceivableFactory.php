@@ -25,7 +25,7 @@ final class ReceivableFactory extends Factory
             'user_id' => User::factory(),
             'contact_id' => Contact::factory(),
             'currency_id' => Currency::factory(),
-            'series_id' => null,
+            'receivable_series_id' => null,
             'amount_total' => fake()->randomFloat(2, 20, 5000),
             'amount_paid' => 0,
             'status' => 'open',

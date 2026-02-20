@@ -27,6 +27,7 @@ it('marks account balance recalculation to run after commit', function () {
     $action->handle($account, new CreateTransactionDto(
         type: TransactionType::INCOME,
         amount: 100.00,
+        personal_amount: null,
         transaction_date: '2025-01-03',
         description: 'Backdated income',
         destination_account: null,
@@ -51,6 +52,7 @@ it('creates splits when provided', function () {
     $action->handle($account, new CreateTransactionDto(
         type: TransactionType::EXPENSE,
         amount: 100.00,
+        personal_amount: null,
         transaction_date: '2025-01-04',
         description: 'Split purchase',
         destination_account: null,
