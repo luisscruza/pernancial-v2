@@ -42,7 +42,7 @@ final class AccountController
         $receivables = $user->receivables()->with('currency')->get();
         $payables = $user->payables()->with('currency')->get();
 
-        $limitDate = Carbon::now()->addMonth()->endOfDay();
+        $limitDate = Carbon::now()->endOfMonth();
 
         $sumPending = static function ($item): float {
             $rate = $item->currency?->is_base ? 1.0 : (float) $item->currency?->currentRate();
