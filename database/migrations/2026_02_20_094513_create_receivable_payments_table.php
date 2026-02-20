@@ -16,6 +16,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('receivable_payments')) {
+            return;
+        }
+
         Schema::create('receivable_payments', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Receivable::class);

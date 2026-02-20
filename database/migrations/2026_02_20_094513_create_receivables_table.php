@@ -18,6 +18,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('receivables')) {
+            return;
+        }
+
         Schema::create('receivables', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
