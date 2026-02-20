@@ -60,7 +60,7 @@ test('user can visit account page', function () {
                                 ->where(
                                     '0',
                                     $account->transactions()
-                                        ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency')
+                                        ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency', 'receivables.contact')
                                         ->first()
                                         ->toArray()
                                 )

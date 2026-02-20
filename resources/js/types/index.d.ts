@@ -122,6 +122,7 @@ export interface Transaction {
     id: number;
     account_id: number;
     amount: number;
+    personal_amount?: number | null;
     description?: string;
     category_id?: string;
     created_at: string;
@@ -132,10 +133,99 @@ export interface Transaction {
     ai_assisted: boolean;
     category?: Category;
     splits?: TransactionSplit[];
+    receivables?: Receivable[];
     account: Account;
     type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';
     from_account: Account | null;
     destination_account: Account | null;
+}
+
+export interface Contact {
+    id: number;
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    notes?: string | null;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface ReceivableSeries {
+    id: number;
+    contact_id: number;
+    currency_id: number;
+    name: string;
+    default_amount: number;
+    is_recurring: boolean;
+    recurrence_rule?: Record<string, unknown> | null;
+    next_due_date?: string | null;
+}
+
+export interface PayableSeries {
+    id: number;
+    contact_id: number;
+    currency_id: number;
+    name: string;
+    default_amount: number;
+    is_recurring: boolean;
+    recurrence_rule?: Record<string, unknown> | null;
+    next_due_date?: string | null;
+}
+
+export interface ReceivablePayment {
+    id: number;
+    receivable_id: number;
+    account_id: number;
+    transaction_id?: number | null;
+    amount: number;
+    paid_at: string;
+    note?: string | null;
+    account?: Account;
+    transaction?: Transaction | null;
+}
+
+export interface PayablePayment {
+    id: number;
+    payable_id: number;
+    account_id: number;
+    transaction_id?: number | null;
+    amount: number;
+    paid_at: string;
+    note?: string | null;
+    account?: Account;
+    transaction?: Transaction | null;
+}
+
+export interface Receivable {
+    id: number;
+    contact_id: number;
+    currency_id: number;
+    receivable_series_id?: number | null;
+    amount_total: number;
+    amount_paid: number;
+    status: 'open' | 'partial' | 'paid';
+    description?: string | null;
+    due_date: string;
+    origin_transaction_id?: number | null;
+    contact?: Contact;
+    currency?: Currency;
+    payments?: ReceivablePayment[];
+}
+
+export interface Payable {
+    id: number;
+    contact_id: number;
+    currency_id: number;
+    payable_series_id?: number | null;
+    amount_total: number;
+    amount_paid: number;
+    status: 'open' | 'partial' | 'paid';
+    description?: string | null;
+    due_date: string;
+    origin_transaction_id?: number | null;
+    contact?: Contact;
+    currency?: Currency;
+    payments?: PayablePayment[];
 }
 
 export interface Category {

@@ -12,7 +12,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, DollarSign, Folder, LayoutGrid, Menu, MessageCircle, Search } from 'lucide-react';
+import { BookOpen, DollarSign, Folder, LayoutGrid, Menu, MessageCircle, Search, Users, WalletCards } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -21,6 +21,21 @@ const mainNavItems: NavItem[] = [
         title: 'Cuentas',
         href: '/',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Cuentas por cobrar',
+        href: '/receivables',
+        icon: WalletCards,
+    },
+    {
+        title: 'Cuentas por pagar',
+        href: '/payables',
+        icon: WalletCards,
+    },
+    {
+        title: 'Personas',
+        href: '/contacts',
+        icon: Users,
     },
     {
         title: 'Categorías',

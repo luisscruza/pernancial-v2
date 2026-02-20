@@ -42,13 +42,19 @@ export default function CategoryShow({ category, transactions, filters }: Props)
             return split.amount;
         }
 
-        return transaction.amount;
+        return transaction.personal_amount ?? transaction.amount;
     };
 
     const getBaseAmount = (transaction: Transaction) => {
         const split = getSplitForCategory(transaction);
         if (!split) {
-            return transaction.converted_amount ?? transaction.amount;
+            const baseAmount = transaction.personal_amount ?? transaction.amount;
+
+            if (transaction.converted_amount && transaction.amount) {
+                return (baseAmount / transaction.amount) * transaction.converted_amount;
+            }
+
+            return baseAmount;
         }
 
         if (transaction.converted_amount && transaction.amount) {
@@ -150,7 +156,7 @@ export default function CategoryShow({ category, transactions, filters }: Props)
         <AppLayout title={category.name}>
             <Head title={category.name} />
 
-            <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
+            <div className="ml-8 w-full max-w-7xl space-y-6 p-4">
                 <motion.div
                     className="flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}

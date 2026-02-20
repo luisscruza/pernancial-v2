@@ -8,6 +8,11 @@ import FinanceChatDestroyController from './FinanceChatDestroyController'
 import CategoryController from './CategoryController'
 import CurrencyController from './CurrencyController'
 import CurrencyRateController from './CurrencyRateController'
+import ContactController from './ContactController'
+import ReceivableController from './ReceivableController'
+import ReceivablePaymentController from './ReceivablePaymentController'
+import PayableController from './PayableController'
+import PayablePaymentController from './PayablePaymentController'
 import BudgetPeriodController from './BudgetPeriodController'
 import BudgetPeriodDuplicateController from './BudgetPeriodDuplicateController'
 import BudgetController from './BudgetController'
@@ -30,6 +35,11 @@ const Controllers = {
     CategoryController: Object.assign(CategoryController, CategoryController),
     CurrencyController: Object.assign(CurrencyController, CurrencyController),
     CurrencyRateController: Object.assign(CurrencyRateController, CurrencyRateController),
+    ContactController: Object.assign(ContactController, ContactController),
+    ReceivableController: Object.assign(ReceivableController, ReceivableController),
+    ReceivablePaymentController: Object.assign(ReceivablePaymentController, ReceivablePaymentController),
+    PayableController: Object.assign(PayableController, PayableController),
+    PayablePaymentController: Object.assign(PayablePaymentController, PayablePaymentController),
     BudgetPeriodController: Object.assign(BudgetPeriodController, BudgetPeriodController),
     BudgetPeriodDuplicateController: Object.assign(BudgetPeriodDuplicateController, BudgetPeriodDuplicateController),
     BudgetController: Object.assign(BudgetController, BudgetController),

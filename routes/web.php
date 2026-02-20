@@ -7,6 +7,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\BudgetPeriodController;
 use App\Http\Controllers\BudgetPeriodDuplicateController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\FinanceChatController;
@@ -17,6 +18,10 @@ use App\Http\Controllers\FinanceChatStreamController;
 use App\Http\Controllers\OnboardingAccountController;
 use App\Http\Controllers\OnboardingCategoryController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PayableController;
+use App\Http\Controllers\PayablePaymentController;
+use App\Http\Controllers\ReceivableController;
+use App\Http\Controllers\ReceivablePaymentController;
 use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +61,25 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/currencies/{currency}/edit', [CurrencyController::class, 'edit'])->name('currencies.edit');
     Route::put('/currencies/{currency}', [CurrencyController::class, 'update'])->name('currencies.update');
     Route::post('/currencies/{currency}/rates', [CurrencyRateController::class, 'store'])->name('currencies.rates.store');
+
+    Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
+    Route::get('/contacts/create', [ContactController::class, 'create'])->name('contacts.create');
+    Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
+    Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/{contact}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
+    Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
+
+    Route::get('/receivables', [ReceivableController::class, 'index'])->name('receivables.index');
+    Route::get('/receivables/create', [ReceivableController::class, 'create'])->name('receivables.create');
+    Route::post('/receivables', [ReceivableController::class, 'store'])->name('receivables.store');
+    Route::get('/receivables/{receivable}', [ReceivableController::class, 'show'])->name('receivables.show');
+    Route::post('/receivables/{receivable}/payments', [ReceivablePaymentController::class, 'store'])->name('receivables.payments.store');
+
+    Route::get('/payables', [PayableController::class, 'index'])->name('payables.index');
+    Route::get('/payables/create', [PayableController::class, 'create'])->name('payables.create');
+    Route::post('/payables', [PayableController::class, 'store'])->name('payables.store');
+    Route::get('/payables/{payable}', [PayableController::class, 'show'])->name('payables.show');
+    Route::post('/payables/{payable}/payments', [PayablePaymentController::class, 'store'])->name('payables.payments.store');
 
     // Budget Periods (main interface)
     Route::get('/budgets', [BudgetPeriodController::class, 'index'])->name('budgets.index');

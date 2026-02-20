@@ -200,7 +200,7 @@ export default function BudgetPeriodShow({ budgetPeriod, budgetSummaries }: Prop
         <AppLayout title={budgetPeriod.name}>
             <Head title={budgetPeriod.name} />
 
-            <div className="mx-auto w-full max-w-4xl p-4">
+            <div className="ml-8 w-full max-w-7xl p-4">
                 {/* Header */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-4">

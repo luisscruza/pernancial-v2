@@ -18,7 +18,7 @@ final readonly class CreateReceivableAction
         $receivable = $user->receivables()->create([
             'contact_id' => $data->contact->id,
             'currency_id' => $data->currency->id,
-            'series_id' => $data->series?->id,
+            'receivable_series_id' => $data->series?->id,
             'amount_total' => $data->amount_total,
             'amount_paid' => 0,
             'status' => 'open',

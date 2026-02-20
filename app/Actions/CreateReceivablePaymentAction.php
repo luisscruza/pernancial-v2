@@ -29,6 +29,7 @@ final readonly class CreateReceivablePaymentAction
                 'amount' => $data->amount,
                 'transaction_date' => $data->paid_at,
                 'description' => $description,
+                'category_id' => $data->category?->id,
                 'conversion_rate' => 1,
                 'converted_amount' => $data->amount,
                 'running_balance' => $optimisticRunningBalance,

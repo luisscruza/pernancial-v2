@@ -171,12 +171,17 @@ final class CreateTransactionTool extends Tool
             $dto = new CreateTransactionDto(
                 type: $transactionType,
                 amount: $validated['amount'],
+                personal_amount: null,
                 transaction_date: $validated['transaction_date'],
                 description: $validated['description'] ?? null,
                 destination_account: $destinationAccount,
                 category: $category,
                 conversion_rate: 1.0, // Default to 1.0 for now
+                received_amount: null,
+                ai_assisted: false,
                 splits: $splitPayload,
+                is_shared: false,
+                shared_receivables: [],
             );
 
             $createTransactionAction->handle($account, $dto);

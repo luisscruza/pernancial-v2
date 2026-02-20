@@ -39,14 +39,14 @@ final class CreateTransactionRequest extends FormRequest
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'destination_account_id' => ['nullable', 'integer', 'exists:accounts,id'],
             'transaction_date' => ['required', 'date'],
-            'splits' => ['nullable', 'array', 'min:1'],
-            'splits.*.category_id' => ['required', 'integer', 'exists:categories,id', 'distinct:strict'],
-            'splits.*.amount' => ['required', 'numeric', 'not_in:0'],
+            'splits' => ['exclude_if:is_shared,true', 'nullable', 'array', 'min:1'],
+            'splits.*.category_id' => ['exclude_if:is_shared,true', 'required', 'integer', 'exists:categories,id', 'distinct:strict'],
+            'splits.*.amount' => ['exclude_if:is_shared,true', 'required', 'numeric', 'not_in:0'],
             'is_shared' => ['nullable', 'boolean'],
-            'shared_receivables' => ['nullable', 'array', 'min:1'],
-            'shared_receivables.*.contact_id' => ['required', 'integer', 'exists:contacts,id', 'distinct:strict'],
-            'shared_receivables.*.amount' => ['required', 'numeric', 'not_in:0'],
-            'shared_receivables.*.paid_account_id' => ['nullable', 'integer', 'exists:accounts,id'],
+            'shared_receivables' => ['exclude_unless:is_shared,true', 'array', 'min:1'],
+            'shared_receivables.*.contact_id' => ['exclude_unless:is_shared,true', 'required', 'integer', 'exists:contacts,id', 'distinct:strict'],
+            'shared_receivables.*.amount' => ['exclude_unless:is_shared,true', 'required', 'numeric', 'not_in:0'],
+            'shared_receivables.*.paid_account_id' => ['exclude_unless:is_shared,true', 'nullable', 'integer', 'exists:accounts,id'],
         ];
     }
 
@@ -294,12 +294,12 @@ final class CreateTransactionRequest extends FormRequest
                 continue;
             }
 
+            $paidAccountId = $sharedReceivable['paid_account_id'] ?? null;
+
             $normalized[] = [
                 'contact_id' => (int) $sharedReceivable['contact_id'],
                 'amount' => (float) $sharedReceivable['amount'],
-                'paid_account_id' => array_key_exists('paid_account_id', $sharedReceivable)
-                    ? ($sharedReceivable['paid_account_id'] !== null ? (int) $sharedReceivable['paid_account_id'] : null)
-                    : null,
+                'paid_account_id' => $paidAccountId === '' || $paidAccountId === null ? null : (int) $paidAccountId,
             ];
         }
 

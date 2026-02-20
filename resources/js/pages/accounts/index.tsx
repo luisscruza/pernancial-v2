@@ -9,33 +9,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { PlusIcon, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-export default function AccountPage({ accounts }: { accounts: Account[] }) {
+export default function AccountPage({
+    accounts,
+    accountingStats,
+}: {
+    accounts: Account[];
+    accountingStats: {
+        cuentasPorPagar: number;
+        cuentasPorCobrar: number;
+        balanceEnCuenta: number;
+        totalGeneral: number;
+    };
+}) {
     const page = usePage<SharedData>();
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Calculate accounting stats
-    const accountingStats = useMemo(() => {
-        const cuentasPorPagar = accounts
-            .filter((account) => account.accounting_type === 'cxp')
-            .reduce((acc, account) => acc + account.balance_in_base, 0);
-
-        const cuentasPorCobrar = accounts
-            .filter((account) => account.accounting_type === 'cxc')
-            .reduce((acc, account) => acc + account.balance_in_base, 0);
-
-        const balanceEnCuenta = accounts
-            .filter((account) => account.accounting_type === 'normal')
-            .reduce((acc, account) => acc + account.balance_in_base, 0);
-
-        const totalGeneral = balanceEnCuenta + cuentasPorCobrar + cuentasPorPagar;
-
-        return {
-            cuentasPorPagar,
-            cuentasPorCobrar,
-            balanceEnCuenta,
-            totalGeneral,
-        };
-    }, [accounts]);
 
     // Filter accounts by search query
     const filteredAccounts = useMemo(() => {
@@ -86,7 +73,7 @@ export default function AccountPage({ accounts }: { accounts: Account[] }) {
     return (
         <AppLayout title="Cuentas">
             <Head title="Cuentas" />
-            <div className="mx-auto w-full max-w-4xl p-4">
+            <div className="ml-8 w-full max-w-7xl p-4">
                 {/* Stats Cards */}
                 <motion.div
                     className="mb-6 grid grid-cols-2 gap-3"

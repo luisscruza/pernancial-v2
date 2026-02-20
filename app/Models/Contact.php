@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ReceivableSeries> $receivableSeries
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Receivable> $receivables
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PayableSeries> $payableSeries
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Payable> $payables
  */
 final class Contact extends Model
 {
@@ -46,6 +48,22 @@ final class Contact extends Model
     public function receivables(): HasMany
     {
         return $this->hasMany(Receivable::class);
+    }
+
+    /**
+     * @return HasMany<PayableSeries, $this>
+     */
+    public function payableSeries(): HasMany
+    {
+        return $this->hasMany(PayableSeries::class);
+    }
+
+    /**
+     * @return HasMany<Payable, $this>
+     */
+    public function payables(): HasMany
+    {
+        return $this->hasMany(Payable::class);
     }
 
     /**

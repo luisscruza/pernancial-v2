@@ -18,6 +18,13 @@ interface Category {
     type: string;
 }
 
+interface Contact {
+    id: number;
+    name: string;
+    email?: string;
+    phone?: string;
+}
+
 interface OtherAccount {
     id: number;
     name: string;
@@ -40,6 +47,7 @@ interface Props extends SharedData {
     incomeCategories: Category[];
     expenseCategories: Category[];
     otherAccounts: OtherAccount[];
+    contacts: Contact[];
     transactionTypes: TransactionType[];
     filters: {
         date_from: string;
@@ -47,7 +55,7 @@ interface Props extends SharedData {
     };
 }
 
-export default function Show({ account, transactions, incomeCategories, expenseCategories, otherAccounts, transactionTypes }: Props) {
+export default function Show({ account, transactions, incomeCategories, expenseCategories, otherAccounts, contacts, transactionTypes }: Props) {
     const [tab, setTab] = useState('balance');
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -142,7 +150,7 @@ export default function Show({ account, transactions, incomeCategories, expenseC
         <AppLayout title={account.name}>
             <Head title={account.name} />
 
-            <div className="mx-auto w-full max-w-4xl space-y-6 p-4">
+            <div className="ml-8 w-full max-w-7xl space-y-6 p-4">
                 <motion.div
                     className="flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}
@@ -256,6 +264,9 @@ export default function Show({ account, transactions, incomeCategories, expenseC
                                                                         <h3 className="font-medium">
                                                                             Dividida en {transaction.splits.length} categorías
                                                                         </h3>
+                                                                    ) : transaction.personal_amount !== null &&
+                                                                      transaction.personal_amount !== undefined ? (
+                                                                        <h3 className="font-medium">Gasto compartido</h3>
                                                                     ) : transaction.category ? (
                                                                         <h3 className="font-medium">{transaction.category.name}</h3>
                                                                     ) : null}
@@ -286,6 +297,14 @@ export default function Show({ account, transactions, incomeCategories, expenseC
                                                                             Asistida por IA
                                                                         </Badge>
                                                                     )}
+
+                                                                    {transaction.personal_amount !== null &&
+                                                                        transaction.personal_amount !== undefined && (
+                                                                            <Badge variant="secondary" className="mt-1">
+                                                                                Tu parte:{' '}
+                                                                                {formatCurrency(transaction.personal_amount, account.currency!)}
+                                                                            </Badge>
+                                                                        )}
 
                                                                     {transaction.type.startsWith('transfer') && (
                                                                         <p className="text-muted-foreground text-sm">
@@ -358,6 +377,7 @@ export default function Show({ account, transactions, incomeCategories, expenseC
                     incomeCategories={incomeCategories}
                     expenseCategories={expenseCategories}
                     otherAccounts={otherAccounts}
+                    contacts={contacts}
                     transactionTypes={transactionTypes}
                     transaction={editingTransaction}
                 />

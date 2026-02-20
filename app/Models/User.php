@@ -138,6 +138,16 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the payable series for the user.
+     *
+     * @return HasMany<PayableSeries, $this>
+     */
+    public function payableSeries(): HasMany
+    {
+        return $this->hasMany(PayableSeries::class);
+    }
+
+    /**
      * Get the receivables for the user.
      *
      * @return HasMany<Receivable, $this>
@@ -145,5 +155,15 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function receivables(): HasMany
     {
         return $this->hasMany(Receivable::class);
+    }
+
+    /**
+     * Get the payables for the user.
+     *
+     * @return HasMany<Payable, $this>
+     */
+    public function payables(): HasMany
+    {
+        return $this->hasMany(Payable::class);
     }
 }

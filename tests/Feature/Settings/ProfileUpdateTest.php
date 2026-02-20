@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -13,7 +14,9 @@ test('profile page is displayed', function () {
         ->actingAs($user)
         ->get('/settings/profile');
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertInertia(fn (Assert $page): Assert => $page->component('settings/profile'));
 });
 
 test('profile information can be updated', function () {

@@ -1,10 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Actions\CreateReceivablePaymentAction;
+use App\Http\Requests\StoreReceivablePaymentRequest;
+use App\Models\Receivable;
+use Illuminate\Http\RedirectResponse;
 
-class ReceivablePaymentController
+final class ReceivablePaymentController
 {
-    //
+    /**
+     * Store a newly created payment for a receivable.
+     */
+    public function store(
+        StoreReceivablePaymentRequest $request,
+        CreateReceivablePaymentAction $action,
+        Receivable $receivable
+    ): RedirectResponse {
+        $action->handle($receivable, $request->getDto());
+
+        return back()->with('success', 'Pago registrado exitosamente.');
+    }
 }

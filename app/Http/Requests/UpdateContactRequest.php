@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateContactRequest extends FormRequest
+final class UpdateContactRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,27 @@ class UpdateContactRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:120'],
+            'phone' => ['nullable', 'string', 'max:40'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.max' => 'El nombre no puede tener más de 120 caracteres.',
+            'email.email' => 'El correo debe ser una dirección válida.',
+            'email.max' => 'El correo no puede tener más de 120 caracteres.',
+            'phone.max' => 'El teléfono no puede tener más de 40 caracteres.',
+            'notes.max' => 'Las notas no pueden tener más de 500 caracteres.',
         ];
     }
 }

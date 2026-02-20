@@ -27,15 +27,45 @@ final class AccountController
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(#[CurrentUser] User $user): Response
     {
         $accounts = Account::query()
             ->where('is_active', true)
             ->with('currency')
             ->get();
 
+        $balanceEnCuenta = $accounts
+            ->where('accounting_type', 'normal')
+            ->sum('balance_in_base');
+
+        $receivables = $user->receivables()->with('currency')->get();
+        $payables = $user->payables()->with('currency')->get();
+
+        $cuentasPorCobrar = $receivables->sum(function ($receivable): float {
+            $rate = $receivable->currency?->is_base ? 1.0 : (float) $receivable->currency?->currentRate();
+            $pending = (float) $receivable->amount_total - (float) $receivable->amount_paid;
+
+            return $pending * ($rate ?: 1.0);
+        });
+
+        $cuentasPorPagar = $payables->sum(function ($payable): float {
+            $rate = $payable->currency?->is_base ? 1.0 : (float) $payable->currency?->currentRate();
+            $pending = (float) $payable->amount_total - (float) $payable->amount_paid;
+
+            return $pending * ($rate ?: 1.0);
+        });
+
+        $cuentasPorPagar = $cuentasPorPagar * -1;
+        $totalGeneral = $balanceEnCuenta + $cuentasPorCobrar + $cuentasPorPagar;
+
         return Inertia::render('accounts/index', [
             'accounts' => AccountResource::collection($accounts),
+            'accountingStats' => [
+                'cuentasPorPagar' => $cuentasPorPagar,
+                'cuentasPorCobrar' => $cuentasPorCobrar,
+                'balanceEnCuenta' => $balanceEnCuenta,
+                'totalGeneral' => $totalGeneral,
+            ],
         ]);
     }
 
@@ -151,6 +181,10 @@ final class AccountController
                 ],
             ]);
 
+        $contacts = $user->contacts()
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'phone']);
+
         $transactionTypes = collect(TransactionType::cases())
             ->filter(fn (TransactionType $type): bool => $type->isCreatable())
             ->map(fn (TransactionType $type): array => [
@@ -162,7 +196,7 @@ final class AccountController
             'account' => fn () => AccountResource::make($account->fresh()),
             'transactions' => fn () => Inertia::deepMerge(
                 $account->transactions()
-                    ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency')
+                    ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency', 'receivables.contact')
                     ->when($dateFrom, fn ($query) => $query->whereDate('transaction_date', '>=', $dateFrom))
                     ->when($dateTo, fn ($query) => $query->whereDate('transaction_date', '<=', $dateTo))
                     ->orderBy('transaction_date', 'desc')
@@ -172,6 +206,7 @@ final class AccountController
             'incomeCategories' => $incomeCategories,
             'expenseCategories' => $expenseCategories,
             'otherAccounts' => $otherAccounts,
+            'contacts' => $contacts,
             'transactionTypes' => $transactionTypes,
             'filters' => [
                 'date_from' => $dateFrom,

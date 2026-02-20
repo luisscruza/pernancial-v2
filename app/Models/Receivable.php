@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $user_id
  * @property int $contact_id
  * @property int $currency_id
- * @property int|null $series_id
+ * @property int|null $receivable_series_id
  * @property float $amount_total
  * @property float $amount_paid
  * @property string $status
@@ -62,7 +62,7 @@ final class Receivable extends Model
      */
     public function series(): BelongsTo
     {
-        return $this->belongsTo(ReceivableSeries::class, 'series_id');
+        return $this->belongsTo(ReceivableSeries::class, 'receivable_series_id');
     }
 
     /**
@@ -91,7 +91,7 @@ final class Receivable extends Model
             'user_id' => 'integer',
             'contact_id' => 'integer',
             'currency_id' => 'integer',
-            'series_id' => 'integer',
+            'receivable_series_id' => 'integer',
             'amount_total' => 'float',
             'amount_paid' => 'float',
             'status' => 'string',

@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Contact;
+use App\Models\Currency;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Receivable>
  */
-class ReceivableFactory extends Factory
+final class ReceivableFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +22,16 @@ class ReceivableFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::factory(),
+            'contact_id' => Contact::factory(),
+            'currency_id' => Currency::factory(),
+            'series_id' => null,
+            'amount_total' => fake()->randomFloat(2, 20, 5000),
+            'amount_paid' => 0,
+            'status' => 'open',
+            'description' => fake()->sentence(),
+            'due_date' => now()->addDays(7)->toDateString(),
+            'origin_transaction_id' => null,
         ];
     }
 }

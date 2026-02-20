@@ -134,7 +134,7 @@ export default function BudgetIndex({ budgetPeriods }: Props) {
     <AppLayout title="Presupuestos">
       <Head title="Presupuestos" />
 
-      <div className="mx-auto w-full max-w-4xl p-4">
+            <div className="ml-8 w-full max-w-7xl p-4">
                 <motion.div
                     className="mb-8 flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}

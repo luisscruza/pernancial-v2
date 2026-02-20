@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Models\Account;
+use App\Models\Category;
 
 final readonly class CreateReceivablePaymentDto
 {
@@ -16,6 +17,7 @@ final readonly class CreateReceivablePaymentDto
         public float $amount,
         public string $paid_at,
         public ?string $note = null,
+        public ?Category $category = null,
     ) {
         //
     }

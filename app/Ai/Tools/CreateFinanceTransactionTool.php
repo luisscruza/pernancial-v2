@@ -152,6 +152,7 @@ final class CreateFinanceTransactionTool implements Tool
         $dto = new CreateTransactionDto(
             type: $transactionType,
             amount: $amount,
+            personal_amount: null,
             transaction_date: $transactionDate,
             description: $description,
             destination_account: $destinationAccount,
@@ -160,6 +161,8 @@ final class CreateFinanceTransactionTool implements Tool
             received_amount: null,
             ai_assisted: true,
             splits: $splits,
+            is_shared: false,
+            shared_receivables: [],
         );
 
         try {

@@ -1,9 +1,9 @@
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Currency } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { PlusIcon, CoinsIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CoinsIcon, PlusIcon } from 'lucide-react';
 
 interface CurrencyItemProps {
     currency: Currency & {
@@ -25,7 +25,7 @@ function CurrencyItem({ currency }: CurrencyItemProps) {
         <Link href={route('currencies.show', currency.id)}>
             <motion.div
                 layout
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
             >
@@ -35,9 +35,9 @@ function CurrencyItem({ currency }: CurrencyItemProps) {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
-                            type: "spring",
+                            type: 'spring',
                             stiffness: 300,
-                            damping: 15
+                            damping: 15,
                         }}
                     >
                         {currency.symbol}
@@ -46,18 +46,14 @@ function CurrencyItem({ currency }: CurrencyItemProps) {
                         <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-gray-900">{currency.code}</h3>
                             {currency.is_base && (
-                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                                    Base
-                                </span>
+                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Base</span>
                             )}
                         </div>
                         <p className="text-sm text-gray-500">{currency.name}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="font-medium text-gray-900">
-                        {formatRate(currency.conversion_rate)}
-                    </p>
+                    <p className="font-medium text-gray-900">{formatRate(currency.conversion_rate)}</p>
                     <p className="text-xs text-gray-500">Tasa actual</p>
                 </div>
             </motion.div>
@@ -65,22 +61,24 @@ function CurrencyItem({ currency }: CurrencyItemProps) {
     );
 }
 
-export default function CurrenciesPage({ 
-    currencies 
-}: { 
-    currencies: Array<Currency & {
-        rates?: Array<{ rate: number; effective_date: string }>;
-        conversion_rate: number;
-        is_base: boolean;
-    }> 
+export default function CurrenciesPage({
+    currencies,
+}: {
+    currencies: Array<
+        Currency & {
+            rates?: Array<{ rate: number; effective_date: string }>;
+            conversion_rate: number;
+            is_base: boolean;
+        }
+    >;
 }) {
-    const baseCurrency = currencies.find(currency => currency.is_base);
-    const otherCurrencies = currencies.filter(currency => !currency.is_base);
+    const baseCurrency = currencies.find((currency) => currency.is_base);
+    const otherCurrencies = currencies.filter((currency) => !currency.is_base);
 
     return (
         <AppLayout title="Monedas">
             <Head title="Monedas" />
-            <div className="mx-auto w-full max-w-4xl p-4">
+            <div className="ml-8 w-full max-w-7xl p-4">
                 <motion.div
                     className="mb-8 flex items-center justify-between"
                     initial={{ opacity: 0, y: -20 }}
@@ -94,20 +92,10 @@ export default function CurrenciesPage({
                         transition={{ delay: 0.2, duration: 0.3 }}
                     >
                         <CoinsIcon className="h-8 w-8 text-blue-600" />
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Monedas
-                        </h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Monedas</h1>
                     </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3, duration: 0.2 }}
-                    >
-                        <Button
-                            variant="default"
-                            asChild
-                            className="rounded-full bg-blue-600 hover:bg-blue-700"
-                        >
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.2 }}>
+                        <Button variant="default" asChild className="rounded-full bg-blue-600 hover:bg-blue-700">
                             <Link href={route('currencies.create')} className="gap-2">
                                 <PlusIcon className="h-4 w-4" />
                                 Nueva moneda
@@ -116,20 +104,10 @@ export default function CurrenciesPage({
                     </motion.div>
                 </motion.div>
 
-                <motion.div
-                    layout
-                    className="space-y-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                >
+                <motion.div layout className="space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
                     {/* Base Currency */}
                     {baseCurrency && (
-                        <motion.section
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
+                        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                             <motion.h2
                                 className="mb-4 text-xl font-semibold text-gray-800"
                                 initial={{ opacity: 0 }}
@@ -138,11 +116,7 @@ export default function CurrenciesPage({
                             >
                                 Moneda base
                             </motion.h2>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4, duration: 0.3 }}
-                            >
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.3 }}>
                                 <CurrencyItem currency={baseCurrency} />
                             </motion.div>
                         </motion.section>
@@ -173,7 +147,7 @@ export default function CurrenciesPage({
                                             exit={{ opacity: 0, y: -20 }}
                                             transition={{
                                                 delay: index * 0.1 + (baseCurrency ? 0.6 : 0.4),
-                                                duration: 0.3
+                                                duration: 0.3,
                                             }}
                                         >
                                             <CurrencyItem currency={currency} />
@@ -200,9 +174,9 @@ export default function CurrenciesPage({
                                 animate={{ scale: 1 }}
                                 transition={{
                                     delay: 0.2,
-                                    type: "spring",
+                                    type: 'spring',
                                     stiffness: 300,
-                                    damping: 15
+                                    damping: 15,
                                 }}
                             >
                                 💰
@@ -223,16 +197,8 @@ export default function CurrenciesPage({
                             >
                                 Crea tu primera moneda para gestionar diferentes divisas en tus transacciones.
                             </motion.p>
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                            >
-                                <Button
-                                    variant="default"
-                                    asChild
-                                    className="mt-6 rounded-full bg-blue-500 hover:bg-blue-600"
-                                >
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                                <Button variant="default" asChild className="mt-6 rounded-full bg-blue-500 hover:bg-blue-600">
                                     <Link href={route('currencies.create')} className="gap-2">
                                         <PlusIcon className="h-4 w-4" />
                                         Crear moneda

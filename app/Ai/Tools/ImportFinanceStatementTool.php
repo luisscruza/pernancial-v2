@@ -698,6 +698,7 @@ final class ImportFinanceStatementTool implements Tool
         $dto = new CreateTransactionDto(
             type: $entry['type'],
             amount: (float) $entry['amount'],
+            personal_amount: null,
             transaction_date: (string) $entry['transaction_date'],
             description: (string) $entry['description'],
             destination_account: null,
@@ -705,6 +706,9 @@ final class ImportFinanceStatementTool implements Tool
             conversion_rate: 1.0,
             received_amount: null,
             ai_assisted: true,
+            splits: [],
+            is_shared: false,
+            shared_receivables: [],
         );
 
         try {

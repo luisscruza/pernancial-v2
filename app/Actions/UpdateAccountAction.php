@@ -61,12 +61,17 @@ final readonly class UpdateAccountAction
         $transactionDto = new CreateTransactionDto(
             type: $difference < 0 ? TransactionType::ADJUSTMENT_NEGATIVE : TransactionType::ADJUSTMENT_POSITIVE,
             amount: abs($difference),
+            personal_amount: null,
             transaction_date: now()->toDateString(),
             description: 'Ajuste de balance',
             category: null,
             destination_account: null,
             conversion_rate: 1,
             received_amount: null,
+            ai_assisted: false,
+            splits: [],
+            is_shared: false,
+            shared_receivables: [],
         );
 
         $this->createTransactionAction->handle($account, $transactionDto);

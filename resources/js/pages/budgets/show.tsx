@@ -53,11 +53,15 @@ const TransactionCard = ({ transaction, baseCurrency, categoryId }: { transactio
     const split = transaction.splits?.find((splitEntry) =>
         splitEntry.category?.id ? splitEntry.category.id === categoryId : splitEntry.category_id?.toString() === categoryId,
     );
-    const displayAmount = split ? split.amount : transaction.amount;
-    const displayConvertedAmount =
-        split && transaction.converted_amount && transaction.amount
+    const baseAmount = transaction.personal_amount ?? transaction.amount;
+    const displayAmount = split ? split.amount : baseAmount;
+    const displayConvertedAmount = split
+        ? transaction.converted_amount && transaction.amount
             ? (split.amount / transaction.amount) * transaction.converted_amount
-            : transaction.converted_amount;
+            : transaction.converted_amount
+        : transaction.converted_amount && transaction.amount
+          ? (baseAmount / transaction.amount) * transaction.converted_amount
+          : transaction.converted_amount;
 
     return (
         <motion.div
@@ -131,7 +135,13 @@ export default function BudgetShow({ budget, budgetSummary, transactions }: Prop
         const split = getSplitForBudget(transaction);
 
         if (!split) {
-            return transaction.converted_amount ?? transaction.amount;
+            const baseAmount = transaction.personal_amount ?? transaction.amount;
+
+            if (transaction.converted_amount && transaction.amount) {
+                return (baseAmount / transaction.amount) * transaction.converted_amount;
+            }
+
+            return baseAmount;
         }
 
         if (transaction.converted_amount && transaction.amount) {
@@ -199,7 +209,7 @@ export default function BudgetShow({ budget, budgetSummary, transactions }: Prop
         <AppLayout title={budget.name}>
             <Head title={budget.name} />
 
-            <div className="mx-auto w-full max-w-4xl p-4">
+            <div className="ml-8 w-full max-w-7xl p-4">
                 {/* Header */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-4">

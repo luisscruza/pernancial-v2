@@ -31,11 +31,17 @@ final readonly class CreateInitialTransactionAction
             $this->createTransactionAction->handle($account, new CreateTransactionDto(
                 type: TransactionType::INITIAL,
                 amount: $balance,
+                personal_amount: null,
                 transaction_date: now()->format('Y-m-d'),
                 description: 'Balance inicial',
                 destination_account: null,
                 category: null,
                 conversion_rate: null,
+                received_amount: null,
+                ai_assisted: false,
+                splits: [],
+                is_shared: false,
+                shared_receivables: [],
             ));
         });
     }
