@@ -22,12 +22,25 @@ export default function ReceivablesIndex({
     accounts,
     categories,
     contacts,
+    summary,
     filters,
 }: {
     receivables: PaginatedProps<Receivable>;
     accounts: Account[];
     categories: Category[];
     contacts: Contact[];
+    summary: {
+        pending_count: number;
+        pending_amount: number;
+        overdue_count: number;
+        overdue_amount: number;
+        due_today_count: number;
+        due_today_amount: number;
+        due_soon_count: number;
+        due_soon_amount: number;
+        paid_count: number;
+        paid_amount: number;
+    };
     filters: {
         contact_id?: number | null;
         status?: string | null;
@@ -183,6 +196,27 @@ export default function ReceivablesIndex({
     };
 
     const formatDueDate = (value: string) => new Date(value).toLocaleDateString();
+    const getDueMeta = (value: string) => {
+        const dueDate = new Date(`${value}T00:00:00`);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dayMs = 24 * 60 * 60 * 1000;
+        const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / dayMs);
+
+        if (diffDays < 0) {
+            return { label: 'Vencida', className: 'bg-red-100 text-red-700' };
+        }
+
+        if (diffDays === 0) {
+            return { label: 'Vence hoy', className: 'bg-amber-100 text-amber-700' };
+        }
+
+        if (diffDays <= 7) {
+            return { label: `En ${diffDays} dias`, className: 'bg-blue-100 text-blue-700' };
+        }
+
+        return { label: `En ${diffDays} dias`, className: 'bg-gray-100 text-gray-600' };
+    };
 
     return (
         <AppLayout title="Cuentas por cobrar">
@@ -202,7 +236,40 @@ export default function ReceivablesIndex({
                 </motion.div>
 
                 <motion.div
-                    className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,_320px)_minmax(0,_220px)_1fr]"
+                    className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    <div className="rounded-xl border border-gray-100 bg-white p-3">
+                        <p className="text-xs text-gray-500">Pendientes</p>
+                        <p className="text-base font-semibold text-gray-900">{formatCurrency(summary.pending_amount, auth.user.currency)}</p>
+                        <p className="text-xs text-gray-400">{summary.pending_count} cuentas</p>
+                    </div>
+                    <div className="rounded-xl border border-red-100 bg-white p-3">
+                        <p className="text-xs text-gray-500">Vencidas</p>
+                        <p className="text-base font-semibold text-red-600">{formatCurrency(summary.overdue_amount, auth.user.currency)}</p>
+                        <p className="text-xs text-gray-400">{summary.overdue_count} cuentas</p>
+                    </div>
+                    <div className="rounded-xl border border-amber-100 bg-white p-3">
+                        <p className="text-xs text-gray-500">Vence hoy</p>
+                        <p className="text-base font-semibold text-amber-700">{formatCurrency(summary.due_today_amount, auth.user.currency)}</p>
+                        <p className="text-xs text-gray-400">{summary.due_today_count} cuentas</p>
+                    </div>
+                    <div className="rounded-xl border border-blue-100 bg-white p-3">
+                        <p className="text-xs text-gray-500">Proximos 7 dias</p>
+                        <p className="text-base font-semibold text-blue-700">{formatCurrency(summary.due_soon_amount, auth.user.currency)}</p>
+                        <p className="text-xs text-gray-400">{summary.due_soon_count} cuentas</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-100 bg-white p-3">
+                        <p className="text-xs text-gray-500">Pagadas</p>
+                        <p className="text-base font-semibold text-emerald-700">{formatCurrency(summary.paid_amount, auth.user.currency)}</p>
+                        <p className="text-xs text-gray-400">{summary.paid_count} cuentas</p>
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    className="sticky top-4 z-10 mb-6 grid gap-3 rounded-xl border border-gray-100 bg-white/90 p-3 backdrop-blur sm:grid-cols-[minmax(0,_320px)_minmax(0,_220px)_1fr]"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
@@ -246,16 +313,32 @@ export default function ReceivablesIndex({
                     </div>
                     <div className="space-y-2">
                         <Label>Estado</Label>
-                        <Select value={selectedStatus} onValueChange={handleStatusFilterChange}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar estado" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="unpaid">No pagados / Parcial</SelectItem>
-                                <SelectItem value="paid">Pagados</SelectItem>
-                                <SelectItem value="all">Todos</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={selectedStatus === 'unpaid' ? 'secondary' : 'outline'}
+                                onClick={() => handleStatusFilterChange('unpaid')}
+                            >
+                                No pagados / Parcial
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={selectedStatus === 'paid' ? 'secondary' : 'outline'}
+                                onClick={() => handleStatusFilterChange('paid')}
+                            >
+                                Pagados
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={selectedStatus === 'all' ? 'secondary' : 'outline'}
+                                onClick={() => handleStatusFilterChange('all')}
+                            >
+                                Todos
+                            </Button>
+                        </div>
                     </div>
                 </motion.div>
 
@@ -263,13 +346,25 @@ export default function ReceivablesIndex({
                     <AnimatePresence mode="popLayout">
                         {groupedReceivables.map(([dueDate, items]) => (
                             <motion.div layout key={dueDate} className="space-y-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
-                                    <p className="text-xs font-semibold tracking-wide text-gray-600 uppercase">Vence: {formatDueDate(dueDate)}</p>
-                                </div>
+                                {(() => {
+                                    const meta = getDueMeta(dueDate);
+                                    return (
+                                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
+                                            <p className="text-xs font-semibold tracking-wide text-gray-600 uppercase">
+                                                Vence: {formatDueDate(dueDate)}
+                                            </p>
+                                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${meta.className}`}>{meta.label}</span>
+                                        </div>
+                                    );
+                                })()}
 
                                 <div className="space-y-3">
                                     {items.map((receivable) => {
                                         const remaining = Math.max(0, receivable.amount_total - receivable.amount_paid);
+                                        const progress =
+                                            receivable.amount_total > 0
+                                                ? Math.min(100, Math.round((receivable.amount_paid / receivable.amount_total) * 100))
+                                                : 0;
                                         return (
                                             <div key={receivable.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                                                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -294,12 +389,20 @@ export default function ReceivablesIndex({
                                                         <p className="text-xs text-gray-500">
                                                             Pendiente: {formatCurrency(remaining, receivable.currency ?? auth.user.currency)}
                                                         </p>
+                                                        {receivable.amount_paid > 0 && remaining > 0 && (
+                                                            <div className="mt-2">
+                                                                <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-100">
+                                                                    <div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} />
+                                                                </div>
+                                                                <p className="mt-1 text-[11px] text-gray-400">{progress}% cobrado</p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 <div className="mt-4 flex flex-wrap items-center gap-2">
                                                     {remaining > 0 && (
-                                                        <Button size="sm" variant="outline" onClick={() => handleOpenPayment(receivable)}>
+                                                        <Button size="sm" variant="default" onClick={() => handleOpenPayment(receivable)}>
                                                             Registrar cobro
                                                         </Button>
                                                     )}

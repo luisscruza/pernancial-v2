@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:76
+* @see app/Http/Controllers/PayableController.php:119
 * @route '/payables/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:76
+* @see app/Http/Controllers/PayableController.php:119
 * @route '/payables/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:76
+* @see app/Http/Controllers/PayableController.php:119
 * @route '/payables/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:76
+* @see app/Http/Controllers/PayableController.php:119
 * @route '/payables/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -89,7 +89,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:92
+* @see app/Http/Controllers/PayableController.php:135
 * @route '/payables'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -104,7 +104,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:92
+* @see app/Http/Controllers/PayableController.php:135
 * @route '/payables'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -113,7 +113,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:92
+* @see app/Http/Controllers/PayableController.php:135
 * @route '/payables'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:142
+* @see app/Http/Controllers/PayableController.php:185
 * @route '/payables/{payable}'
 */
 export const show = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:142
+* @see app/Http/Controllers/PayableController.php:185
 * @route '/payables/{payable}'
 */
 show.url = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ show.url = (args: { payable: number | { id: number } } | [payable: number | { id
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:142
+* @see app/Http/Controllers/PayableController.php:185
 * @route '/payables/{payable}'
 */
 show.get = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.get = (args: { payable: number | { id: number } } | [payable: number | { id
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:142
+* @see app/Http/Controllers/PayableController.php:185
 * @route '/payables/{payable}'
 */
 show.head = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({

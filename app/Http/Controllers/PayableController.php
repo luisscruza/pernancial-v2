@@ -31,6 +31,9 @@ final class PayableController
         $status = $request->string('status')->toString();
         $statusFilter = $status !== '' ? $status : 'unpaid';
 
+        $today = Carbon::today();
+        $soonDate = $today->copy()->addDays(7);
+
         $payables = $user->payables()
             ->with(['contact', 'currency'])
             ->when($contactId, fn ($query) => $query->where('contact_id', $contactId))
@@ -39,6 +42,45 @@ final class PayableController
             ->orderBy('due_date', 'desc')
             ->paginate(20)
             ->withQueryString();
+
+        $summaryBase = $user->payables()
+            ->when($contactId, fn ($query) => $query->where('contact_id', $contactId));
+
+        $pendingQuery = (clone $summaryBase)->whereIn('status', ['open', 'partial']);
+        $paidQuery = (clone $summaryBase)->where('status', 'paid');
+
+        $pendingAmount = (float) (clone $pendingQuery)
+            ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
+            ->value('total');
+
+        $paidAmount = (float) (clone $paidQuery)
+            ->selectRaw('COALESCE(SUM(amount_total), 0) as total')
+            ->value('total');
+
+        $overdueQuery = (clone $pendingQuery)->whereDate('due_date', '<', $today);
+        $dueTodayQuery = (clone $pendingQuery)->whereDate('due_date', $today);
+        $dueSoonQuery = (clone $pendingQuery)
+            ->whereDate('due_date', '>', $today)
+            ->whereDate('due_date', '<=', $soonDate);
+
+        $summary = [
+            'pending_count' => (clone $pendingQuery)->count(),
+            'pending_amount' => $pendingAmount,
+            'overdue_count' => (clone $overdueQuery)->count(),
+            'overdue_amount' => (float) (clone $overdueQuery)
+                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
+                ->value('total'),
+            'due_today_count' => (clone $dueTodayQuery)->count(),
+            'due_today_amount' => (float) (clone $dueTodayQuery)
+                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
+                ->value('total'),
+            'due_soon_count' => (clone $dueSoonQuery)->count(),
+            'due_soon_amount' => (float) (clone $dueSoonQuery)
+                ->selectRaw('COALESCE(SUM(amount_total - amount_paid), 0) as total')
+                ->value('total'),
+            'paid_count' => (clone $paidQuery)->count(),
+            'paid_amount' => $paidAmount,
+        ];
 
         $accounts = $user->accounts()
             ->with('currency')
@@ -63,6 +105,7 @@ final class PayableController
             'accounts' => $accounts,
             'categories' => $categories,
             'contacts' => $contacts,
+            'summary' => $summary,
             'filters' => [
                 'contact_id' => $contactId ?: null,
                 'status' => $statusFilter,
