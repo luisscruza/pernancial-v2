@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ObservedBy([TransactionObserver::class])]
 /**
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property int|null $related_transaction_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TransactionSplit> $splits
  */
 final class Transaction extends Model
 {
@@ -75,6 +77,14 @@ final class Transaction extends Model
     public function relatedTransaction(): BelongsTo
     {
         return $this->belongsTo(self::class, 'related_transaction_id');
+    }
+
+    /**
+     * @return HasMany<TransactionSplit, $this>
+     */
+    public function splits(): HasMany
+    {
+        return $this->hasMany(TransactionSplit::class);
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Currency;
+use App\Models\Transaction;
 use App\Models\User;
 
 beforeEach(function () {
@@ -64,6 +65,39 @@ test('user can create an expense transaction', function () {
         'amount' => 75.50,
         'description' => 'Grocery shopping',
         'category_id' => $this->category->id,
+    ]);
+});
+
+test('user can create a split expense transaction', function () {
+    $foodCategory = Category::factory()->for($this->user)->create(['type' => CategoryType::EXPENSE]);
+    $drinkCategory = Category::factory()->for($this->user)->create(['type' => CategoryType::EXPENSE]);
+
+    $data = [
+        'type' => TransactionType::EXPENSE->value,
+        'amount' => 100.00,
+        'description' => 'Split grocery shopping',
+        'transaction_date' => now()->toDateString(),
+        'splits' => [
+            ['category_id' => $foodCategory->id, 'amount' => 60.00],
+            ['category_id' => $drinkCategory->id, 'amount' => 40.00],
+        ],
+    ];
+
+    $response = $this->actingAs($this->user)->post(route('transactions.store', $this->account), $data);
+
+    $response->assertRedirect()
+        ->assertSessionHas('success', 'Transacción creada exitosamente.');
+
+    $transaction = Transaction::query()->where('description', 'Split grocery shopping')->first();
+
+    expect($transaction)->not->toBeNull()
+        ->and($transaction->category_id)->toBeNull()
+        ->and($transaction->splits)->toHaveCount(2);
+
+    $this->assertDatabaseHas('transaction_splits', [
+        'transaction_id' => $transaction->id,
+        'category_id' => $foodCategory->id,
+        'amount' => 60.00,
     ]);
 });
 
@@ -146,6 +180,26 @@ test('transaction creation validates amount is numeric', function () {
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['amount']);
+});
+
+test('transaction creation validates split sums match total', function () {
+    $foodCategory = Category::factory()->for($this->user)->create(['type' => CategoryType::EXPENSE]);
+    $drinkCategory = Category::factory()->for($this->user)->create(['type' => CategoryType::EXPENSE]);
+
+    $data = [
+        'type' => TransactionType::EXPENSE->value,
+        'amount' => 100.00,
+        'transaction_date' => now()->toDateString(),
+        'splits' => [
+            ['category_id' => $foodCategory->id, 'amount' => 30.00],
+            ['category_id' => $drinkCategory->id, 'amount' => 40.00],
+        ],
+    ];
+
+    $response = $this->actingAs($this->user)->postJson(route('transactions.store', $this->account), $data);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['splits']);
 });
 
 test('transaction creation validates category exists', function () {

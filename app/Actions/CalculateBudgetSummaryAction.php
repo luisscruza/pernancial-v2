@@ -8,6 +8,7 @@ use App\Dto\BudgetSummaryDto;
 use App\Enums\BudgetType;
 use App\Models\Budget;
 use App\Models\Transaction;
+use App\Models\TransactionSplit;
 use Carbon\Carbon;
 
 final class CalculateBudgetSummaryAction
@@ -21,13 +22,26 @@ final class CalculateBudgetSummaryAction
         $dateRange = $this->getDateRangeForBudget($budget);
 
         // Find all expense transactions in this category within the date range
-        $transactions = Transaction::where('category_id', $budget->category_id)
+        $directTransactions = Transaction::query()
+            ->where('category_id', $budget->category_id)
             ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
+            ->whereDoesntHave('splits')
             ->with(['account.currency'])
             ->get();
 
+        $splitTransactions = TransactionSplit::query()
+            ->where('category_id', $budget->category_id)
+            ->whereHas('transaction', function ($query) use ($dateRange): void {
+                $query->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']]);
+            })
+            ->with(['transaction.account.currency', 'transaction.account.user.currencies'])
+            ->get();
+
         // Sum up the spending (convert to user's base currency if needed)
-        $totalSpent = $transactions->sum(fn ($transaction): float => $this->convertToBaseCurrency($transaction));
+        $totalSpent = $directTransactions->sum(fn (Transaction $transaction): float => $this->convertTransactionAmountToBase($transaction, $transaction->amount));
+        $totalSpent += $splitTransactions->sum(fn (TransactionSplit $split): float => $this->convertSplitToBaseCurrency($split));
+
+        $transactionCount = $directTransactions->count() + $splitTransactions->count();
 
         $remaining = $budget->amount - $totalSpent;
         $percentageUsed = $budget->amount > 0 ? ($totalSpent / $budget->amount) * 100 : 0;
@@ -42,7 +56,7 @@ final class CalculateBudgetSummaryAction
                 'start' => $dateRange['start']->toDateString(),
                 'end' => $dateRange['end']->toDateString(),
             ],
-            transactionCount: $transactions->count()
+            transactionCount: $transactionCount
         );
     }
 
@@ -67,10 +81,18 @@ final class CalculateBudgetSummaryAction
         ];
     }
 
-    /**
-     * Convert transaction amount to user's base currency.
-     */
-    private function convertToBaseCurrency(Transaction $transaction): float
+    private function convertSplitToBaseCurrency(TransactionSplit $split): float
+    {
+        $transaction = $split->transaction;
+
+        if (! $transaction) {
+            return 0.0;
+        }
+
+        return $this->convertTransactionAmountToBase($transaction, $split->amount);
+    }
+
+    private function convertTransactionAmountToBase(Transaction $transaction, float $amount): float
     {
         $accountCurrency = $transaction->account->currency;
         $userBaseCurrency = $transaction->account->user->currencies()
@@ -78,10 +100,13 @@ final class CalculateBudgetSummaryAction
             ->first();
 
         if (! $userBaseCurrency || $accountCurrency->id === $userBaseCurrency->id) {
-            return $transaction->amount;
+            return $amount;
         }
 
-        // Convert using current conversion rate
-        return $transaction->amount * $accountCurrency->conversion_rate;
+        if ($transaction->conversion_rate) {
+            return $amount * $transaction->conversion_rate;
+        }
+
+        return $amount * $accountCurrency->conversion_rate;
     }
 }

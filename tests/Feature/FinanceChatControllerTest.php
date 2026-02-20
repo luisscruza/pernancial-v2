@@ -170,6 +170,25 @@ test('finance chat stream accepts statement file without message', function () {
     });
 });
 
+test('finance chat stream accepts image file without message', function () {
+    $user = createOnboardedUser();
+
+    FinanceAgent::fake(['Analice la imagen adjunta y detecte movimientos.']);
+
+    $this->actingAs($user)
+        ->post(route('finance.chat.stream'), [
+            'statement_file' => UploadedFile::fake()->image('estado.png'),
+        ])
+        ->assertOk()
+        ->assertJsonPath('ok', true)
+        ->assertJsonPath('reply', 'Analice la imagen adjunta y detecte movimientos.');
+
+    FinanceAgent::assertPrompted(function (AgentPrompt $prompt): bool {
+        return $prompt->contains('Analiza el archivo adjunto')
+            && $prompt->attachments->count() === 1;
+    });
+});
+
 test('user can reset the finance chat conversation', function () {
     $user = createOnboardedUser();
 

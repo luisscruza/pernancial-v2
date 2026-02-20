@@ -110,6 +110,14 @@ export interface Account {
     transactions?: Transaction[];
 }
 
+export interface TransactionSplit {
+    id: number;
+    transaction_id?: number;
+    category_id: number;
+    amount: number;
+    category?: Category;
+}
+
 export interface Transaction {
     id: number;
     account_id: number;
@@ -123,6 +131,7 @@ export interface Transaction {
     converted_amount?: number;
     ai_assisted: boolean;
     category?: Category;
+    splits?: TransactionSplit[];
     account: Account;
     type: 'expense' | 'income' | 'transfer_in' | 'transfer_out' | 'initial';
     from_account: Account | null;

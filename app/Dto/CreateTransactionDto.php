@@ -12,6 +12,8 @@ final class CreateTransactionDto
 {
     /**
      * Create a new class instance.
+     *
+     * @param  array<int, array{category_id: int, amount: float}>  $splits
      */
     public function __construct(
         public TransactionType $type,
@@ -23,6 +25,7 @@ final class CreateTransactionDto
         public ?float $conversion_rate,
         public ?float $received_amount = null,
         public bool $ai_assisted = false,
+        public array $splits = [],
     ) {
         //
     }

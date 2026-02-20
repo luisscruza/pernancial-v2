@@ -57,7 +57,7 @@ final class StreamFinanceChatRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
+    public function prepareForValidation(): void
     {
         $conversationId = mb_trim((string) $this->input('conversation_id', ''));
         $message = mb_trim((string) $this->input('message', ''));

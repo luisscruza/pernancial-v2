@@ -10,6 +10,7 @@ use App\Jobs\UpdateAccountBalance;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Currency;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
@@ -36,4 +37,34 @@ it('marks account balance recalculation to run after commit', function () {
     Queue::assertPushed(UpdateAccountBalance::class, function (UpdateAccountBalance $job) use ($account): bool {
         return $job->account->is($account) && $job->afterCommit === true;
     });
+});
+
+it('creates splits when provided', function () {
+    $user = User::factory()->create();
+    $currency = Currency::factory()->for($user)->create();
+    $account = Account::factory()->for($user)->for($currency)->create();
+    $foodCategory = Category::factory()->for($user)->create(['type' => CategoryType::EXPENSE]);
+    $drinkCategory = Category::factory()->for($user)->create(['type' => CategoryType::EXPENSE]);
+
+    $action = app(CreateTransactionAction::class);
+
+    $action->handle($account, new CreateTransactionDto(
+        type: TransactionType::EXPENSE,
+        amount: 100.00,
+        transaction_date: '2025-01-04',
+        description: 'Split purchase',
+        destination_account: null,
+        category: null,
+        conversion_rate: null,
+        splits: [
+            ['category_id' => $foodCategory->id, 'amount' => 60.00],
+            ['category_id' => $drinkCategory->id, 'amount' => 40.00],
+        ],
+    ));
+
+    $transaction = Transaction::query()->where('description', 'Split purchase')->first();
+
+    expect($transaction)->not->toBeNull()
+        ->and($transaction->category_id)->toBeNull()
+        ->and($transaction->splits)->toHaveCount(2);
 });

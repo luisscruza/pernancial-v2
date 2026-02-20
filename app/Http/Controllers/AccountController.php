@@ -30,7 +30,7 @@ final class AccountController
     public function index(): Response
     {
         $accounts = Account::query()
-            ->active()
+            ->where('is_active', true)
             ->with('currency')
             ->get();
 
@@ -162,7 +162,7 @@ final class AccountController
             'account' => fn () => AccountResource::make($account->fresh()),
             'transactions' => fn () => Inertia::deepMerge(
                 $account->transactions()
-                    ->with('category', 'fromAccount.currency', 'destinationAccount.currency')
+                    ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency')
                     ->when($dateFrom, fn ($query) => $query->whereDate('transaction_date', '>=', $dateFrom))
                     ->when($dateTo, fn ($query) => $query->whereDate('transaction_date', '<=', $dateTo))
                     ->orderBy('transaction_date', 'desc')

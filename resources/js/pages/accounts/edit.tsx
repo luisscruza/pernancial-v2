@@ -27,7 +27,6 @@ interface Props {
 }
 
 export default function EditAccount({ account, accountTypes }: Props) {
-    console.log(account);
     const [showBalanceAdjustment, setShowBalanceAdjustment] = useState(false);
 
     const form = useForm({
@@ -38,8 +37,6 @@ export default function EditAccount({ account, accountTypes }: Props) {
         is_active: account.is_active ?? true,
         balance_adjustment: null as number | null,
     });
-
-    const selectedAccountType = accountTypes.find((t) => t.value === form.data.type);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

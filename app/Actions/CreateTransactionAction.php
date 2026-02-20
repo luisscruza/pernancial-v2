@@ -9,7 +9,6 @@ use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
 use App\Models\Account;
 use App\Models\Transaction;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 final readonly class CreateTransactionAction
@@ -19,7 +18,7 @@ final readonly class CreateTransactionAction
      */
     public function handle(Account $account, CreateTransactionDto $data): void
     {
-        DB::transaction(function () use ($account, $data): void {
+        $account->getConnection()->transaction(function () use ($account, $data): void {
 
             if ($data->type === TransactionType::TRANSFER) {
                 $this->handleTransfer($account, $data);
@@ -31,18 +30,24 @@ final readonly class CreateTransactionAction
             $isPositive = $data->type->isPositive();
             $optimisticRunningBalance = $account->balance + ($isPositive ? $data->amount : -$data->amount);
 
+            $hasSplits = count($data->splits) > 0;
+
             $transaction = $account->transactions()->create([
                 'type' => $data->type,
                 'amount' => $data->amount,
                 'transaction_date' => $data->transaction_date,
                 'description' => $data->description,
-                'category_id' => $data->category?->id,
+                'category_id' => $hasSplits ? null : $data->category?->id,
                 'destination_account_id' => $data->destination_account?->id,
                 'conversion_rate' => 1,
                 'converted_amount' => $data->amount,
                 'running_balance' => $optimisticRunningBalance,
                 'ai_assisted' => $data->ai_assisted,
             ]);
+
+            if ($hasSplits) {
+                $this->createSplits($transaction, $data->splits);
+            }
 
             // Update account balance optimistically
             $account->update(['balance' => $optimisticRunningBalance]);
@@ -53,6 +58,23 @@ final readonly class CreateTransactionAction
 
             UpdateAccountBalance::dispatch($account, $transaction);
         });
+    }
+
+    /**
+     * @param  array<int, array{category_id: int, amount: float}>  $splits
+     */
+    private function createSplits(Transaction $transaction, array $splits): void
+    {
+        $payload = [];
+
+        foreach ($splits as $split) {
+            $payload[] = [
+                'category_id' => $split['category_id'],
+                'amount' => $split['amount'],
+            ];
+        }
+
+        $transaction->splits()->createMany($payload);
     }
 
     /**

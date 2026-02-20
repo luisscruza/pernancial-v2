@@ -1,6 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../wayfinder'
 /**
-* @see routes/web.php:22
+* @see routes/web.php:26
 * @route '/token'
 */
 export const token = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -14,7 +14,7 @@ token.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:22
+* @see routes/web.php:26
 * @route '/token'
 */
 token.url = (options?: RouteQueryOptions) => {
@@ -22,7 +22,7 @@ token.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:22
+* @see routes/web.php:26
 * @route '/token'
 */
 token.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -31,7 +31,7 @@ token.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:22
+* @see routes/web.php:26
 * @route '/token'
 */
 token.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -85,7 +85,7 @@ accounts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 export const categories = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -100,7 +100,7 @@ categories.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 categories.url = (options?: RouteQueryOptions) => {
@@ -109,7 +109,7 @@ categories.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -119,7 +119,7 @@ categories.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::categories
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 categories.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

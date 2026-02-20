@@ -239,7 +239,9 @@ export default function Show({ account, transactions, incomeCategories, expenseC
                                                         >
                                                             <div className="flex items-center gap-4">
                                                                 <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                                                                    {transaction.category ? (
+                                                                    {transaction.splits && transaction.splits.length > 0 ? (
+                                                                        <span className="text-lg">🧩</span>
+                                                                    ) : transaction.category ? (
                                                                         <span className="text-lg">{transaction.category.emoji}</span>
                                                                     ) : transaction.type === 'transfer_in' ? (
                                                                         <span className="text-lg">⬅️</span>
@@ -250,12 +252,33 @@ export default function Show({ account, transactions, incomeCategories, expenseC
                                                                     )}
                                                                 </div>
                                                                 <div>
-                                                                    {transaction.category && (
+                                                                    {transaction.splits && transaction.splits.length > 0 ? (
+                                                                        <h3 className="font-medium">
+                                                                            Dividida en {transaction.splits.length} categorías
+                                                                        </h3>
+                                                                    ) : transaction.category ? (
                                                                         <h3 className="font-medium">{transaction.category.name}</h3>
-                                                                    )}
+                                                                    ) : null}
 
                                                                     {transaction.description && (
                                                                         <p className="text-muted-foreground text-sm">{transaction.description}</p>
+                                                                    )}
+
+                                                                    {transaction.splits && transaction.splits.length > 0 && (
+                                                                        <div className="mt-2 flex flex-wrap gap-2">
+                                                                            {transaction.splits.map((split) => (
+                                                                                <span
+                                                                                    key={`${transaction.id}-${split.id}`}
+                                                                                    className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
+                                                                                >
+                                                                                    <span>{split.category?.emoji || '🧾'}</span>
+                                                                                    <span>{split.category?.name || 'Sin categoría'}</span>
+                                                                                    <span className="text-gray-400">
+                                                                                        {formatCurrency(split.amount, account.currency!)}
+                                                                                    </span>
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
                                                                     )}
 
                                                                     {transaction.ai_assisted && (

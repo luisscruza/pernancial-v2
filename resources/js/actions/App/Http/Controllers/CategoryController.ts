@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CategoryController::index
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::index
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CategoryController::index
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::index
-* @see app/Http/Controllers/CategoryController.php:24
+* @see app/Http/Controllers/CategoryController.php:25
 * @route '/categories'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::create
-* @see app/Http/Controllers/CategoryController.php:39
+* @see app/Http/Controllers/CategoryController.php:40
 * @route '/categories/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::create
-* @see app/Http/Controllers/CategoryController.php:39
+* @see app/Http/Controllers/CategoryController.php:40
 * @route '/categories/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CategoryController::create
-* @see app/Http/Controllers/CategoryController.php:39
+* @see app/Http/Controllers/CategoryController.php:40
 * @route '/categories/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -79,7 +79,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::create
-* @see app/Http/Controllers/CategoryController.php:39
+* @see app/Http/Controllers/CategoryController.php:40
 * @route '/categories/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -89,7 +89,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::store
-* @see app/Http/Controllers/CategoryController.php:47
+* @see app/Http/Controllers/CategoryController.php:48
 * @route '/categories'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -104,7 +104,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::store
-* @see app/Http/Controllers/CategoryController.php:47
+* @see app/Http/Controllers/CategoryController.php:48
 * @route '/categories'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -113,7 +113,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CategoryController::store
-* @see app/Http/Controllers/CategoryController.php:47
+* @see app/Http/Controllers/CategoryController.php:48
 * @route '/categories'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -123,7 +123,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\CategoryController::show
-* @see app/Http/Controllers/CategoryController.php:63
+* @see app/Http/Controllers/CategoryController.php:64
 * @route '/categories/{category}'
 */
 export const show = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -138,7 +138,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::show
-* @see app/Http/Controllers/CategoryController.php:63
+* @see app/Http/Controllers/CategoryController.php:64
 * @route '/categories/{category}'
 */
 show.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -171,7 +171,7 @@ show.url = (args: { category: string | { uuid: string } } | [category: string | 
 
 /**
 * @see \App\Http\Controllers\CategoryController::show
-* @see app/Http/Controllers/CategoryController.php:63
+* @see app/Http/Controllers/CategoryController.php:64
 * @route '/categories/{category}'
 */
 show.get = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.get = (args: { category: string | { uuid: string } } | [category: string | 
 
 /**
 * @see \App\Http\Controllers\CategoryController::show
-* @see app/Http/Controllers/CategoryController.php:63
+* @see app/Http/Controllers/CategoryController.php:64
 * @route '/categories/{category}'
 */
 show.head = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -191,7 +191,7 @@ show.head = (args: { category: string | { uuid: string } } | [category: string |
 
 /**
 * @see \App\Http\Controllers\CategoryController::edit
-* @see app/Http/Controllers/CategoryController.php:102
+* @see app/Http/Controllers/CategoryController.php:108
 * @route '/categories/{category}/edit'
 */
 export const edit = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -206,7 +206,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::edit
-* @see app/Http/Controllers/CategoryController.php:102
+* @see app/Http/Controllers/CategoryController.php:108
 * @route '/categories/{category}/edit'
 */
 edit.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -239,7 +239,7 @@ edit.url = (args: { category: string | { uuid: string } } | [category: string | 
 
 /**
 * @see \App\Http\Controllers\CategoryController::edit
-* @see app/Http/Controllers/CategoryController.php:102
+* @see app/Http/Controllers/CategoryController.php:108
 * @route '/categories/{category}/edit'
 */
 edit.get = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -249,7 +249,7 @@ edit.get = (args: { category: string | { uuid: string } } | [category: string | 
 
 /**
 * @see \App\Http\Controllers\CategoryController::edit
-* @see app/Http/Controllers/CategoryController.php:102
+* @see app/Http/Controllers/CategoryController.php:108
 * @route '/categories/{category}/edit'
 */
 edit.head = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -259,7 +259,7 @@ edit.head = (args: { category: string | { uuid: string } } | [category: string |
 
 /**
 * @see \App\Http\Controllers\CategoryController::update
-* @see app/Http/Controllers/CategoryController.php:112
+* @see app/Http/Controllers/CategoryController.php:118
 * @route '/categories/{category}'
 */
 export const update = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -274,7 +274,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::update
-* @see app/Http/Controllers/CategoryController.php:112
+* @see app/Http/Controllers/CategoryController.php:118
 * @route '/categories/{category}'
 */
 update.url = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ update.url = (args: { category: string | { uuid: string } } | [category: string 
 
 /**
 * @see \App\Http\Controllers\CategoryController::update
-* @see app/Http/Controllers/CategoryController.php:112
+* @see app/Http/Controllers/CategoryController.php:118
 * @route '/categories/{category}'
 */
 update.put = (args: { category: string | { uuid: string } } | [category: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({

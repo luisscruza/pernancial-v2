@@ -30,7 +30,35 @@ export default function CategoryShow({ category, transactions, filters }: Props)
     const [dateFrom, setDateFrom] = useState<string>(filters?.date_from || '');
     const [dateTo, setDateTo] = useState<string>(filters?.date_to || '');
     const [hasReachedEnd, setHasReachedEnd] = useState<boolean | undefined>();
-    const totalTransactions = transactions.data.reduce((sum, transaction) => sum + (transaction.converted_amount || 0), 0);
+
+    const getSplitForCategory = (transaction: Transaction) =>
+        transaction.splits?.find((split) =>
+            split.category?.id ? split.category.id.toString() === category.id.toString() : split.category_id?.toString() === category.id.toString(),
+        );
+
+    const getDisplayAmount = (transaction: Transaction) => {
+        const split = getSplitForCategory(transaction);
+        if (split) {
+            return split.amount;
+        }
+
+        return transaction.amount;
+    };
+
+    const getBaseAmount = (transaction: Transaction) => {
+        const split = getSplitForCategory(transaction);
+        if (!split) {
+            return transaction.converted_amount ?? transaction.amount;
+        }
+
+        if (transaction.converted_amount && transaction.amount) {
+            return (split.amount / transaction.amount) * transaction.converted_amount;
+        }
+
+        return split.amount;
+    };
+
+    const totalTransactions = transactions.data.reduce((sum, transaction) => sum + getBaseAmount(transaction), 0);
 
     const typeColorMap: Record<string, string> = {
         expense: 'text-red-500',
@@ -304,7 +332,7 @@ export default function CategoryShow({ category, transactions, filters }: Props)
                                                             </div>
                                                             <div className="flex flex-col items-end">
                                                                 <p className={`${typeColorMap[transaction.type]} text-md font-medium`}>
-                                                                    {formatCurrency(transaction.amount, transaction.account.currency)}
+                                                                    {formatCurrency(getDisplayAmount(transaction), transaction.account.currency)}
                                                                 </p>
                                                             </div>
                                                         </motion.div>

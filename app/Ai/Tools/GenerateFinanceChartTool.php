@@ -149,7 +149,7 @@ final class GenerateFinanceChartTool implements Tool
             ->where('type', TransactionType::EXPENSE)
             ->whereBetween('transaction_date', [$start->format('Y-m-d'), $end->format('Y-m-d')])
             ->whereHas('account', fn ($query) => $query->where('user_id', $this->user->id))
-            ->with(['account.currency', 'category'])
+            ->with(['account.currency', 'category', 'splits.category'])
             ->when($account !== null, fn ($query) => $query->where('account_id', $account->id))
             ->get();
 
@@ -160,8 +160,17 @@ final class GenerateFinanceChartTool implements Tool
         $totals = [];
 
         foreach ($transactions as $transaction) {
+            if ($transaction->splits->isNotEmpty()) {
+                foreach ($transaction->splits as $split) {
+                    $categoryName = $split->category?->name ?? 'Sin categoria';
+                    $totals[$categoryName] = ($totals[$categoryName] ?? 0.0) + $this->toBaseAmountFor($transaction, $split->amount);
+                }
+
+                continue;
+            }
+
             $categoryName = $transaction->category?->name ?? 'Sin categoria';
-            $totals[$categoryName] = ($totals[$categoryName] ?? 0.0) + $this->toBaseAmount($transaction);
+            $totals[$categoryName] = ($totals[$categoryName] ?? 0.0) + $this->toBaseAmountFor($transaction, $transaction->amount);
         }
 
         arsort($totals);
@@ -228,10 +237,13 @@ final class GenerateFinanceChartTool implements Tool
 
         $transactions = Transaction::query()
             ->where('type', $transactionType)
-            ->where('category_id', $category->id)
             ->whereBetween('transaction_date', [$start->format('Y-m-d'), $end->format('Y-m-d')])
             ->whereHas('account', fn ($query) => $query->where('user_id', $this->user->id))
-            ->with(['account.currency'])
+            ->where(function ($query) use ($category): void {
+                $query->where('category_id', $category->id)
+                    ->orWhereHas('splits', fn ($splitQuery) => $splitQuery->where('category_id', $category->id));
+            })
+            ->with(['account.currency', 'splits'])
             ->when($account !== null, fn ($query) => $query->where('account_id', $account->id))
             ->get();
 
@@ -244,7 +256,20 @@ final class GenerateFinanceChartTool implements Tool
                 continue;
             }
 
-            $monthBuckets[$bucket] += $this->toBaseAmount($transaction);
+            $amount = 0.0;
+
+            if ($transaction->splits->isNotEmpty()) {
+                $split = $transaction->splits->firstWhere('category_id', $category->id);
+                $amount = $split?->amount ?? 0.0;
+            } elseif ((int) $transaction->category_id === (int) $category->id) {
+                $amount = $transaction->amount;
+            }
+
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $monthBuckets[$bucket] += $this->toBaseAmountFor($transaction, $amount);
         }
 
         $points = [];
@@ -318,7 +343,7 @@ final class GenerateFinanceChartTool implements Tool
                 continue;
             }
 
-            $amount = $this->toBaseAmount($transaction);
+            $amount = $this->toBaseAmountFor($transaction, $transaction->amount);
 
             if ($transaction->type === TransactionType::INCOME) {
                 $monthBuckets[$bucket]['income'] += $amount;
@@ -525,17 +550,19 @@ final class GenerateFinanceChartTool implements Tool
             ->first();
     }
 
-    private function toBaseAmount(Transaction $transaction): float
+    private function toBaseAmountFor(Transaction $transaction, float $amount): float
     {
-        if ($transaction->converted_amount !== null) {
-            return (float) $transaction->converted_amount;
-        }
-
         if ($transaction->conversion_rate !== null && $transaction->conversion_rate > 0) {
-            return (float) $transaction->amount * (float) $transaction->conversion_rate;
+            return $amount * (float) $transaction->conversion_rate;
         }
 
-        return (float) $transaction->amount;
+        if ($transaction->converted_amount !== null && $transaction->amount > 0) {
+            $factor = (float) $transaction->converted_amount / (float) $transaction->amount;
+
+            return $amount * $factor;
+        }
+
+        return $amount;
     }
 
     /**

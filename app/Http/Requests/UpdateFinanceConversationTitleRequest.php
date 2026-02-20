@@ -42,7 +42,7 @@ final class UpdateFinanceConversationTitleRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
+    public function prepareForValidation(): void
     {
         $this->merge([
             'title' => mb_trim((string) $this->input('title', '')),

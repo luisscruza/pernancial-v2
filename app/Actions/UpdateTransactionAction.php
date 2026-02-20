@@ -8,7 +8,6 @@ use App\Dto\CreateTransactionDto;
 use App\Enums\TransactionType;
 use App\Jobs\UpdateAccountBalance;
 use App\Models\Transaction;
-use Illuminate\Support\Facades\DB;
 
 final readonly class UpdateTransactionAction
 {
@@ -17,7 +16,7 @@ final readonly class UpdateTransactionAction
      */
     public function handle(Transaction $transaction, CreateTransactionDto $data): void
     {
-        DB::transaction(function () use ($transaction, $data): void {
+        $transaction->getConnection()->transaction(function () use ($transaction, $data): void {
             $account = $transaction->account;
 
             // Check if this is a transfer transaction
@@ -77,6 +76,7 @@ final readonly class UpdateTransactionAction
     private function updateTransaction(Transaction $transaction, CreateTransactionDto $data): void
     {
         $account = $transaction->account;
+        $hasSplits = count($data->splits) > 0;
 
         // Update the transaction
         $transaction->update([
@@ -84,9 +84,11 @@ final readonly class UpdateTransactionAction
             'amount' => $data->amount,
             'transaction_date' => $data->transaction_date,
             'description' => $data->description,
-            'category_id' => $data->category?->id,
+            'category_id' => $hasSplits ? null : $data->category?->id,
             'destination_account_id' => $data->destination_account?->id,
         ]);
+
+        $this->syncSplits($transaction, $data->splits);
 
         // Handle conversion if needed
         if (! $account->currency->is_base) {
@@ -102,5 +104,28 @@ final readonly class UpdateTransactionAction
                 'converted_amount' => $data->amount,
             ]);
         }
+    }
+
+    /**
+     * @param  array<int, array{category_id: int, amount: float}>  $splits
+     */
+    private function syncSplits(Transaction $transaction, array $splits): void
+    {
+        $transaction->splits()->delete();
+
+        if ($splits === []) {
+            return;
+        }
+
+        $payload = [];
+
+        foreach ($splits as $split) {
+            $payload[] = [
+                'category_id' => $split['category_id'],
+                'amount' => $split['amount'],
+            ];
+        }
+
+        $transaction->splits()->createMany($payload);
     }
 }

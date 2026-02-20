@@ -80,6 +80,9 @@ interface FinanceChatResponse {
 const chatPageEndpoint = '/finance/chat';
 const streamEndpoint = '/finance/chat/stream';
 const resetEndpoint = '/finance/chat/reset';
+const acceptedAttachmentTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+const invalidAttachmentMessage = 'Solo se permiten archivos PDF o imagenes JPG, PNG o WebP.';
+const dropAttachmentMessage = 'Suelta el PDF o foto para importar movimientos.';
 
 function conversationEndpoint(conversationId: string): string {
     return `/finance/chat/${conversationId}`;
@@ -533,9 +536,11 @@ export default function FinanceChatPage({ conversations = [], activeConversation
     const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
     const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+    const [isDraggingFile, setIsDraggingFile] = useState(false);
 
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const dragCounterRef = useRef(0);
     const nextMessageIdRef = useRef(1);
     const csrfToken = useMemo(() => resolveCsrfToken(), []);
 
@@ -576,8 +581,86 @@ export default function FinanceChatPage({ conversations = [], activeConversation
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }, [messages, isSending]);
 
+    const canAttach = !isSending && !isCreatingConversation;
     const canSend = (draft.trim().length > 0 || attachmentFile !== null) && !isSending && !isCreatingConversation;
     const hasPendingResponse = isSending;
+
+    const hasFileTransfer = (dataTransfer: DataTransfer | null): boolean => {
+        if (!dataTransfer) {
+            return false;
+        }
+
+        return Array.from(dataTransfer.types).includes('Files');
+    };
+
+    const handleFileSelection = (file: File | null): void => {
+        if (file === null) {
+            setAttachmentFile(null);
+            return;
+        }
+
+        if (!acceptedAttachmentTypes.has(file.type)) {
+            setErrorMessage(invalidAttachmentMessage);
+            return;
+        }
+
+        setAttachmentFile(file);
+        setErrorMessage(null);
+    };
+
+    const handleDragEnter = (event: React.DragEvent<HTMLDivElement>): void => {
+        if (!canAttach || !hasFileTransfer(event.dataTransfer)) {
+            return;
+        }
+
+        event.preventDefault();
+        dragCounterRef.current += 1;
+        setIsDraggingFile(true);
+    };
+
+    const handleDragOver = (event: React.DragEvent<HTMLDivElement>): void => {
+        if (!canAttach || !hasFileTransfer(event.dataTransfer)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+    };
+
+    const handleDragLeave = (event: React.DragEvent<HTMLDivElement>): void => {
+        if (!canAttach || (!hasFileTransfer(event.dataTransfer) && !isDraggingFile)) {
+            return;
+        }
+
+        event.preventDefault();
+        dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
+
+        if (dragCounterRef.current === 0) {
+            setIsDraggingFile(false);
+        }
+    };
+
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
+        if (!canAttach || !hasFileTransfer(event.dataTransfer)) {
+            return;
+        }
+
+        event.preventDefault();
+        dragCounterRef.current = 0;
+        setIsDraggingFile(false);
+
+        const droppedFile = event.dataTransfer.files?.[0] ?? null;
+
+        if (!droppedFile) {
+            return;
+        }
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+
+        handleFileSelection(droppedFile);
+    };
 
     const submitMessage = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
@@ -899,7 +982,21 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                         </div>
                     </div>
 
-                    <div className="border-border/60 bg-card flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border shadow-sm">
+                    <div
+                        className="border-border/60 bg-card relative flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border shadow-sm"
+                        onDragEnter={handleDragEnter}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                    >
+                        {isDraggingFile && (
+                            <div className="bg-background/80 pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4 backdrop-blur-sm">
+                                <div className="border-border/70 bg-background/90 text-foreground w-full max-w-md rounded-2xl border border-dashed px-4 py-6 text-center shadow-sm">
+                                    <p className="text-sm font-semibold">{dropAttachmentMessage}</p>
+                                    <p className="text-muted-foreground mt-1 text-xs">Formatos: PDF, JPG, PNG, WebP.</p>
+                                </div>
+                            </div>
+                        )}
                         <div
                             ref={scrollContainerRef}
                             className="max-h-[70vh] flex-1 space-y-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4 md:p-6"
@@ -967,7 +1064,15 @@ export default function FinanceChatPage({ conversations = [], activeConversation
                                         accept="application/pdf,image/jpeg,image/png,image/webp"
                                         onChange={(event) => {
                                             const selectedFile = event.target.files?.[0] ?? null;
-                                            setAttachmentFile(selectedFile);
+
+                                            if (selectedFile !== null && !acceptedAttachmentTypes.has(selectedFile.type)) {
+                                                setErrorMessage(invalidAttachmentMessage);
+                                                setAttachmentFile(null);
+                                                event.target.value = '';
+                                                return;
+                                            }
+
+                                            handleFileSelection(selectedFile);
                                         }}
                                         disabled={isSending || isCreatingConversation}
                                         className="hidden"

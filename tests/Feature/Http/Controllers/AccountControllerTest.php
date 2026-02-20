@@ -57,7 +57,13 @@ test('user can visit account page', function () {
                         ->has(
                             'data',
                             fn (Assert $page) => $page
-                                ->where('0', $account->transactions()->with('category', 'fromAccount', 'destinationAccount')->first()->toArray())
+                                ->where(
+                                    '0',
+                                    $account->transactions()
+                                        ->with('category', 'splits.category', 'fromAccount.currency', 'destinationAccount.currency')
+                                        ->first()
+                                        ->toArray()
+                                )
                         )
                         ->hasAll([
                             'current_page',

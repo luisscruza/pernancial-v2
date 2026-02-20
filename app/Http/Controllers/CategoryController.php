@@ -9,6 +9,7 @@ use App\Actions\UpdateCategoryAction;
 use App\Http\Requests\CreateCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -66,8 +67,13 @@ final class CategoryController
         $dateTo = $request->string('date_to')->toString();
         $accountId = $request->string('account_id')->toString();
 
-        $transactionsQuery = $category->transactions()
-            ->with(['account.currency', 'fromAccount.currency', 'destinationAccount.currency'])
+        $transactionsQuery = Transaction::query()
+            ->whereHas('account', fn ($query) => $query->where('user_id', $category->user_id))
+            ->where(function ($query) use ($category): void {
+                $query->where('category_id', $category->id)
+                    ->orWhereHas('splits', fn ($splitQuery) => $splitQuery->where('category_id', $category->id));
+            })
+            ->with(['account.currency', 'fromAccount.currency', 'destinationAccount.currency', 'splits.category'])
             ->orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc');
 

@@ -42,6 +42,14 @@ final class Category extends Model
     }
 
     /**
+     * @return HasMany<TransactionSplit, $this>
+     */
+    public function transactionSplits(): HasMany
+    {
+        return $this->hasMany(TransactionSplit::class);
+    }
+
+    /**
      * Get the budgets for this category.
      *
      * @return HasMany<Budget, $this>

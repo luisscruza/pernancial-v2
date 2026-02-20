@@ -1,6 +1,10 @@
 import AccountController from './AccountController'
 import TransactionController from './TransactionController'
 import FinanceChatController from './FinanceChatController'
+import FinanceChatStreamController from './FinanceChatStreamController'
+import FinanceChatResetController from './FinanceChatResetController'
+import FinanceChatRenameController from './FinanceChatRenameController'
+import FinanceChatDestroyController from './FinanceChatDestroyController'
 import CategoryController from './CategoryController'
 import CurrencyController from './CurrencyController'
 import CurrencyRateController from './CurrencyRateController'
@@ -19,6 +23,10 @@ const Controllers = {
     AccountController: Object.assign(AccountController, AccountController),
     TransactionController: Object.assign(TransactionController, TransactionController),
     FinanceChatController: Object.assign(FinanceChatController, FinanceChatController),
+    FinanceChatStreamController: Object.assign(FinanceChatStreamController, FinanceChatStreamController),
+    FinanceChatResetController: Object.assign(FinanceChatResetController, FinanceChatResetController),
+    FinanceChatRenameController: Object.assign(FinanceChatRenameController, FinanceChatRenameController),
+    FinanceChatDestroyController: Object.assign(FinanceChatDestroyController, FinanceChatDestroyController),
     CategoryController: Object.assign(CategoryController, CategoryController),
     CurrencyController: Object.assign(CurrencyController, CurrencyController),
     CurrencyRateController: Object.assign(CurrencyRateController, CurrencyRateController),
