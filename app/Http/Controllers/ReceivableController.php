@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateReceivableAction;
 use App\Actions\CreateReceivableSeriesAction;
+use App\Actions\UpdateReceivableAction;
 use App\Dto\CreateReceivableDto;
 use App\Dto\CreateReceivableSeriesDto;
 use App\Enums\CategoryType;
 use App\Http\Requests\CreateReceivableRequest;
+use App\Http\Requests\UpdateReceivableRequest;
 use App\Models\Category;
 use App\Models\Receivable;
 use App\Models\User;
@@ -209,6 +211,33 @@ final class ReceivableController
             'accounts' => $accounts,
             'categories' => $categories,
         ]);
+    }
+
+    /**
+     * Show the form for editing the specified receivable.
+     */
+    public function edit(Receivable $receivable, #[CurrentUser] User $user): Response
+    {
+        $contacts = $user->contacts()->orderBy('name')->get();
+        $currencies = $user->currencies()->orderBy('name')->get();
+
+        return Inertia::render('receivables/edit', [
+            'receivable' => $receivable->load(['contact', 'currency']),
+            'contacts' => $contacts,
+            'currencies' => $currencies,
+        ]);
+    }
+
+    /**
+     * Update the specified receivable in storage.
+     */
+    public function update(UpdateReceivableRequest $request, Receivable $receivable, UpdateReceivableAction $action): RedirectResponse
+    {
+        $data = $request->getDto();
+
+        $action->handle($receivable, $data);
+
+        return to_route('receivables.show', $receivable)->with('success', 'Cuenta por cobrar actualizada exitosamente.');
     }
 
     private function calculateNextDueDate(string $dueDate, int $dayOfMonth): string

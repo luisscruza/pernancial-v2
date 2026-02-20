@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreatePayableAction;
 use App\Actions\CreatePayableSeriesAction;
+use App\Actions\UpdatePayableAction;
 use App\Dto\CreatePayableDto;
 use App\Dto\CreatePayableSeriesDto;
 use App\Enums\CategoryType;
 use App\Http\Requests\CreatePayableRequest;
+use App\Http\Requests\UpdatePayableRequest;
 use App\Models\Category;
 use App\Models\Payable;
 use App\Models\User;
@@ -209,6 +211,33 @@ final class PayableController
             'accounts' => $accounts,
             'categories' => $categories,
         ]);
+    }
+
+    /**
+     * Show the form for editing the specified payable.
+     */
+    public function edit(Payable $payable, #[CurrentUser] User $user): Response
+    {
+        $contacts = $user->contacts()->orderBy('name')->get();
+        $currencies = $user->currencies()->orderBy('name')->get();
+
+        return Inertia::render('payables/edit', [
+            'payable' => $payable->load(['contact', 'currency']),
+            'contacts' => $contacts,
+            'currencies' => $currencies,
+        ]);
+    }
+
+    /**
+     * Update the specified payable in storage.
+     */
+    public function update(UpdatePayableRequest $request, Payable $payable, UpdatePayableAction $action): RedirectResponse
+    {
+        $data = $request->getDto();
+
+        $action->handle($payable, $data);
+
+        return to_route('payables.show', $payable)->with('success', 'Cuenta por pagar actualizada exitosamente.');
     }
 
     private function calculateNextDueDate(string $dueDate, int $dayOfMonth): string

@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefa
 import payments from './payments'
 /**
 * @see \App\Http\Controllers\PayableController::index
-* @see app/Http/Controllers/PayableController.php:28
+* @see app/Http/Controllers/PayableController.php:30
 * @route '/payables'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::index
-* @see app/Http/Controllers/PayableController.php:28
+* @see app/Http/Controllers/PayableController.php:30
 * @route '/payables'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -26,7 +26,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PayableController::index
-* @see app/Http/Controllers/PayableController.php:28
+* @see app/Http/Controllers/PayableController.php:30
 * @route '/payables'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -36,7 +36,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::index
-* @see app/Http/Controllers/PayableController.php:28
+* @see app/Http/Controllers/PayableController.php:30
 * @route '/payables'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -46,7 +46,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:128
+* @see app/Http/Controllers/PayableController.php:130
 * @route '/payables/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -61,7 +61,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:128
+* @see app/Http/Controllers/PayableController.php:130
 * @route '/payables/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -70,7 +70,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:128
+* @see app/Http/Controllers/PayableController.php:130
 * @route '/payables/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -80,7 +80,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::create
-* @see app/Http/Controllers/PayableController.php:128
+* @see app/Http/Controllers/PayableController.php:130
 * @route '/payables/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -90,7 +90,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:144
+* @see app/Http/Controllers/PayableController.php:146
 * @route '/payables'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -105,7 +105,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:144
+* @see app/Http/Controllers/PayableController.php:146
 * @route '/payables'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -114,7 +114,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PayableController::store
-* @see app/Http/Controllers/PayableController.php:144
+* @see app/Http/Controllers/PayableController.php:146
 * @route '/payables'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -124,7 +124,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:194
+* @see app/Http/Controllers/PayableController.php:196
 * @route '/payables/{payable}'
 */
 export const show = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -139,7 +139,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:194
+* @see app/Http/Controllers/PayableController.php:196
 * @route '/payables/{payable}'
 */
 show.url = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -172,7 +172,7 @@ show.url = (args: { payable: number | { id: number } } | [payable: number | { id
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:194
+* @see app/Http/Controllers/PayableController.php:196
 * @route '/payables/{payable}'
 */
 show.get = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -182,7 +182,7 @@ show.get = (args: { payable: number | { id: number } } | [payable: number | { id
 
 /**
 * @see \App\Http\Controllers\PayableController::show
-* @see app/Http/Controllers/PayableController.php:194
+* @see app/Http/Controllers/PayableController.php:196
 * @route '/payables/{payable}'
 */
 show.head = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -190,11 +190,139 @@ show.head = (args: { payable: number | { id: number } } | [payable: number | { i
     method: 'head',
 })
 
+/**
+* @see \App\Http\Controllers\PayableController::edit
+* @see app/Http/Controllers/PayableController.php:219
+* @route '/payables/{payable}/edit'
+*/
+export const edit = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: edit.url(args, options),
+    method: 'get',
+})
+
+edit.definition = {
+    methods: ["get","head"],
+    url: '/payables/{payable}/edit',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\PayableController::edit
+* @see app/Http/Controllers/PayableController.php:219
+* @route '/payables/{payable}/edit'
+*/
+edit.url = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { payable: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { payable: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            payable: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        payable: typeof args.payable === 'object'
+        ? args.payable.id
+        : args.payable,
+    }
+
+    return edit.definition.url
+            .replace('{payable}', parsedArgs.payable.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\PayableController::edit
+* @see app/Http/Controllers/PayableController.php:219
+* @route '/payables/{payable}/edit'
+*/
+edit.get = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: edit.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\PayableController::edit
+* @see app/Http/Controllers/PayableController.php:219
+* @route '/payables/{payable}/edit'
+*/
+edit.head = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: edit.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\PayableController::update
+* @see app/Http/Controllers/PayableController.php:234
+* @route '/payables/{payable}'
+*/
+export const update = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(args, options),
+    method: 'put',
+})
+
+update.definition = {
+    methods: ["put"],
+    url: '/payables/{payable}',
+} satisfies RouteDefinition<["put"]>
+
+/**
+* @see \App\Http\Controllers\PayableController::update
+* @see app/Http/Controllers/PayableController.php:234
+* @route '/payables/{payable}'
+*/
+update.url = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { payable: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { payable: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            payable: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        payable: typeof args.payable === 'object'
+        ? args.payable.id
+        : args.payable,
+    }
+
+    return update.definition.url
+            .replace('{payable}', parsedArgs.payable.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\PayableController::update
+* @see app/Http/Controllers/PayableController.php:234
+* @route '/payables/{payable}'
+*/
+update.put = (args: { payable: number | { id: number } } | [payable: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(args, options),
+    method: 'put',
+})
+
 const payables = {
     index: Object.assign(index, index),
     create: Object.assign(create, create),
     store: Object.assign(store, store),
     show: Object.assign(show, show),
+    edit: Object.assign(edit, edit),
+    update: Object.assign(update, update),
     payments: Object.assign(payments, payments),
 }
 

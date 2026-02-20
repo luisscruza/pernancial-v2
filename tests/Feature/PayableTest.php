@@ -133,3 +133,61 @@ it('shows the payable detail page', function () {
                 ->has('accounts', 1)
         );
 });
+
+it('shows the payable edit page', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $currency = Currency::factory()->for($user)->create();
+    $contact = Contact::factory()->for($user)->create();
+
+    Account::factory()->for($user)->for($currency)->create();
+    $payable = Payable::factory()->for($user)->for($contact)->for($currency)->create();
+
+    actingAs($user);
+
+    get(route('payables.edit', $payable))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('payables/edit')
+                ->where('payable.id', $payable->id)
+                ->has('contacts', 1)
+                ->has('currencies', 1)
+        );
+});
+
+it('updates a payable', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $currency = Currency::factory()->for($user)->create();
+    $newCurrency = Currency::factory()->for($user)->create();
+    $contact = Contact::factory()->for($user)->create();
+    $newContact = Contact::factory()->for($user)->create();
+
+    Account::factory()->for($user)->for($currency)->create();
+    $payable = Payable::factory()->for($user)->for($contact)->for($currency)->create([
+        'amount_total' => 200,
+        'amount_paid' => 50,
+        'status' => 'partial',
+    ]);
+
+    actingAs($user);
+
+    $response = post(route('payables.update', $payable), [
+        '_method' => 'PUT',
+        'contact_id' => $newContact->id,
+        'currency_id' => $newCurrency->id,
+        'amount_total' => 180,
+        'due_date' => now()->addDays(10)->toDateString(),
+        'description' => 'Actualizado',
+    ]);
+
+    $response->assertRedirect(route('payables.show', $payable));
+
+    $payable->refresh();
+    expect($payable->contact_id)->toBe($newContact->id)
+        ->and($payable->currency_id)->toBe($newCurrency->id)
+        ->and($payable->amount_total)->toBe(180.0)
+        ->and($payable->description)->toBe('Actualizado')
+        ->and($payable->status)->toBe('partial');
+});

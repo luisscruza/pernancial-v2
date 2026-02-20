@@ -101,7 +101,12 @@ export default function ReceivableShow({
                             <p className="text-sm text-gray-500">Vence: {new Date(receivable.due_date).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <Button onClick={() => setIsPaymentOpen(true)}>Registrar cobro</Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href={route('receivables.edit', receivable.id)}>Editar</Link>
+                        </Button>
+                        {remainingAmount > 0 && <Button onClick={() => setIsPaymentOpen(true)}>Registrar cobro</Button>}
+                    </div>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

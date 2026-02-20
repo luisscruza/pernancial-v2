@@ -11,6 +11,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
 it('shows the receivables index page', function () {
     /** @var User $user */
@@ -86,4 +87,62 @@ it('filters receivables by contact', function () {
                 ->where('filters.contact_id', $contactA->id)
                 ->where('filters.status', 'unpaid')
         );
+});
+
+it('shows the receivable edit page', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $currency = Currency::factory()->for($user)->create();
+    $contact = Contact::factory()->for($user)->create();
+
+    Account::factory()->for($user)->for($currency)->create();
+    $receivable = Receivable::factory()->for($user)->for($contact)->for($currency)->create();
+
+    actingAs($user);
+
+    get(route('receivables.edit', $receivable))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('receivables/edit')
+                ->where('receivable.id', $receivable->id)
+                ->has('contacts', 1)
+                ->has('currencies', 1)
+        );
+});
+
+it('updates a receivable', function () {
+    /** @var User $user */
+    $user = User::factory()->createOne();
+    $currency = Currency::factory()->for($user)->create();
+    $newCurrency = Currency::factory()->for($user)->create();
+    $contact = Contact::factory()->for($user)->create();
+    $newContact = Contact::factory()->for($user)->create();
+
+    Account::factory()->for($user)->for($currency)->create();
+    $receivable = Receivable::factory()->for($user)->for($contact)->for($currency)->create([
+        'amount_total' => 200,
+        'amount_paid' => 50,
+        'status' => 'partial',
+    ]);
+
+    actingAs($user);
+
+    $response = post(route('receivables.update', $receivable), [
+        '_method' => 'PUT',
+        'contact_id' => $newContact->id,
+        'currency_id' => $newCurrency->id,
+        'amount_total' => 180,
+        'due_date' => now()->addDays(10)->toDateString(),
+        'description' => 'Actualizado',
+    ]);
+
+    $response->assertRedirect(route('receivables.show', $receivable));
+
+    $receivable->refresh();
+    expect($receivable->contact_id)->toBe($newContact->id)
+        ->and($receivable->currency_id)->toBe($newCurrency->id)
+        ->and($receivable->amount_total)->toBe(180.0)
+        ->and($receivable->description)->toBe('Actualizado')
+        ->and($receivable->status)->toBe('partial');
 });

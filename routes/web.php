@@ -73,12 +73,16 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/receivables/create', [ReceivableController::class, 'create'])->name('receivables.create');
     Route::post('/receivables', [ReceivableController::class, 'store'])->name('receivables.store');
     Route::get('/receivables/{receivable}', [ReceivableController::class, 'show'])->name('receivables.show');
+    Route::get('/receivables/{receivable}/edit', [ReceivableController::class, 'edit'])->name('receivables.edit');
+    Route::put('/receivables/{receivable}', [ReceivableController::class, 'update'])->name('receivables.update');
     Route::post('/receivables/{receivable}/payments', [ReceivablePaymentController::class, 'store'])->name('receivables.payments.store');
 
     Route::get('/payables', [PayableController::class, 'index'])->name('payables.index');
     Route::get('/payables/create', [PayableController::class, 'create'])->name('payables.create');
     Route::post('/payables', [PayableController::class, 'store'])->name('payables.store');
     Route::get('/payables/{payable}', [PayableController::class, 'show'])->name('payables.show');
+    Route::get('/payables/{payable}/edit', [PayableController::class, 'edit'])->name('payables.edit');
+    Route::put('/payables/{payable}', [PayableController::class, 'update'])->name('payables.update');
     Route::post('/payables/{payable}/payments', [PayablePaymentController::class, 'store'])->name('payables.payments.store');
 
     // Budget Periods (main interface)
